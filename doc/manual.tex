@@ -1,0 +1,64 @@
+\documentclass{article}
+
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage{bytefield}
+
+
+\newcommand{\memsection}[4]{
+	\bytefieldsetup{bitheight=#3\baselineskip}
+	\bitbox[]{10}{
+		\texttt{#1}
+		\\ \vspace{#3\baselineskip} \vspace{-2\baselineskip} \vspace{- #3pt}
+		\texttt{#2}
+	}
+	\bitbox{16}{#4}
+}
+
+\begin{document}
+
+\begin{figure}[t]
+	\caption{Memory map at boot}
+	\vspace{2ex}
+	\begin{bytefield}{12}
+		\memsection{0000 0000}{0000 ffff}{2}{ROM}\\
+		\memsection{}{}{3}{-}\\
+		\memsection{1000 0000}{100f ffff}{3}{SRAM}\\
+		\memsection{}{}{3}{-}\\
+		\memsection{2000 0000}{3fff ffff}{12}{DRAM}\\
+		\memsection{}{ffff ffff}{3}{-}\\
+
+		%\begin{rightwordgroup}{internal memory}
+			%\memsection{003f ffff}{002f c000}{4}{Special Function Registers}\\
+			%\memsection{002f bfff}{0007 0000}{3}{-- reserved --}\\
+			%\memsection{0006 ffff}{0000 0000}{8}{Internal Flash}
+		%\end{rightwordgroup}
+	\end{bytefield}
+\end{figure}
+
+\begin{figure}[b]
+	\caption{Memory map shortly after bootrom starts}
+	\vspace{2ex}
+	\begin{bytefield}{12}
+		\memsection{0000 0000}{000f ffff}{3}{SRAM}\\
+		\memsection{}{}{3}{-}\\
+		\memsection{2000 0000}{3fff ffff}{12}{DRAM}\\
+		\memsection{}{}{3}{-}\\
+		\memsection{8000 0000}{8000 ffff}{2}{ROM}\\
+		\memsection{}{ffff ffff}{3}{-}\\
+	\end{bytefield}
+\end{figure}
+
+\begin{figure}[t]
+	\caption{Memory map after DRAM tests OK}
+	\vspace{2ex}
+	\begin{bytefield}{12}
+		\memsection{0000 0000}{2fff ffff}{12}{DRAM}\\
+		\memsection{}{}{3}{-}\\
+		\memsection{2000 0000}{200f ffff}{3}{SRAM}\\
+		\memsection{}{}{3}{-}\\
+		\memsection{8000 0000}{8000 ffff}{2}{ROM}\\
+		\memsection{}{ffff ffff}{3}{-}\\
+	\end{bytefield}
+\end{figure}
+
+\end{document}
