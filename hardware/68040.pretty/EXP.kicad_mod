@@ -3,7 +3,7 @@
   (descr "DIN96SBSS2.5-2")
   (tags "Connector")
   (attr through_hole)
-  (fp_text reference "J**" (at 0 10.16 180 unlocked) (layer "F.SilkS")
+  (fp_text reference "J**" (at -83.82 -5.08 unlocked) (layer "F.SilkS")
       (effects (font (size 1.27 1.27) (thickness 0.254)))
     (tstamp 21972a0d-fcd8-4808-baa5-593f72482198)
   )
@@ -145,8 +145,8 @@
   (pad "C32" thru_hole circle (at -78.74 5.08) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (tstamp 6279907a-fb27-4656-af78-4cb1ecfa006e))
   (pad "MH1" thru_hole circle (at 5.63 2.24) (size 4.2 4.2) (drill 2.8) (layers "*.Cu" "*.Mask") (tstamp ad18a0c6-f65e-4ca4-b397-77c1bbeacdf1))
   (pad "MH2" thru_hole circle (at -84.37 2.24) (size 4.2 4.2) (drill 2.8) (layers "*.Cu" "*.Mask") (tstamp c842da04-ec57-44ab-abb8-981b31cd5bb5))
-  (model "${KIPRJMOD}/3d/DIN96SBSS2.5.stp"
-    (offset (xyz 0 0 0))
+  (model "${KIPRJMOD}/3d/DIN96SBSS2.step"
+    (offset (xyz 8.13 -7.78 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
   )
