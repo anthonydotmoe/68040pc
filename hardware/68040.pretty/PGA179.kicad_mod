@@ -200,4 +200,9 @@
   (pad "T16" thru_hole circle (at 38.1 43.18) (size 1.524 1.524) (drill 0.762) (layers "*.Cu" "*.Mask") (tstamp 30fccae9-8770-49aa-8952-7f03cb2f0def))
   (pad "T17" thru_hole circle (at 40.64 43.18) (size 1.524 1.524) (drill 0.762) (layers "*.Cu" "*.Mask") (tstamp d1c3efea-c82e-4434-8b0e-ef19fb32ae2f))
   (pad "T18" thru_hole circle (at 43.18 43.18) (size 1.524 1.524) (drill 0.762) (layers "*.Cu" "*.Mask") (tstamp 396863f7-38cb-4721-8183-a5178412e11f))
+  (model "${KIPRJMOD}/3d/PGA179.step"
+    (offset (xyz 0 0 -2.5))
+    (scale (xyz 25.4 25.4 25.4))
+    (rotate (xyz 0 0 90))
+  )
 )

@@ -934,6 +934,14 @@
     [
       "f9007ce6-1d62-4428-abf8-f7bfb8f1e86d",
       "Memory"
+    ],
+    [
+      "6f182cda-7e39-45e5-bd87-2afe18ff289a",
+      "Expansion"
+    ],
+    [
+      "8c603cc2-ad4e-464f-bb82-a54ab024fd2f",
+      "IO"
     ]
   ],
   "text_variables": {}
