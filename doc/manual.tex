@@ -1,8 +1,25 @@
 \documentclass{article}
 
-\usepackage[letterpaper, margin=1in]{geometry}
+%\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage[letterpaper]{geometry}
 \usepackage{bytefield}
+\usepackage{tabularx}
+\usepackage{threeparttable}
+\usepackage{xifthen}
+\usepackage{xparse}
+\usepackage{xspace}
 
+\newcommand{\systemname}[0]{Baby040\xspace}
+
+\makeatletter
+\newcommand*{\textoverline}[1]{$\overline{\hbox{#1}}\m@th$}
+\makeatother
+
+\NewDocumentCommand{\addr}{mm}{%
+  \IfNoValueTF{#2}
+  	{\texttt{\$#1}}
+	{\mbox{\texttt{\$#1}-\texttt{\$#2}}}
+}
 
 \newcommand{\memsection}[4]{
 	\bytefieldsetup{bitheight=#3\baselineskip}
@@ -14,51 +31,247 @@
 	\bitbox{16}{#4}
 }
 
+\setlength\parindent{0pt}
 \begin{document}
 
-\begin{figure}[t]
-	\caption{Memory map at boot}
+\begin{titlepage}
+	\begin{center}
+		\vspace*{1cm}
+
+		\Huge
+		\textbf{\systemname Specification}
+
+		\vspace{0.5cm}
+		\LARGE
+		A Personal Computer Platform
+
+		\vspace{1.5cm}
+		\textbf{Anthony Guerrero}
+
+		\vfill
+
+		\normalsize
+		Document Revision 0.0.1
+
+		\vspace{0.8cm}
+	\end{center}
+\end{titlepage}
+
+\section{System Overview}
+
+\subsection{Design Goal}
+The primary objective of the \systemname is to construct a personal computer
+platform that aligns with the capabilities and aesthetics of computing systems
+from the 1990s. The system is not merely a reflection of retro hardware but a
+modern interpretation emphasizing complete transparancy, user understanding,
+and modifiability. The design principles prioritize open-source documentation,
+source code, and hardware description language (HDL) to empower users and
+enthusiasts to understand, modify, and expand upon the system.
+
+\subsection{Key Features}
+\begin{itemize}
+	\item \textbf{Open Architecture:} An open-source ethos is at the core of the
+	project. All documentation, designs, and code associated with this
+	system will be freely accessible and modifiable by the end-users and
+	community.
+
+	\item \textbf{MC68040 Processor:} Serving as the heart of the system, this 32-bit
+	microprocessor offers a blend of performance and functionality suitable
+	for a wide range of computing tasks. It's Instruction Set Architecture
+	(ISA) and built-in MMU lends itself well to implementing UNIX-like
+	operating systems.
+
+	\item \textbf{Flexible Expansion:} The platform is designed with expansion and
+	modularity in mind, featuring an ``Expansion Bus'' architecture to
+	facilitate the addition of new components. The bus dynamically assigns
+	memory space to bus members, bypassing address conflicts and setup
+	jumpers.
+
+	\item \textbf{Integrated FPGA:} Utilizing the iCE40-HX4K FPGA, with full access
+	to the CPU bus, most glue logic and peripheral controllers can be
+	implemented and modified after the design is finalized.
+
+	\item \textbf{512MB Dynamic RAM:} With four 72-pin SIMM slots, the platform
+	supports up to 512MB of main system memory. (3.3v only!)
+
+	\item \textbf{Standard Form Factor:} The PCB will be sized to fit in a pre-ATX
+	form factor called ``Baby AT''. This allows for eight expansion slots,
+	a DIN-5 sized cutout for a keyboard, and simple power management.
+\end{itemize}
+
+\subsection{System Philosophy}
+
+Beyond the technical specifications, this project embodies a philosophy of
+transparency, education, and user empowerment. The system is not just a
+computing platform but a testament to the ethos that technology should be
+understandable, modifiable, and, above all, open. Whether for education,
+nostalgia, or innovation, this platform seeks to be a canvas for users to
+explore the intricacies of computing, reminiscent of an era when personal
+computing was just blossoming.
+
+\section{Hardware}
+
+\subsection{CPU}
+
+The Motorola MC68040 was chosen because I found it in a box. The processor
+operates in the non-multiplexed address mode and with control circuitry that
+asserts the . Data Latch Enable (DLE) is not used.
+
+\subsection{SRAM}
+
+There are 512KB of SRAM for boot ROM, et al...
+
+\subsection{DRAM}
+
+Four 72-pin SIMM slots provide the bulk RAM for the system. Each SIMM's
+\textoverline{RAS} lines are tied together and sent to the memory controller,
+\textoverline{CAS} lines are routed separately. The memory controller only
+supports 3.3v SIMMs (TODO)
+
+The SIMMs I have (Keystron MK16DS3232LP-50) have (16) 16M $\times$ 4-bit DRAMs
+per module. (Place chip to \textoverline{CAS}, \textoverline{RAS}, DQ here)
+
+\subsection{I2C Bus}
+
+I2C is used on-board for communication with the Real-Time Clock (DS1307)
+
+\section{Memory Map}
+
+Pay no attention to the memory map diagram at Figure \ref{map:sysmem}, it's
+probably inaccurate.
+
+\vspace{12pt}
+
+When \textoverline{RESET} is asserted from a reboot, power-up, etc., the address
+decoder maps addresses \mbox{\texttt{\$00000000-\$000003FF}} to
+\mbox{\texttt{\$8000FC00-\$8000FFFF}}. This allows the processor to read the
+exception vector table from ROM, but writes to these addresses will be routed to
+RAM. Once the system RAM test passes, the boot program copies the table to
+system RAM and writes to a configuration register which remaps all accesses from
+\texttt{\$00000000} to RAM.
+
+\begin{figure}[]
+	\caption{System Memory Map}
+	\label{map:sysmem}
 	\vspace{2ex}
 	\begin{bytefield}{12}
-		\memsection{0000 0000}{0000 ffff}{2}{ROM}\\
-		\memsection{}{}{3}{-}\\
-		\memsection{1000 0000}{100f ffff}{3}{SRAM}\\
-		\memsection{}{}{3}{-}\\
-		\memsection{2000 0000}{3fff ffff}{12}{DRAM}\\
-		\memsection{}{ffff ffff}{3}{-}\\
-
-		%\begin{rightwordgroup}{internal memory}
-			%\memsection{003f ffff}{002f c000}{4}{Special Function Registers}\\
-			%\memsection{002f bfff}{0007 0000}{3}{-- reserved --}\\
-			%\memsection{0006 ffff}{0000 0000}{8}{Internal Flash}
-		%\end{rightwordgroup}
-	\end{bytefield}
-\end{figure}
-
-\begin{figure}[b]
-	\caption{Memory map shortly after bootrom starts}
-	\vspace{2ex}
-	\begin{bytefield}{12}
-		\memsection{0000 0000}{000f ffff}{3}{SRAM}\\
-		\memsection{}{}{3}{-}\\
-		\memsection{2000 0000}{3fff ffff}{12}{DRAM}\\
-		\memsection{}{}{3}{-}\\
-		\memsection{8000 0000}{8000 ffff}{2}{ROM}\\
-		\memsection{}{ffff ffff}{3}{-}\\
-	\end{bytefield}
-\end{figure}
-
-\begin{figure}[t]
-	\caption{Memory map after DRAM tests OK}
-	\vspace{2ex}
-	\begin{bytefield}{12}
-		\memsection{0000 0000}{2fff ffff}{12}{DRAM}\\
-		\memsection{}{}{3}{-}\\
+		\memsection{0000 0000}{1fff ffff}{12}{DRAM}\\
 		\memsection{2000 0000}{200f ffff}{3}{SRAM}\\
-		\memsection{}{}{3}{-}\\
+		\memsection{}{}{6}{-}\\
 		\memsection{8000 0000}{8000 ffff}{2}{ROM}\\
 		\memsection{}{ffff ffff}{3}{-}\\
 	\end{bytefield}
 \end{figure}
+
+\section{On-board Bus}
+
+Standard 68040 bus, DRAM data is buffered through FPGA, MC68150 bus resizer for
+expansion bus, I2C provided by PCA9564...
+
+\section{Expansion Bus}
+
+The system provides a Zorro III-inspired expansion slot bus, the main feature of
+which is dynamic memory mapping of add-in devices. 
+
+\subsection{Signal Description}
+
+\subsection{Electrical Specifications}
+
+\begin{figure}[h]
+	\begin{centering}
+
+	\begin{threeparttable}
+	\caption{Expansion Bus Connector Pinout}
+	\begin{tabularx}{\textwidth}
+		{| c | X || c | X || c | X |}
+		\hline
+		Pin & Name & Pin & Name & Pin & Name \\
+		\hline\hline
+		a1  & NC\tnote{1}	& b1  &	NC		& c1  &	NC 		\\
+		\hline
+		a2  & NC		& b2  &	NC		& c2  &	NC 		\\
+		\hline
+		a3  & NC		& b3  &	NC		& c3  &	NC 		\\
+		\hline
+		a4  & NC		& b4  &	NC		& c4  &	NC 		\\
+		\hline
+		a5  & NC		& b5  &	NC		& c5  &	NC 		\\
+		\hline
+		a6  & NC		& b6  &	NC		& c6  &	NC 		\\
+		\hline
+		a7  & NC		& b7  &	NC		& c7  &	NC 		\\
+		\hline
+		a8  & NC		& b8  &	NC		& c8  &	NC 		\\
+		\hline
+		a9  & NC		& b9  &	NC		& c9  &	NC 		\\
+		\hline
+		a10 & NC		& b10 &	NC		& c10 &	NC 		\\
+		\hline
+		a11 & NC		& b11 &	NC		& c11 &	NC 		\\
+		\hline
+		a12 & NC		& b12 &	NC		& c12 &	NC 		\\
+		\hline
+		a13 & NC		& b13 &	NC		& c13 &	NC 		\\
+		\hline
+		a14 & NC		& b14 &	NC		& c14 &	NC 		\\
+		\hline
+		a15 & NC		& b15 &	NC		& c15 &	NC 		\\
+		\hline
+		a16 & NC		& b16 &	NC		& c16 &	NC 		\\
+		\hline
+		a17 & NC		& b17 &	NC		& c17 &	NC 		\\
+		\hline
+		a18 & NC		& b18 &	NC		& c18 &	NC 		\\
+		\hline
+		a19 & NC		& b19 &	NC		& c19 &	NC 		\\
+		\hline
+		a20 & NC		& b20 &	NC		& c20 &	NC 		\\
+		\hline
+		a21 & NC		& b21 &	NC		& c21 &	NC 		\\
+		\hline
+		a22 & NC		& b22 &	NC		& c22 &	NC 		\\
+		\hline
+		a23 & NC		& b23 &	NC		& c23 &	NC 		\\
+		\hline
+		a24 & NC		& b24 &	NC		& c24 &	NC 		\\
+		\hline
+		a25 & NC		& b25 &	NC		& c25 &	NC 		\\
+		\hline
+		a26 & NC		& b26 &	NC		& c26 &	NC 		\\
+		\hline
+		a27 & NC		& b27 &	NC		& c27 &	NC 		\\
+		\hline
+		a28 & NC		& b28 &	NC		& c28 &	NC 		\\
+		\hline
+		a29 & NC		& b29 &	NC		& c29 &	NC 		\\
+		\hline
+		a30 & NC		& b30 &	NC		& c30 &	NC 		\\
+		\hline
+		a31 & NC		& b31 &	NC		& c31 &	NC 		\\
+		\hline
+		a32 & NC		& b32 &	NC		& c32 &	NC 		\\
+		\hline
+	\end{tabularx}
+	\begin{tablenotes}
+	\item [1] This means it's not connected.
+	\end{tablenotes}
+	\end{threeparttable}
+	\end{centering}
+\end{figure}
+		
+\subsection{Mechanical Specification}
+
+\section{Interrupt System}
+
+\section{Special Thanks}
+
+\textbf{Ben Eater} for creating engaging videos on computer engineering,
+inspiring me to build a computer of my own.
+
+\textbf{Lawrence Manning} MAXI030
+
+\textbf{Stephen Moody} Y Ddraig(030)
+
+\textbf{Dave Haynie} Author of "The Zorro III Bus Specification"
 
 \end{document}
