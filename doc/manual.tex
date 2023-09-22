@@ -2,6 +2,7 @@
 
 %\usepackage[letterpaper, margin=1in]{geometry}
 \usepackage[letterpaper]{geometry}
+\usepackage{bold-extra}
 \usepackage{bytefield}
 \usepackage{tabularx}
 \usepackage{threeparttable}
@@ -14,6 +15,8 @@
 \makeatletter
 \newcommand*{\textoverline}[1]{$\overline{\hbox{#1}}\m@th$}
 \makeatother
+
+\newcommand{\textss}[1]{$_{\hbox{#1}}$}
 
 \NewDocumentCommand{\addr}{mm}{%
   \IfNoValueTF{#2}
@@ -113,9 +116,12 @@ computing was just blossoming.
 
 \subsection{CPU}
 
-The Motorola MC68040 was chosen because I found it in a box. The processor
-operates in the non-multiplexed address mode and with control circuitry that
-asserts the . Data Latch Enable (DLE) is not used.
+The Motorola MC68040 was chosen because I found it in a box. Control circuitry
+on the motherboard asserts the \textoverline{MDIS} and \textoverline{IPLx} lines
+on processor reset to configure it for non-multiplexed bus, small output buffer,
+and data latch enable modes disabled. This allows for easy compatibility with
+the LC and EC versions of the MC68040 and these features aren't required for
+the system.
 
 \subsection{SRAM}
 
@@ -133,7 +139,8 @@ per module. (Place chip to \textoverline{CAS}, \textoverline{RAS}, DQ here)
 
 \subsection{I2C Bus}
 
-I2C is used on-board for communication with the Real-Time Clock (DS1307)
+I2C is used on-board for communication with the Real-Time Clock (DS1307) and
+other devices. (Temperature sensors/Fan controllers, etc.)
 
 \section{Memory Map}
 
@@ -163,7 +170,7 @@ system RAM and writes to a configuration register which remaps all accesses from
 	\end{bytefield}
 \end{figure}
 
-\section{On-board Bus}
+\section{Local Bus}
 
 Standard 68040 bus, DRAM data is buffered through FPGA, MC68150 bus resizer for
 expansion bus, I2C provided by PCA9564...
@@ -173,11 +180,222 @@ expansion bus, I2C provided by PCA9564...
 The system provides a Zorro III-inspired expansion slot bus, the main feature of
 which is dynamic memory mapping of add-in devices. 
 
+\subsection{Design Goals}
+
+\begin{itemize}
+	\item \textbf{Expansion and Flexibility:} A primary aim of the expansion
+	bus is to ensure that the design does not inherently limit future
+	enhancements or adaptations.
+
+	\item \textbf{Performance:} While the exact performance target is yet to
+	be finalized, the system aims to achieve robust performance comparable
+	to 1990s standards.
+
+	\item \textbf{Support for Varied Devices:} The bus should accomodate
+	different devices, including those with different data widths.
+
+	\item \textbf{Reliability:} Ensure robust operation and avoid
+	complications that might make the system prone to errors.
+\end{itemize}
+
+\subsection{Bus Architecture}
+
+The design of the expansion bus draws heavily from the Zorro III expansion bus
+designed for the Amiga 3000 series of computers, but differs in many key ways
+which make it incompatible.
+
+The address and data bus are not multiplexed in this design, making use of the
+generous conductor count provided by the DIN 41612 connectors.
+
+The bus system is designed for potential synchronous operation at the BCLK rate,
+but a lower frequency, like 10MHz, is also under consideration for ease of
+implementation and broader device compatibility.
+
+\subsubsection{Card Configuration}
+
+Cards must ground the \textoverline{CDET} line to be included in the
+bus, and therefore is a requirement for complying with this bus specification.
+If the card doesn't pull this line down, or there isn't a card plugged into an
+expansion slot, the \textoverline{CFGIN} line will be bridged to the
+\textoverline{CFGOUT} line for that expansion slot.
+
+\subsubsection{Bus Cycles}
+
+\subsubsection{Arbitration/Mastering}
+
+\subsubsection{Cache Support}
+
+While the expansion bus doesn't have any cache consistency mechanisms for
+managing caches between several caching bus masters, it does allow cards that
+absolutely must not be cached to assert a cache inhibit line,
+\textoverline{CI}, on a per-cycle basis. This cache management is mainly useful
+for support of I/O and other devices that shouldn't be cached.
+
+\subsubsection{Interrupts}
+
+A card supporting interrupts has on-board registers to store one or more vector
+numbers. The numbers are obtained from the OS by the device driver for the card
+and the card/driver combination must be able to handle the situation in which no
+additional vectors are available.
+
 \subsection{Signal Description}
+
+\subsubsection{Power Connections}
+
+\begin{itemize}
+	\item{\textbf{Digital Ground (GND)}} This is the digital supply ground
+	used by all expansion cards as the return path for all expansion
+	supplies.
+
+	\item{\textbf{Main Supply (+5VDC)}} This is the main power supply for
+	all expanion cards. (Define power specification)
+
+\end{itemize}
+
+\subsubsection{Clock Signals}
+
+\begin{itemize}
+	\item{\textbf{TBD...}}
+\end{itemize}
+
+\subsubsection{System Control Signals}
+
+\begin{itemize}
+	\item{\textbf{Hardware Bus Error}}
+
+	\item{\textbf{System Interrupts}}
+\end{itemize}
+
+\subsubsection{Slot Control Signals}
+
+\begin{itemize}
+
+	\item{\textbf{Configuration Chain
+	(\textoverline{\scshape CFGINn},
+	\textoverline{\scshape CFGOUTn})}} The slot configuration mechanism uses
+	the bus signals \textoverline{\scshape CFGOUTn} and
+	\textoverline{\scshape CFGINn}, where ``\textsc{n}'' refers to the slot
+	number. Each slot has its own version of both signals, which make up the
+	\textit{configuration chain} between slots. Each subsequent
+	\textoverline{CFGIN} is a result of all previous
+	\textoverline{CFGOUT}s, going from slot 0 to the last slot on the
+	expansion bus.
+
+	During the autoconfiguration process, an unconfigured card responds to
+	the address space X if its \textoverline{\scshape CFGINn} is asserted.
+	All unconfigured cards start up with \textoverline{\scshape CFGOUTn}
+	negated. When configured, a card will assert its
+	\textoverline{\scshape CFGOUTn} which results in the
+	\textoverline{\scshape CFGINn} of the next slot being asserted.
+	Backplane logic automatically passes on the state of the previous
+	\textoverline{\scshape CFGOUTn} to the next
+	\textoverline{\scshape CFGINn} for any slot not occupied by a card.
+
+	\item{\textbf{Card Detect (\textoverline{CDET})}} This signal is to
+	always be attached to ground by cards to allow them to participate in
+	the expansion bus. This signal is part of the backplane circuitry that
+	allows the configuration chain to function.
+
+\end{itemize}
+
+\subsubsection{DMA Control Signals}
+
+\begin{itemize}
+	\item{\textbf{TBD...}}
+\end{itemize}
+
+\subsubsection{Address and Related Control Signals}
+
+\begin{itemize}
+
+	\item{\textbf{Address Bus (A\textss{0}-A\textss{31})}} This is the
+	expansion address bus, which is driven by the bus master.
+
+\end{itemize}
+
+\subsubsection{Data and Related Control Signals}
+
+\begin{itemize}
+	\item{\textbf{Data Bus (D\textss{0}-D\textss{31})}} This is the
+	expansion data bus, which is driven by either the master or the slave
+	when ``'' is asserted by the master. It's valid for reads when
+	\textoverline{DTACK} is asserted by the slave.
+
+	\item{\textbf{Data Transfer Acknowledge (\textoverline{DTACK})}} This
+	signal is used to normally terminate an expansion bus cycle. The slave
+	is always responsible for driving this signal. For a read cycle, it
+	asserts \textoverline{DTACK} as soon as it has driven valid data onto
+	the bus. For a write cycle, it asserts \textoverline{DTACK} as soon as
+	it's dont with the data.
+
+	\item{\textbf{Cache Inhibit (\textoverline{CI})}} This line is asserted
+	at the same time as ``'' to indicate to the bus master that the cycle
+	must not be cached.
+
+	\item{\textbf{Burst Inhibit (\textoverline{BI})}} This line is asserted
+	at the same time as ``'' to indicate to the bus master that the
+	requested burst (MOVE16) cycle should be done as four 32-bit transfers.
+	This line is only used for 32-bit add-in cards.
+\end{itemize}
 
 \subsection{Electrical Specifications}
 
-\begin{figure}[h]
+\subsubsection{Standard Signals}
+
+The majority of signals on the bus are in this group. These are the bussed
+signals, driven actively on the bus by F-series (or compatible) drivers, usually
+tri-stated when ownership of the signal changed for master and slave, and
+generally terminated with a 220$\Omega$/330$\Omega$ thevenin terminator.
+
+\begin{center}
+	\begin{tabularx}{0.75\textwidth}{X X X}
+		A\textss{0}-A\textss{31} & D\textss{0}-D\textss{31} & R/\textoverline{W} \\
+		FC\textss{0}-FC\textss{2} & & 
+	\end{tabularx}
+\end{center}
+
+\subsubsection{Clock Signals}
+
+\subsubsection{Open Collector Signals}
+
+Many of the bus signals are shared via open collector or open drain outputs
+rather than via tri-stated signals. A backplane resistor pulls these lines high,
+cards only drive the line low.
+
+\begin{center}
+	\begin{tabularx}{0.75\textwidth}{X X X}
+		\textoverline{DTACK} & \textoverline{CI} & \textoverline{BI} \\
+		\textoverline{RESET} & \textoverline{INT} & 
+	\end{tabularx}
+\end{center}
+
+\subsubsection{Non-bussed signals}
+
+\subsubsection{Slot Power Availability}
+
+The system power for the expansion bus is based on the slot configurations. A
+backplane is always free to supply extra power, but it must meet the minimum
+requirements specified here. All cards must be designed with the minimum
+specifications in mind, especially the tolerances.
+
+\begin{center}
+	\begin{tabularx}{0.75\textwidth}{X X}
+		Pin & Supply \\
+		\hline \\
+		X, X	& $+$5 VDC $\pm$5\% @ 2A \\
+		X	& $-$5 VDC $\pm$5\% @ 60mA \\
+		X	& $+$12 VDC $\pm$5\% @ 500mA \\
+		X	& $-$12 VDC $\pm$5\% @ 60mA \\
+	\end{tabularx}
+\end{center}
+
+
+
+\subsection{Mechanical Specifications}
+
+\subsection{Expansion Slot Pin Assignments}
+
+%\begin{figure}[h]
 	\begin{centering}
 
 	\begin{threeparttable}
@@ -257,9 +475,7 @@ which is dynamic memory mapping of add-in devices.
 	\end{tablenotes}
 	\end{threeparttable}
 	\end{centering}
-\end{figure}
-		
-\subsection{Mechanical Specification}
+% \end{figure}
 
 \section{Interrupt System}
 
