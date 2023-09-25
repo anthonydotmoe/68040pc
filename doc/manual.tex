@@ -34,7 +34,6 @@
 	\bitbox{16}{#4}
 }
 
-\setlength\parindent{0pt}
 \begin{document}
 
 \begin{titlepage}
@@ -125,7 +124,9 @@ the system.
 
 \subsection{SRAM}
 
-There are 512KB of SRAM for boot ROM, et al...
+There are 512KB of SRAM for the boot ROM to use. During boot, information about
+the hardware installed in the system is collected into a device attribute table
+and is communicated to the operating system.
 
 \subsection{DRAM}
 
@@ -480,6 +481,7 @@ specifications in mind, especially the tolerances.
 \section{Interrupt System}
 
 \section{Special Thanks}
+\setlength\parindent{0pt}
 
 \textbf{Ben Eater} for creating engaging videos on computer engineering,
 inspiring me to build a computer of my own.
@@ -488,6 +490,6 @@ inspiring me to build a computer of my own.
 
 \textbf{Stephen Moody} Y Ddraig(030)
 
-\textbf{Dave Haynie} Author of "The Zorro III Bus Specification"
+\textbf{Dave Haynie} Author of ``The Zorro III Bus Specification''
 
 \end{document}
