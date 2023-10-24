@@ -5,12 +5,12 @@
 // -----------------------------------------------------------------------------
 
 module decoder(
-	input nRESET;
+	input nRESET,
 
-	input A31, A30, A29, A0;
-	input nTS;
+	input A31, A30, A29, A0,
+	input nTS,
 
-	output dramsel;
+	output dramsel
 	);
 
 // -----------------
@@ -23,3 +23,4 @@ module decoder(
 // are 0)
 assign dramsel = ( !A31 & !A30 & !A29 );
 
+endmodule

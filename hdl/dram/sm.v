@@ -6,10 +6,13 @@
 
 module sm(
 	input clk,
-	input nRESET,
+	input nRESET
 
 	// TODO: ...
 );
+
+// Asynchronous versions of outputs
+reg a_refack;
 
 // internal signals
 reg		refreq;		// Refresh request
@@ -48,7 +51,7 @@ always @(*) begin
 			begin
 			end
 		end
-	end
+	endcase
 end
 
 // Sync FSM
@@ -67,7 +70,7 @@ always @(negedge clk or negedge nRESET)
 //   refresh counter
 //   9 bits - 15us interval
 // ---------------------------
-always @(negedge CLK or negedge nRESET) begin
+always @(negedge clk or negedge nRESET) begin
 	if (~nRESET)
 		q <= 10'b0;
 	else begin
@@ -77,11 +80,11 @@ always @(negedge CLK or negedge nRESET) begin
 			q <= q + 1;
 	end
 end
-// 33MHz input clock = 30.303/cycle
+// 33MHz input clock = 30.303ns/cycle
 // 4096 RAS before CAS refreshes to do per 64ms
 // 64ms / 4096 = 15.6us
-// 500 cycles * 30.303 = 15.151us (less than 15.6us)
-assign tc = ( q == 9'b11_1110_1000 ) ? 1'b1 : 1'b0;
+// 500 cycles * 30.303ns = 15.151us (less than 15.6us)
+assign tc = ( q == 9'd500 ) ? 1'b1 : 1'b0;
 
 // Synchronously set refreq to 1 if tc, and to 0 if refack
 always @(negedge clk or negedge nRESET) begin
@@ -96,3 +99,5 @@ always @(negedge clk or negedge nRESET) begin
 		end
 	end
 end
+
+endmodule
