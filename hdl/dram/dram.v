@@ -14,8 +14,7 @@ module dram(
 	input 	nRESET,		// Reset
 
 	// A/D Bus
-	input 	[23:0] A,	// Address Bus
-	inout 	[32:0] D,	// Data Bus
+	input 	[31:0] A,	// Address Bus
 
 	// Transfer Attributes
 	input 	[1:0] TT,	// Transfer Type
@@ -29,71 +28,43 @@ module dram(
 	output	nTBI,		// Transfer Burst Inhibit
 
 	// Snoop Control Signals
-	/* TODO: Implement Memory Inhibit
 	input	nMI,		// Memory Inhibit
-	*/
 
 // DRAM signals
 	
 	// Addressing
 	output	[11:0] DRAMA,	// DRAM Multiplexed Address Bus
 
-	output	nRAS0,		// Row Address Strobe
-	output	nRAS1,
-	output	nRAS2,
-	output	nRAS3,
-
-	output	nCASA0,		// Column Address Strobe (Module A)
-	output	nCASA1,
-	output	nCASA2,
-	output	nCASA3,
-
-	output	nCASB0,		// Column Address Strobe (Module B)
-	output	nCASB1,
-	output	nCASB2,
-	output	nCASB3,
-
-	output	nCASC0,		// Column Address Strobe (Module C)
-	output	nCASC1,
-	output	nCASC2,
-	output	nCASC3,
-
-	output	nCASD0,		// Column Address Strobe (Module D)
-	output	nCASD1,
-	output	nCASD2,
-	output	nCASD3,
-
-	output	DRAMRW		// DRAM Read/nWrite
+	// RAS and CAS lines are arrays to make things easier
+	output	[3:0]	nRAS,	// Row Address Strobe
+	output	[3:0]	nCASA,	// Column Address Strobe (Module A)
+	output	[3:0]	nCASB,	// Column Address Strobe (Module B)
+	output	[3:0]	nCASC,	// Column Address Strobe (Module C)
+	output	[3:0]	nCASD,	// Column Address Strobe (Module D)
 
 	// Module Detection
 	/* TODO: Implement detection
-	
-	input	PDA1,		// Presence Detect (Module A)
-	input	PDA2,
-	input	PDA3,
-	input	PDA4,
-	
-	input	PDB1,		// Presence Detect (Module B)
-	input	PDB2,
-	input	PDB3,
-	input	PDB4,
-	
-	input	PDC1,		// Presence Detect (Module C)
-	input	PDC2,
-	input	PDC3,
-	input	PDC4,
-	
-	input	PDD1,		// Presence Detect (Module D)
-	input	PDD2,
-	input	PDD3,
-	input	PDD4,
 
+	input	[3:0]	PDA,	// Presence Detect (Module A)
+	input	[3:0]	PDB,	// Presence Detect (Module B)
+	input	[3:0]	PDC,	// Presence Detect (Module C)
+	input	[3:0]	PDD,	// Presence Detect (Module D)
 	*/
 );
 
 // Internal signals
 wire dramsel;
-wire bank0, bank1;
+wire banksel;
+
+// ----------------
+// -- Addressing --
+// ----------------
+
+// Enable DRAM controller when Address bus = 0x0000_0000 to 0x1FFF_FFFF
+assign dramsel = (( ~A[31] & ~A[30] & ~A[29] ) & ~nMI );
+assign banksel = A[16];
+
+
 
 sm sm_inst(
 	.clk(clk),
