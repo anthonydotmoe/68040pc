@@ -29,7 +29,9 @@ module dram(
 	output	nTBI,		// Transfer Burst Inhibit
 
 	// Snoop Control Signals
+	/* TODO: Implement Memory Inhibit
 	input	nMI,		// Memory Inhibit
+	*/
 
 // DRAM signals
 	

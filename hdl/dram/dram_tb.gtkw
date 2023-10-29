@@ -1,0 +1,28 @@
+[*]
+[*] GTKWave Analyzer v3.3.117 (w)1999-2023 BSI
+[*] Tue Oct 24 19:05:26 2023
+[*]
+[dumpfile] "/home/user/projects/68040pc/hdl/dram/dram_tb.vcd"
+[dumpfile_mtime] "Tue Oct 24 18:54:43 2023"
+[dumpfile_size] 13130
+[savefile] "/home/user/projects/68040pc/hdl/dram/dram_tb.gtkw"
+[timestart] 0
+[size] 786 819
+[pos] -1 -1
+*-17.484396 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dram_tb.
+[sst_width] 209
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 232
+@820
+dram_tb.bus_cycle[7:0]
+@28
+dram_tb.nRESET
+dram_tb.BCLK
+@22
+dram_tb.A[31:0]
+@28
+dram_tb.TS
+[pattern_trace] 1
+[pattern_trace] 0
