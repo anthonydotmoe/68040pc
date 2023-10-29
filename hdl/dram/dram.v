@@ -95,15 +95,6 @@ module dram(
 wire dramsel;
 wire bank0, bank1;
 
-decoder decoder_inst(
-	.nRESET(nRESET),
-	.A31(A[31]),
-	.A30(A[30]),
-	.A29(A[29]),
-	.nTS(nTS),
-	.dramsel(dramsel)
-);
-
 sm sm_inst(
 	.clk(clk),
 	.nRESET(nRESET)

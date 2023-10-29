@@ -1,0 +1,34 @@
+[*]
+[*] GTKWave Analyzer v3.3.117 (w)1999-2023 BSI
+[*] Sun Oct 29 03:54:44 2023
+[*]
+[dumpfile] "/mnt/hdd/Projects/68k/68040pc/hdl/dram/decoder_tb.vcd"
+[dumpfile_mtime] "Sun Oct 29 03:48:34 2023"
+[dumpfile_size] 1132
+[savefile] "/mnt/hdd/Projects/68k/68040pc/hdl/dram/decoder_tb.gtkw"
+[timestart] 0
+[size] 1706 1361
+[pos] -1 -1
+*-21.600000 2980000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] decoder_tb.
+[sst_width] 273
+[signals_width] 94
+[sst_expanded] 1
+[sst_vpaned_height] 421
+@28
+decoder_tb.SIZ[1:0]
+decoder_tb.A[1:0]
+decoder_tb.CAS3
+decoder_tb.CAS2
+decoder_tb.CAS1
+decoder_tb.CAS0
+@20000
+-
+@28
+decoder_tb.RAS0
+decoder_tb.RAS1
+decoder_tb.RAS2
+@29
+decoder_tb.RAS3
+[pattern_trace] 1
+[pattern_trace] 0
