@@ -136,7 +136,38 @@ Four 72-pin SIMM slots provide the bulk RAM for the system. Each SIMM's
 supports 3.3v SIMMs (TODO)
 
 The SIMMs I have (Keystron MK16DS3232LP-50) have (16) 16M $\times$ 4-bit DRAMs
-per module. (Place chip to \textoverline{CAS}, \textoverline{RAS}, DQ here)
+per module. The module is layed out as listed in Figure \ref{map:keystron}, the
+DRAM chip numbers are listed from 0-7 for the front side and 8-15 for the back
+side. I've ordered the table so Bank 0 is listed first in order of Data Line.
+Next, Bank 1 is listed in the same order.
+
+\begin{figure}[]
+	\caption{Keystron MK16DS3232LP-50 module layout}
+	\label{map:keystron}
+\begin{center}
+	\begin{tabularx}{0.75\textwidth}{X X X X}
+		DRAM Chip \# & CAS Line & RAS Line & Data Lines\\
+		\hline \\
+		0  & \textoverline{CAS0} & \textoverline{RAS0} & D0-D3\\
+		2  & \textoverline{CAS0} & \textoverline{RAS0} & D4-D7\\
+		4  & \textoverline{CAS1} & \textoverline{RAS0} & D8-D11\\
+		6  & \textoverline{CAS1} & \textoverline{RAS0} & D12-D15\\
+		1  & \textoverline{CAS2} & \textoverline{RAS2} & D16-D19\\
+		3  & \textoverline{CAS2} & \textoverline{RAS2} & D20-D23\\
+		5  & \textoverline{CAS3} & \textoverline{RAS2} & D24-D27\\
+		7  & \textoverline{CAS3} & \textoverline{RAS2} & D27-D31\\
+		8  & \textoverline{CAS0} & \textoverline{RAS1} & D0-D3\\
+		10 & \textoverline{CAS0} & \textoverline{RAS1} & D4-D7\\
+		12 & \textoverline{CAS1} & \textoverline{RAS1} & D8-D11\\
+		14 & \textoverline{CAS1} & \textoverline{RAS1} & D12-D15\\
+		9  & \textoverline{CAS2} & \textoverline{RAS3} & D16-D19\\
+		11 & \textoverline{CAS2} & \textoverline{RAS3} & D20-D23\\
+		13 & \textoverline{CAS3} & \textoverline{RAS3} & D24-D27\\
+		15 & \textoverline{CAS3} & \textoverline{RAS3} & D27-D31\\
+	\end{tabularx}
+\end{center}
+\end{figure}
+
 
 \subsection{I2C Bus}
 
@@ -150,24 +181,26 @@ probably inaccurate.
 
 \vspace{12pt}
 
-When \textoverline{RESET} is asserted from a reboot, power-up, etc., the address
-decoder maps addresses \mbox{\texttt{\$00000000-\$000003FF}} to
-\mbox{\texttt{\$8000FC00-\$8000FFFF}}. This allows the processor to read the
-exception vector table from ROM, but writes to these addresses will be routed to
-RAM. Once the system RAM test passes, the boot program copies the table to
-system RAM and writes to a configuration register which remaps all accesses from
-\texttt{\$00000000} to RAM.
+The memory map of the system is mostly organized into 512MB sections, using the
+\texttt{A31}, \texttt{A30}, and \texttt{A29} signals to select them.
+The system boot ROM is mapped at \mbox{\texttt{\$00000000-\$1FFFFFFF}}, followed
+by DRAM and SRAM areas.
+
 
 \begin{figure}[]
 	\caption{System Memory Map}
 	\label{map:sysmem}
 	\vspace{2ex}
 	\begin{bytefield}{12}
-		\memsection{0000 0000}{1fff ffff}{12}{DRAM}\\
-		\memsection{2000 0000}{200f ffff}{3}{SRAM}\\
-		\memsection{}{}{6}{-}\\
-		\memsection{8000 0000}{8000 ffff}{2}{ROM}\\
-		\memsection{}{ffff ffff}{3}{-}\\
+		\memsection{0000 0000}{}{4}{ROM Area}\\
+		\memsection{2000 0000}{}{4}{DRAM Area}\\
+		\memsection{4000 0000}{}{4}{SRAM Area}\\
+		\memsection{6000 0000}{}{4}{-}\\
+		\memsection{}{}{4}{-}\\
+		\memsection{}{}{4}{-}\\
+		\memsection{}{}{4}{-}\\
+		\memsection{E000 0000}{FFFF FFFF}{4}{Expansion Card Area}\\
+		% \memsection{ff00 0000}{ffff ffff}{3}{Expansion Card Area}\\
 	\end{bytefield}
 \end{figure}
 
