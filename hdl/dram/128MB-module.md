@@ -11,6 +11,7 @@ OKI-side  pin 72 to pin 1 are 8-15
 | 3           | CAS2     | RAS2     | D20-D23       |
 | 5           | CAS3     | RAS2     | D24-D27       |
 | 7           | CAS3     | RAS2     | D28-D31       |
+|---------------------------------------------------|
 | 8           | CAS0     | RAS1     | D0-D3         |
 | 10          | CAS0     | RAS1     | D4-D7         |
 | 12          | CAS1     | RAS1     | D8-D11        |

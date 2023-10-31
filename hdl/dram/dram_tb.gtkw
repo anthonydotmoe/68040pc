@@ -1,16 +1,17 @@
 [*]
 [*] GTKWave Analyzer v3.3.117 (w)1999-2023 BSI
-[*] Tue Oct 24 19:05:26 2023
+[*] Mon Oct 30 23:01:01 2023
 [*]
 [dumpfile] "/home/user/projects/68040pc/hdl/dram/dram_tb.vcd"
-[dumpfile_mtime] "Tue Oct 24 18:54:43 2023"
-[dumpfile_size] 13130
+[dumpfile_mtime] "Mon Oct 30 23:00:30 2023"
+[dumpfile_size] 566008
 [savefile] "/home/user/projects/68040pc/hdl/dram/dram_tb.gtkw"
-[timestart] 0
+[timestart] 306852000
 [size] 786 819
 [pos] -1 -1
-*-17.484396 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-18.684397 307245000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dram_tb.
+[treeopen] dram_tb.dram_inst.
 [sst_width] 209
 [signals_width] 142
 [sst_expanded] 1
@@ -24,5 +25,36 @@ dram_tb.BCLK
 dram_tb.A[31:0]
 @28
 dram_tb.TS
+dram_tb.TA
+dram_tb.TIP
+dram_tb.RAS[3:0]
+dram_tb.CASA[3:0]
+dram_tb.CASB[3:0]
+dram_tb.CASC[3:0]
+dram_tb.CASD[3:0]
+@20000
+-
+@22
+dram_tb.dram_inst.sm_inst.initc[12:0]
+@28
+dram_tb.dram_inst.sm_inst.initdone
+@100000028
+dram_tb.dram_inst.sm_inst.state[3:0]
+@20000
+-
+@22
+dram_tb.dram_inst.sm_inst.initrefc[3:0]
+@20000
+-
+@22
+dram_tb.dram_inst.sm_inst.refc[8:0]
+@28
+dram_tb.dram_inst.sm_inst.refreq
+dram_tb.dram_inst.sm_inst.reftimer
+dram_tb.dram_inst.sm_inst.refack
+@20000
+-
+@28
+dram_tb.dram_inst.sm_inst.dramsel
 [pattern_trace] 1
 [pattern_trace] 0

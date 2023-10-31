@@ -1,3 +1,4 @@
 *.out
 *.vcd
 *.dblite
+hardware.json
