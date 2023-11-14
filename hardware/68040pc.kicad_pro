@@ -932,16 +932,48 @@
       ""
     ],
     [
+      "8c603cc2-ad4e-464f-bb82-a54ab024fd2f",
+      "IO"
+    ],
+    [
       "f9007ce6-1d62-4428-abf8-f7bfb8f1e86d",
       "Memory"
     ],
     [
-      "6f182cda-7e39-45e5-bd87-2afe18ff289a",
+      "0c0cac44-9aa9-4b32-8e43-d344da036aa9",
+      "ExpansionSlot8"
+    ],
+    [
+      "152e7871-95bc-47ab-825c-bb5d6a619287",
+      "ExpansionSlot6"
+    ],
+    [
+      "06276238-72f5-4502-b9bf-5478f60bdf21",
+      "ExpansionSlot5"
+    ],
+    [
+      "d2912239-fb7b-446e-bfb0-0b5e840d3654",
+      "ExpansionSlot7"
+    ],
+    [
+      "4c7887cb-c367-4b93-be02-0b485997fe7b",
       "Expansion"
     ],
     [
-      "8c603cc2-ad4e-464f-bb82-a54ab024fd2f",
-      "IO"
+      "7ec8eb4e-b717-420a-8362-da3ef72bd0fa",
+      "ExpansionSlot4"
+    ],
+    [
+      "8e92e20e-117f-4808-ba42-563380c9b9a9",
+      "ExpansionSlot3"
+    ],
+    [
+      "6875ca27-6e73-4793-97a5-e8c42623624f",
+      "ExpansionSlot2"
+    ],
+    [
+      "4a50b038-ddbb-45ef-83ad-890c6e7cc82c",
+      "ExpansionSlot1"
     ]
   ],
   "text_variables": {}
