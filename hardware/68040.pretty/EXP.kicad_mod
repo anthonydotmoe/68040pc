@@ -143,8 +143,8 @@
   (pad "C30" thru_hole circle (at -73.66 5.08) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (tstamp f37157ef-152f-4b05-9c29-7baca0ec6cee))
   (pad "C31" thru_hole circle (at -76.2 5.08) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (tstamp 3f36e44b-6dae-4c5b-a799-5815d372bc01))
   (pad "C32" thru_hole circle (at -78.74 5.08) (size 1.5 1.5) (drill 1) (layers "*.Cu" "*.Mask") (tstamp 6279907a-fb27-4656-af78-4cb1ecfa006e))
-  (pad "MH1" thru_hole circle (at 5.63 2.24) (size 4.2 4.2) (drill 2.8) (layers "*.Cu" "*.Mask") (tstamp ad18a0c6-f65e-4ca4-b397-77c1bbeacdf1))
-  (pad "MH2" thru_hole circle (at -84.37 2.24) (size 4.2 4.2) (drill 2.8) (layers "*.Cu" "*.Mask") (tstamp c842da04-ec57-44ab-abb8-981b31cd5bb5))
+  (pad "MH" thru_hole circle (at -84.37 2.24) (size 4.2 4.2) (drill 2.8) (layers "*.Cu" "*.Mask") (tstamp c842da04-ec57-44ab-abb8-981b31cd5bb5))
+  (pad "MH" thru_hole circle (at 5.63 2.24) (size 4.2 4.2) (drill 2.8) (layers "*.Cu" "*.Mask") (tstamp ad18a0c6-f65e-4ca4-b397-77c1bbeacdf1))
   (model "${KIPRJMOD}/3d/DIN96SBSS2.step"
     (offset (xyz 8.13 -7.78 0))
     (scale (xyz 1 1 1))
