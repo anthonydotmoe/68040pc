@@ -974,6 +974,10 @@
     [
       "4a50b038-ddbb-45ef-83ad-890c6e7cc82c",
       "ExpansionSlot1"
+    ],
+    [
+      "f8ecdba8-12ed-4532-a81b-3b086d58d046",
+      "Power"
     ]
   ],
   "text_variables": {}
