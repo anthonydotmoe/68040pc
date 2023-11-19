@@ -742,7 +742,7 @@
     (property "Value" "EXP" (at 8.89 48.26 0)
       (effects (font (size 1.27 1.27)) (justify left top))
     )
-    (property "Footprint" "DIN96SBSS25" (at 8.89 -51.74 0)
+    (property "Footprint" "68040:EXP" (at 8.89 -51.74 0)
       (effects (font (size 1.27 1.27)) (justify left top) hide)
     )
     (property "Datasheet" "https://www.belfuse.com/search/search?search_keywords=DIN96SBSS2.5&search=Submit" (at 8.89 -151.74 0)
