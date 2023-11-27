@@ -172,7 +172,8 @@
         }
       ],
       "track_widths": [
-        0.0
+        0.0,
+        2.54
       ],
       "via_dimensions": [
         {
@@ -940,36 +941,24 @@
       "Memory"
     ],
     [
-      "0c0cac44-9aa9-4b32-8e43-d344da036aa9",
-      "ExpansionSlot8"
+      "cb293a02-ab30-4c8a-a1c0-096525c507f2",
+      "ExpansionSlot2"
     ],
     [
-      "152e7871-95bc-47ab-825c-bb5d6a619287",
-      "ExpansionSlot6"
+      "0776ee06-ca6a-474b-8930-643fb1879758",
+      "ExpansionSlot3"
     ],
     [
-      "06276238-72f5-4502-b9bf-5478f60bdf21",
-      "ExpansionSlot5"
-    ],
-    [
-      "d2912239-fb7b-446e-bfb0-0b5e840d3654",
-      "ExpansionSlot7"
+      "e3fdc7e0-b0cd-4106-aa8e-240174c46b8d",
+      "ExpansionSlot4"
     ],
     [
       "4c7887cb-c367-4b93-be02-0b485997fe7b",
       "Expansion"
     ],
     [
-      "7ec8eb4e-b717-420a-8362-da3ef72bd0fa",
-      "ExpansionSlot4"
-    ],
-    [
-      "8e92e20e-117f-4808-ba42-563380c9b9a9",
-      "ExpansionSlot3"
-    ],
-    [
-      "6875ca27-6e73-4793-97a5-e8c42623624f",
-      "ExpansionSlot2"
+      "fdc28cb7-1567-43bd-b2d6-75893fb1e0c5",
+      "FPGA"
     ],
     [
       "4a50b038-ddbb-45ef-83ad-890c6e7cc82c",
