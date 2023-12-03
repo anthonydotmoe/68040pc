@@ -3,6 +3,11 @@
 // Top-level module for DRAM controller
 //
 // -----------------------------------------------------------------------------
+
+`include "sm.v"
+`include "decoder.v"
+`include "mux.v"
+
 (* top *)
 module dram(
 
@@ -134,7 +139,7 @@ module clk_div(
 	output clk1,
 	output clk2,
 	output clk4
-)
+);
 
 reg [2:0] clkreg;
 

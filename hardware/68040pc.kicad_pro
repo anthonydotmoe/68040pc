@@ -111,21 +111,21 @@
       },
       "rules": {
         "max_error": 0.005,
-        "min_clearance": 0.09,
+        "min_clearance": 0.0,
         "min_connection": 0.0,
-        "min_copper_edge_clearance": 0.3,
-        "min_hole_clearance": 0.254,
-        "min_hole_to_hole": 0.5,
-        "min_microvia_diameter": 0.19999999999999998,
-        "min_microvia_drill": 0.09999999999999999,
-        "min_resolved_spokes": 1,
+        "min_copper_edge_clearance": 0.5,
+        "min_hole_clearance": 0.25,
+        "min_hole_to_hole": 0.25,
+        "min_microvia_diameter": 0.0,
+        "min_microvia_drill": 0.0,
+        "min_resolved_spokes": 2,
         "min_silk_clearance": 0.0,
         "min_text_height": 0.7999999999999999,
         "min_text_thickness": 0.08,
         "min_through_hole_diameter": 0.3,
-        "min_track_width": 0.09,
-        "min_via_annular_width": 0.13,
-        "min_via_diameter": 0.25,
+        "min_track_width": 0.127,
+        "min_via_annular_width": 0.09999999999999999,
+        "min_via_diameter": 0.39999999999999997,
         "solder_mask_clearance": 0.0,
         "solder_mask_min_width": 0.0,
         "solder_mask_to_copper_clearance": 0.0,
@@ -173,12 +173,22 @@
       ],
       "track_widths": [
         0.0,
+        0.127,
+        0.254,
         2.54
       ],
       "via_dimensions": [
         {
           "diameter": 0.0,
           "drill": 0.0
+        },
+        {
+          "diameter": 0.4,
+          "drill": 0.25
+        },
+        {
+          "diameter": 0.45,
+          "drill": 0.3
         }
       ],
       "zones_allow_external_fillets": false
@@ -413,7 +423,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.1524,
+        "clearance": 0.10922,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -423,24 +433,7 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
-        "via_diameter": 0.6858,
-        "via_drill": 0.3302,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.1524,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.6858,
-        "microvia_drill": 0.3302,
-        "name": "Thicc",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.254,
+        "track_width": 0.127,
         "via_diameter": 0.6858,
         "via_drill": 0.3302,
         "wire_width": 6
@@ -721,7 +714,7 @@
         "pattern": "/~{WRU}"
       },
       {
-        "netclass": "Thicc",
+        "netclass": "Default",
         "pattern": "GND"
       },
       {
@@ -753,7 +746,7 @@
         "pattern": "Net-(D6-Pad2)"
       },
       {
-        "netclass": "Thicc",
+        "netclass": "Default",
         "pattern": "Net-(J1-Pad1)"
       },
       {
@@ -769,7 +762,7 @@
         "pattern": "Net-(J2-Pad2)"
       },
       {
-        "netclass": "Thicc",
+        "netclass": "Default",
         "pattern": "Net-(J2-Pad3)"
       },
       {
@@ -877,7 +870,7 @@
         "pattern": "Net-(X1-Pad1)"
       },
       {
-        "netclass": "Thicc",
+        "netclass": "Default",
         "pattern": "VCC"
       }
     ]
@@ -959,6 +952,14 @@
     [
       "fdc28cb7-1567-43bd-b2d6-75893fb1e0c5",
       "FPGA"
+    ],
+    [
+      "5e403dbd-3453-4f3e-bc8e-0b981cf3decb",
+      "SRAM"
+    ],
+    [
+      "2a622311-cc5c-4b5f-b457-4d52db73c27a",
+      "Processor"
     ],
     [
       "4a50b038-ddbb-45ef-83ad-890c6e7cc82c",
