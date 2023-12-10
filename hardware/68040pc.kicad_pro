@@ -972,6 +972,14 @@
     [
       "4f6064b8-149d-4ca5-a87e-2a70892ab2ac",
       "CPLD"
+    ],
+    [
+      "51964a36-5d27-45eb-b5cb-366a462adb53",
+      "KbdMou"
+    ],
+    [
+      "a9a81e85-0330-45ce-bcea-32c44203aa02",
+      "Interrupts"
     ]
   ],
   "text_variables": {}
