@@ -10,7 +10,7 @@
 \usepackage{xparse}
 \usepackage{xspace}
 
-\newcommand{\systemname}[0]{Baby040\xspace}
+\newcommand{\systemname}[0]{68040pc\xspace}
 
 \makeatletter
 \newcommand*{\textoverline}[1]{$\overline{\hbox{#1}}\m@th$}
@@ -93,7 +93,7 @@ enthusiasts to understand, modify, and expand upon the system.
 	to the CPU bus, most glue logic and peripheral controllers can be
 	implemented and modified after the design is finalized.
 
-	\item \textbf{512MB Dynamic RAM:} With four 72-pin SIMM slots, the platform
+	\item \textbf{Dynamic RAM Controller:} With four 72-pin SIMM slots, the platform
 	supports up to 512MB of main system memory. (3.3v only!)
 
 	\item \textbf{Standard Form Factor:} The PCB will be sized to fit in a pre-ATX
@@ -115,12 +115,12 @@ computing was just blossoming.
 
 \subsection{CPU}
 
-The Motorola MC68040 was chosen because I found it in a box. Control circuitry
-on the motherboard asserts the \textoverline{MDIS} and \textoverline{IPLx} lines
-on processor reset to configure it for non-multiplexed bus, small output buffer,
-and data latch enable modes disabled. This allows for easy compatibility with
-the LC and EC versions of the MC68040 and these features aren't required for
-the system.
+The Motorola MC68LC040 was chosen because I found it in a box. The
+\textoverline{MDIS} and \textoverline{IPLx} lines are tied high by pull-up
+resistors during normal operation, which has the effect of enabling the small
+output buffers and non-multiplexed bus mode on the 68040 CPU. Designing the
+motherboard with this in mind makes the system also compatible with the standard
+68040.
 
 \subsection{SRAM}
 
@@ -132,8 +132,9 @@ and is communicated to the operating system.
 
 Four 72-pin SIMM slots provide the bulk RAM for the system. Each SIMM's
 \textoverline{RAS} lines are tied together and sent to the memory controller,
-\textoverline{CAS} lines are routed separately. The memory controller only
-supports 3.3v SIMMs (TODO)
+\textoverline{CAS} lines are routed separately. The system should support
+commodity 5V 72-pin SIMMs which were available for the 486 and early Pentium
+platforms.
 
 The SIMMs I have (Keystron MK16DS3232LP-50) have (16) 16M $\times$ 4-bit DRAMs
 per module. The module is layed out as listed in Figure \ref{map:keystron}, the
@@ -168,6 +169,13 @@ Next, Bank 1 is listed in the same order.
 \end{center}
 \end{figure}
 
+\subsection{Boot ROM}
+
+The boot ROM program is stored on the same SPI EEPROM thats used to configure
+the FPGA. Accesses to ROM space are routed through the FPGA, which performs the
+required access to the SPI ROM and returns the data back to the CPU. This was
+done to facilitate rapid prototyping by providing a fast and available interface
+to update the ROM.
 
 \subsection{I2C Bus}
 
@@ -176,16 +184,10 @@ other devices. (Temperature sensors/Fan controllers, etc.)
 
 \section{Memory Map}
 
-Pay no attention to the memory map diagram at Figure \ref{map:sysmem}, it's
-probably inaccurate.
-
-\vspace{12pt}
-
 The memory map of the system is mostly organized into 512MB sections, using the
 \texttt{A31}, \texttt{A30}, and \texttt{A29} signals to select them.
 The system boot ROM is mapped at \mbox{\texttt{\$00000000-\$1FFFFFFF}}, followed
 by DRAM and SRAM areas.
-
 
 \begin{figure}[]
 	\caption{System Memory Map}
@@ -204,11 +206,6 @@ by DRAM and SRAM areas.
 	\end{bytefield}
 \end{figure}
 
-\section{Local Bus}
-
-Standard 68040 bus, DRAM data is buffered through FPGA, MC68150 bus resizer for
-expansion bus, I2C provided by PCA9564...
-
 \section{Expansion Bus}
 
 The system provides a Zorro III-inspired expansion slot bus, the main feature of
@@ -221,12 +218,15 @@ which is dynamic memory mapping of add-in devices.
 	bus is to ensure that the design does not inherently limit future
 	enhancements or adaptations.
 
-	\item \textbf{Performance:} While the exact performance target is yet to
-	be finalized, the system aims to achieve robust performance comparable
-	to 1990s standards.
+	\item \textbf{Performance:} The bus shouldn't unnecessarily constrain
+	the bandwidth of any peripheral that connects to it, including the
+	bus-master. In practice, this means that it should pretty much be a
+	minor extension to the local bus.
 
-	\item \textbf{Support for Varied Devices:} The bus should accomodate
-	different devices, including those with different data widths.
+	\item \textbf{Support for Varied Devices:} The bus should accomodate any
+	device which can interface with the MC68040's local bus. Unfortunately,
+	this means 16 or 8-bit devices will need logic on the card to support
+	``resizing'' the accesses.
 
 	\item \textbf{Reliability:} Ensure robust operation and avoid
 	complications that might make the system prone to errors.
@@ -235,15 +235,8 @@ which is dynamic memory mapping of add-in devices.
 \subsection{Bus Architecture}
 
 The design of the expansion bus draws heavily from the Zorro III expansion bus
-designed for the Amiga 3000 series of computers, but differs in many key ways
-which make it incompatible.
-
-The address and data bus are not multiplexed in this design, making use of the
-generous conductor count provided by the DIN 41612 connectors.
-
-The bus system is designed for potential synchronous operation at the BCLK rate,
-but a lower frequency, like 10MHz, is also under consideration for ease of
-implementation and broader device compatibility.
+designed for the Amiga 3000 and 4000 series of computers, but differs in many
+key ways which make it incompatible.
 
 \subsubsection{Card Configuration}
 
@@ -355,21 +348,17 @@ additional vectors are available.
 	when ``'' is asserted by the master. It's valid for reads when
 	\textoverline{DTACK} is asserted by the slave.
 
-	\item{\textbf{Data Transfer Acknowledge (\textoverline{DTACK})}} This
+	\item{\textbf{Transfer Acknowledge (\textoverline{TA})}} This
 	signal is used to normally terminate an expansion bus cycle. The slave
 	is always responsible for driving this signal. For a read cycle, it
-	asserts \textoverline{DTACK} as soon as it has driven valid data onto
-	the bus. For a write cycle, it asserts \textoverline{DTACK} as soon as
-	it's dont with the data.
+	asserts \textoverline{TA} as soon as it has driven valid data onto
+	the bus. For a write cycle, it asserts \textoverline{TA} as soon as
+	it's done with the data.
 
-	\item{\textbf{Cache Inhibit (\textoverline{CI})}} This line is asserted
-	at the same time as ``'' to indicate to the bus master that the cycle
-	must not be cached.
-
-	\item{\textbf{Burst Inhibit (\textoverline{BI})}} This line is asserted
-	at the same time as ``'' to indicate to the bus master that the
-	requested burst (MOVE16) cycle should be done as four 32-bit transfers.
-	This line is only used for 32-bit add-in cards.
+\item{\textbf{Transfer Burst Inhibit/Transfer Cache Inhibit (\textoverline{TBI}/\textoverline{TCI})}}
+	This line is asserted at the same time as \textoverline{TA} to indicate
+	to the bus master that the cycle must not be cached, or that that the
+	cycle can't be completed as a burst transfer.
 \end{itemize}
 
 \subsection{Electrical Specifications}
@@ -398,12 +387,19 @@ cards only drive the line low.
 
 \begin{center}
 	\begin{tabularx}{0.75\textwidth}{X X X}
-		\textoverline{DTACK} & \textoverline{CI} & \textoverline{BI} \\
-		\textoverline{RESET} & \textoverline{INT} & 
+		\textoverline{TA} & \textoverline{TCI}/\textoverline{TBI} & \textoverline{TEA} \\
+		\textoverline{RESET} & R/\textoverline{W} & 
 	\end{tabularx}
 \end{center}
 
 \subsubsection{Non-bussed signals}
+
+\begin{center}
+	\begin{tabularx}{0.75\textwidth}{X X X}
+		\textoverline{\scshape CFGINn} & \textoverline{\scshape IRQn} & R/\textoverline{W} \\
+		\textoverline{\scshape CFGOUTn} & & 
+	\end{tabularx}
+\end{center}
 
 \subsubsection{Slot Power Availability}
 
@@ -417,9 +413,7 @@ specifications in mind, especially the tolerances.
 		Pin & Supply \\
 		\hline \\
 		X, X	& $+$5 VDC $\pm$5\% @ 2A \\
-		X	& $-$5 VDC $\pm$5\% @ 60mA \\
 		X	& $+$12 VDC $\pm$5\% @ 500mA \\
-		X	& $-$12 VDC $\pm$5\% @ 60mA \\
 	\end{tabularx}
 \end{center}
 
@@ -439,47 +433,47 @@ specifications in mind, especially the tolerances.
 		\hline
 		Pin & Name & Pin & Name & Pin & Name \\
 		\hline\hline
-		a1  & NC\tnote{1}	& b1  &	NC		& c1  &	NC 		\\
+		a1  & NC\tnote{1}	& b1  &	D\textss{16}	& c1  &	NC 		\\
 		\hline
-		a2  & NC		& b2  &	NC		& c2  &	NC 		\\
+		a2  & NC		& b2  &	D\textss{17}	& c2  &	NC 		\\
 		\hline
-		a3  & NC		& b3  &	NC		& c3  &	NC 		\\
+		a3  & D\textss{0}	& b3  &	D\textss{18}	& c3  &	NC 		\\
 		\hline
-		a4  & NC		& b4  &	NC		& c4  &	NC 		\\
+		a4  & D\textss{2}	& b4  &	D\textss{19}	& c4  &	NC 		\\
 		\hline
-		a5  & NC		& b5  &	NC		& c5  &	NC 		\\
+		a5  & D\textss{4}	& b5  &	D\textss{20}	& c5  &	NC 		\\
 		\hline
-		a6  & NC		& b6  &	NC		& c6  &	NC 		\\
+		a6  & D\textss{6}	& b6  &	D\textss{21}	& c6  &	NC 		\\
 		\hline
-		a7  & NC		& b7  &	NC		& c7  &	NC 		\\
+		a7  & D\textss{8}	& b7  &	D\textss{22}	& c7  &	NC 		\\
 		\hline
-		a8  & NC		& b8  &	NC		& c8  &	NC 		\\
+		a8  & D\textss{10}	& b8  &	D\textss{23}	& c8  &	NC 		\\
 		\hline
-		a9  & NC		& b9  &	NC		& c9  &	NC 		\\
+		a9  & D\textss{12}	& b9  &	D\textss{24}	& c9  &	NC 		\\
 		\hline
-		a10 & NC		& b10 &	NC		& c10 &	NC 		\\
+		a10 & D\textss{14}	& b10 &	D\textss{25}	& c10 &	NC 		\\
 		\hline
-		a11 & NC		& b11 &	NC		& c11 &	NC 		\\
+		a11 & GND		& b11 &	D\textss{26}	& c11 &	NC 		\\
 		\hline
-		a12 & NC		& b12 &	NC		& c12 &	NC 		\\
+		a12 & A\textss{1}	& b12 &	D\textss{27}	& c12 &	NC 		\\
 		\hline
-		a13 & NC		& b13 &	NC		& c13 &	NC 		\\
+		a13 & A\textss{3}	& b13 &	D\textss{28}	& c13 &	NC 		\\
 		\hline
-		a14 & NC		& b14 &	NC		& c14 &	NC 		\\
+		a14 & A\textss{5}	& b14 &	D\textss{29}	& c14 &	NC 		\\
 		\hline
-		a15 & NC		& b15 &	NC		& c15 &	NC 		\\
+		a15 & A\textss{7}	& b15 &	D\textss{30}	& c15 &	NC 		\\
 		\hline
-		a16 & NC		& b16 &	NC		& c16 &	NC 		\\
+		a16 & A\textss{9}	& b16 &	D\textss{31}	& c16 &	NC 		\\
 		\hline
-		a17 & NC		& b17 &	NC		& c17 &	NC 		\\
+		a17 & A\textss{11}	& b17 &	A\textss{0}	& c17 &	NC 		\\
 		\hline
-		a18 & NC		& b18 &	NC		& c18 &	NC 		\\
+		a18 & A\textss{13}	& b18 &	A\textss{0}	& c18 &	NC 		\\
 		\hline
-		a19 & NC		& b19 &	NC		& c19 &	NC 		\\
+		a19 & A\textss{15}	& b19 &	NC		& c19 &	NC 		\\
 		\hline
-		a20 & NC		& b20 &	NC		& c20 &	NC 		\\
+		a20 & A\textss{17}	& b20 &	NC		& c20 &	NC 		\\
 		\hline
-		a21 & NC		& b21 &	NC		& c21 &	NC 		\\
+		a21 & A\textss{19}	& b21 &	NC		& c21 &	NC 		\\
 		\hline
 		a22 & NC		& b22 &	NC		& c22 &	NC 		\\
 		\hline
@@ -505,7 +499,8 @@ specifications in mind, especially the tolerances.
 		\hline
 	\end{tabularx}
 	\begin{tablenotes}
-	\item [1] This means it's not connected.
+	\item [1] This means it's not connected. You knew that though. This
+	footnote is only here so I remember how to do it later.
 	\end{tablenotes}
 	\end{threeparttable}
 	\end{centering}
