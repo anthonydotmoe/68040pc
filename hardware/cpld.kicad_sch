@@ -1660,7 +1660,7 @@
     (effects (font (size 1.27 1.27)) (justify left))
     (uuid 5b41ad9b-aa7d-43d4-865a-00052ea24428)
   )
-  (hierarchical_label "A[0..29]" (shape input) (at 53.34 71.12 180) (fields_autoplaced)
+  (hierarchical_label "{ABUS}" (shape input) (at 53.34 71.12 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid 5c4481e6-6708-4f46-a49a-fbfd6250baaf)
   )
