@@ -3493,7 +3493,7 @@
   (symbol (lib_id "Device:C") (at 43.18 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 08811315-4e05-4dda-b404-49c5458f0000)
-    (property "Reference" "C?" (at 46.99 256.54 0)
+    (property "Reference" "C48" (at 46.99 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 46.99 259.08 0)
@@ -3510,7 +3510,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C48") (unit 1)
         )
       )
     )
@@ -3594,7 +3594,7 @@
   (symbol (lib_id "Device:C") (at 93.98 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 17ca28db-b488-483c-a002-7021ee691473)
-    (property "Reference" "C?" (at 97.79 256.54 0)
+    (property "Reference" "C52" (at 97.79 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 97.79 259.08 0)
@@ -3611,7 +3611,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C52") (unit 1)
         )
       )
     )
@@ -3752,7 +3752,7 @@
   (symbol (lib_id "Device:C") (at 55.88 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2db47812-0486-4cb3-895e-7a8d5070f919)
-    (property "Reference" "C?" (at 59.69 256.54 0)
+    (property "Reference" "C49" (at 59.69 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 59.69 259.08 0)
@@ -3769,7 +3769,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C49") (unit 1)
         )
       )
     )
@@ -3803,7 +3803,7 @@
   (symbol (lib_id "Device:C") (at 68.58 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 40998e8f-393a-4650-95e5-ca842e514932)
-    (property "Reference" "C?" (at 72.39 256.54 0)
+    (property "Reference" "C50" (at 72.39 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 72.39 259.08 0)
@@ -3820,7 +3820,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C50") (unit 1)
         )
       )
     )
@@ -3829,7 +3829,7 @@
   (symbol (lib_id "Device:C") (at 81.28 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 49f61d9f-110e-4afd-829c-b03ce6d9ace5)
-    (property "Reference" "C?" (at 85.09 256.54 0)
+    (property "Reference" "C51" (at 85.09 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 85.09 259.08 0)
@@ -3846,7 +3846,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C51") (unit 1)
         )
       )
     )
@@ -3930,7 +3930,7 @@
   (symbol (lib_id "Device:C") (at 320.04 143.51 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5acc440e-94a1-4f7c-a237-84262fa8fb25)
-    (property "Reference" "C?" (at 323.85 142.24 0)
+    (property "Reference" "C47" (at 323.85 142.24 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 323.85 144.78 0)
@@ -3947,7 +3947,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C47") (unit 1)
         )
       )
     )
@@ -4245,7 +4245,7 @@
   (symbol (lib_id "Device:C") (at 132.08 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 852b071e-344e-4bdc-8de0-e0eac8400cb7)
-    (property "Reference" "C?" (at 135.89 256.54 0)
+    (property "Reference" "C55" (at 135.89 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 135.89 259.08 0)
@@ -4262,7 +4262,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C55") (unit 1)
         )
       )
     )
@@ -4598,7 +4598,7 @@
   (symbol (lib_id "Device:C") (at 106.68 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d603d3fe-0f89-49c2-8067-5e44d426d777)
-    (property "Reference" "C?" (at 110.49 256.54 0)
+    (property "Reference" "C53" (at 110.49 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 110.49 259.08 0)
@@ -4615,7 +4615,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C53") (unit 1)
         )
       )
     )
@@ -4693,7 +4693,7 @@
   (symbol (lib_id "Device:C") (at 119.38 257.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e7cb9f75-bb03-4db2-ab12-4a3a2ffe7e2e)
-    (property "Reference" "C?" (at 123.19 256.54 0)
+    (property "Reference" "C54" (at 123.19 256.54 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" ".1uF" (at 123.19 259.08 0)
@@ -4710,7 +4710,7 @@
     (instances
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/4c7887cb-c367-4b93-be02-0b485997fe7b"
-          (reference "C?") (unit 1)
+          (reference "C54") (unit 1)
         )
       )
     )
