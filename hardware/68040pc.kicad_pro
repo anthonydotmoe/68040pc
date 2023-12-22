@@ -984,6 +984,18 @@
     [
       "e85906ae-7695-4d7a-a9d7-10789281636f",
       "CF Card"
+    ],
+    [
+      "38c425a3-e6b6-42cc-a996-d194567b1b07",
+      "Clock"
+    ],
+    [
+      "d3aeee3d-6481-4519-9cd2-762f9c0a4e06",
+      "AddressBuffer"
+    ],
+    [
+      "69ba36c9-f0ea-4d35-9748-4c77e62173d0",
+      "TransferBuffer"
     ]
   ],
   "text_variables": {}
