@@ -2,6 +2,12 @@
 
 	include "sys.inc"
 
+	section bss
+	org	SRAM
+ILLEGALINSTRVAR:	dc.l	0
+
+	section	vectors
+
 VECTORS:
 	org	ROM
 		dc.l	INITIAL_SP	;  0
@@ -58,7 +64,9 @@ VECTORS:
 	endr
 		; User deviced vectors (192)
 
-RESET:
+	section	text
+
+DELAY10000:
 		move.l	#10000,d2	; Wait for a bit (for some reason)
 .1:
 		subq.l	#1,d2
@@ -68,6 +76,10 @@ RESET:
 INIT_DUART:
 		
 
+RESET:
+		move.l	#0,ILLEGALINSTRVAR
+		move.l	#2,d7
+		illegal
 CPU_IDENT:
 ; Define CPU types
 
@@ -79,11 +91,14 @@ CPU_IDENT:
 ; Next, we see if a 68040 instruction executes
 ;
 ; Could do this:
-;		lea	VECTORS,a0
-;		move16	(a0),SRAM	; Copy 16 bytes from vectors to SRAM.
+		move.l	#0,ILLEGALINSTRVAR
+		move.l	#6,d7		; Skip six bytes if illegal
+		lea	VECTORS,a0
+		move16	(a0),SRAM+16	; Copy 16 bytes from vectors to SRAM.
 ; Or this:
-		move.l	#2,d7		; Skip two bytes if illegal
-		cinva	bc		; Invalidate all I/D caches
+;		move.l	#0,ILLEGALINSTRVAR
+;		move.l	#2,d7		; Skip two bytes if illegal
+;		cinva	bc		; Invalidate all I/D caches
 ;
 ; -- Check illegal instruction variable
 ;
@@ -93,6 +108,7 @@ CPU_IDENT:
 ; -- Reset illegal instruction variable
 ; 
 ; Try a 68030 instruction
+		move.l	#0,ILLEGALINSTRVAR
 		move.l	#2,d7		; Skip two bytes if illegal
 		move	ccr,d0		; (valid on 68010, 68020, 68030, 68040, CPU32)
 ;
@@ -103,13 +119,16 @@ CPU_IDENT:
 ;
 ; Try a 68020 exclusive instruction
 ; 
-		move.l	#6,d7		; Skip two bytes if illegal
+		move.l	#0,ILLEGALINSTRVAR
+		move.l	#6,d7		; Skip six bytes if illegal
 		callm	#0,DET_020_MODULE_HEADER
 ;
 ; -- Check illegal instruction variable
 ;
 ; -- -- If non-zero, we are on 68030. Return
 ; -- -- If zero, we are on 68020
+
+DIE:		bra	DIE
 
 DET_020_MODULE_HEADER:
 		dc.b	%00000000	; 000: args on stack, $00: no access rights change
@@ -128,8 +147,9 @@ DET_020_MODULE:
 		rtm	a7
 
 VEC_ILLINSTR:
+		move.l	#1,ILLEGALINSTRVAR
 		; Skip the number of bytes given in d7.l and return
-		add.l	d7,(2,sp)
+		add.l	d7,2(sp)
 		rte
 VEC_BUSFAULT:
 VEC_ADERROR:
@@ -153,6 +173,16 @@ VEC_AUTOVEC5:
 VEC_AUTOVEC6:
 VEC_AUTOVEC7:
 VEC_TRAP0:
+		even
+
+		pea	.vectextname
+		pea	.vectext
+		jsr	printf_
+		rte
+.vectext:
+		dc.b	"Hello there, %s\n",0
+.vectextname:
+		dc.b	"68040pc",0
 VEC_TRAP1:
 VEC_TRAP2:
 VEC_TRAP3:
@@ -168,4 +198,8 @@ VEC_TRAP12:
 VEC_TRAP13:
 VEC_TRAP14:
 VEC_TRAP15:
+		even
 		bra	VEC_RESERVED
+
+_putchar::
+		move.b	(sp),$FFFFFFFF

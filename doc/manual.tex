@@ -184,24 +184,28 @@ other devices. (Temperature sensors/Fan controllers, etc.)
 
 \section{Memory Map}
 
-The memory map of the system is mostly organized into 512MB sections, using the
-\texttt{A31}, \texttt{A30}, and \texttt{A29} signals to select them.
-The system boot ROM is mapped at \mbox{\texttt{\$00000000-\$1FFFFFFF}}, followed
-by DRAM and SRAM areas.
+The memory map of the system is mostly organized into 128MB sections, using the
+\texttt{A[31:27]} signals to select them (Figure \ref{map:sysmem}). This means
+the FPGA only needs 5 address lines to decode and provide chip select signals
+for the on-board devices. It also takes \texttt{A[1:0]} from the MC68150 and
+\texttt{A[18:2]} from the 68040 for addressing registers internal to the FPGA,
+discriminating between devices in the System Registers space, and for bridging
+up to 512KB of SPI flash to the system.
 
 \begin{figure}[]
 	\caption{System Memory Map}
 	\label{map:sysmem}
 	\vspace{2ex}
 	\begin{bytefield}{12}
-		\memsection{0000 0000}{}{4}{ROM Area}\\
-		\memsection{2000 0000}{}{4}{DRAM Area}\\
-		\memsection{4000 0000}{}{4}{SRAM Area}\\
-		\memsection{6000 0000}{}{4}{-}\\
-		\memsection{}{}{4}{-}\\
-		\memsection{}{}{4}{-}\\
-		\memsection{}{}{4}{-}\\
-		\memsection{E000 0000}{FFFF FFFF}{4}{Expansion Card Area}\\
+		\memsection{0000 0000}{}{2}{ROM Area}\\
+		\memsection{0800 0000}{}{2}{On-board SRAM}\\
+		\memsection{1000 0000}{}{2}{On-board DRAM}\\
+		\memsection{1800 0000}{}{4}{-}\\
+		\memsection{3800 0000}{}{2}{System Registers}\\
+		\memsection{4000 0000}{}{8}{Expansion Area}\\
+		\memsection{8000 0000}{}{4}{-}\\
+		\memsection{B800 0000}{}{2}{EXP Configuration}\\
+		\memsection{C000 0000}{FFFF FFFF}{4}{Expansion Area}\\
 		% \memsection{ff00 0000}{ffff ffff}{3}{Expansion Card Area}\\
 	\end{bytefield}
 \end{figure}

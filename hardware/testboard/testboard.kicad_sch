@@ -1,0 +1,31 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid a1ce156a-fb78-423b-b05a-d07384e5c8a7)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 48.26 40.64) (size 30.48 25.4) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid c3c6cc86-f502-4327-a18c-59fb2b41e513)
+    (property "Sheetname" "CPU" (at 48.26 39.9284 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "cpu.kicad_sch" (at 48.26 66.6246 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "testboard"
+        (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7" (page "2"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
