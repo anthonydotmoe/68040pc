@@ -3167,7 +3167,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 041a5e91-d2c0-4a3e-85a5-352cd690ab72)
   )
-  (label "LV.A6" (at 353.06 76.2 0)
+  (label "LV.A6" (at 353.06 76.2 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 041ad31b-93af-4fcc-8d94-6978d7c8970f)
   )
@@ -3183,7 +3183,7 @@
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid 07fa87f8-68f9-45a9-8829-6ed895ee3c12)
   )
-  (label "LV.A7" (at 353.06 73.66 0)
+  (label "LV.A7" (at 353.06 73.66 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 0855704e-5197-4498-90ed-dce6c1c0fcfc)
   )
@@ -3203,7 +3203,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 0f3e9476-5511-4d9d-9523-8dfb332d8331)
   )
-  (label "LV.A9" (at 353.06 68.58 0)
+  (label "LV.A9" (at 353.06 68.58 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 144f3bef-ad59-47bf-a728-cad155a923f1)
   )
@@ -3223,7 +3223,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 1a29c27f-c624-45c5-97b3-b9d4270170d6)
   )
-  (label "LV.A5" (at 353.06 78.74 0)
+  (label "LV.A5" (at 353.06 78.74 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 1b59b75f-f2e5-4e57-8d43-296183d39e99)
   )
@@ -3251,7 +3251,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 23c3656e-a8c1-4db3-b9f5-e0f823ce2414)
   )
-  (label "LV.A13" (at 353.06 58.42 0)
+  (label "LV.A13" (at 353.06 58.42 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 269c3287-a914-4346-accf-b94b4f9282be)
   )
@@ -3267,7 +3267,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 2870c3b3-bd74-437a-ab31-d7f9c782d82d)
   )
-  (label "LV.A15" (at 353.06 53.34 0)
+  (label "LV.A15" (at 353.06 53.34 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 2f909467-522c-40b5-a40a-bca5702b5c5a)
   )
@@ -3275,7 +3275,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 309f8ede-6603-4e7f-8523-59db78a5d558)
   )
-  (label "LV.A12" (at 353.06 60.96 0)
+  (label "LV.A12" (at 353.06 60.96 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 31ab31b5-4bc8-4876-98b1-eb24ed96c6f4)
   )
@@ -3419,7 +3419,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 80d5dac4-8e1b-4dd8-887b-41366eafd6de)
   )
-  (label "LV.A14" (at 353.06 55.88 0)
+  (label "LV.A14" (at 353.06 55.88 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 850884bf-31d7-44f5-b5a2-42247bebe69d)
   )
@@ -3451,7 +3451,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 90511a18-11c8-4eb1-8ecd-0e17bfdd0abc)
   )
-  (label "LV.A17" (at 353.06 48.26 0)
+  (label "LV.A17" (at 353.06 48.26 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 90e45c62-08bf-40e9-b9ad-9741754f2d82)
   )
@@ -3495,7 +3495,7 @@
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid 9b0af019-e51c-4e30-b87f-a001b88fb20a)
   )
-  (label "LV.A3" (at 353.06 83.82 0)
+  (label "LV.A3" (at 353.06 83.82 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 9e431108-9c4e-4dac-8eb4-2822cb7cf42c)
   )
@@ -3515,11 +3515,11 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid a20e4223-0ac7-4d14-8016-a5aaed80002b)
   )
-  (label "LV.A10" (at 353.06 66.04 0)
+  (label "LV.A10" (at 353.06 66.04 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid a3660d5a-d3cf-4809-95f8-4868b97ded52)
   )
-  (label "LV.A8" (at 353.06 71.12 0)
+  (label "LV.A8" (at 353.06 71.12 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid a4251e30-6dad-4fed-87dc-3ebf4e507460)
   )
@@ -3551,7 +3551,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid b2ac8cb4-7092-4f9c-a071-d30ac8beb938)
   )
-  (label "LV.A16" (at 353.06 50.8 0)
+  (label "LV.A16" (at 353.06 50.8 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid b4e4fd69-291e-4d3a-8eec-481c4f778da1)
   )
@@ -3611,7 +3611,7 @@
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid c72a6a14-08d7-430b-9efe-898b0d9edda2)
   )
-  (label "LV.A4" (at 353.06 81.28 0)
+  (label "LV.A4" (at 353.06 81.28 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid cab6c289-ae93-4320-bd42-80dbef69a5c7)
   )
@@ -3635,7 +3635,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid d56c903f-6488-4990-8f81-50e59b67a35a)
   )
-  (label "LV.A18" (at 353.06 45.72 0)
+  (label "LV.A18" (at 353.06 45.72 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid d5fac1bf-561b-4ce3-83b1-912f5605fb86)
   )
@@ -3647,7 +3647,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid da8d7e59-cf85-4c23-85bf-5bf926323354)
   )
-  (label "LV.A2" (at 353.06 86.36 0)
+  (label "LV.A2" (at 353.06 86.36 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid db8eb1b3-2f50-4b10-b42c-3e324e3152f1)
   )
@@ -3683,7 +3683,7 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid f003ef94-4a92-45c3-bb66-2acc8c7e0985)
   )
-  (label "LV.A11" (at 353.06 63.5 0)
+  (label "LV.A11" (at 353.06 63.5 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid f0649bf6-acb8-4aa1-885a-797c4ced48fd)
   )
@@ -3881,9 +3881,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "R2") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "R2") (unit 1)
         )
@@ -3894,7 +3891,7 @@
   (symbol (lib_id "power:+5V") (at 370.84 195.58 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 05c74d5d-caea-4fe4-bebe-5f4c0daee234)
-    (property "Reference" "#PWR016" (at 370.84 199.39 0)
+    (property "Reference" "#PWR028" (at 370.84 199.39 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 370.84 190.5 0)
@@ -3909,12 +3906,6 @@
     (pin "1" (uuid 80b3fa73-efb2-4448-9a1d-1f2437f7c01e))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7"
-          (reference "#PWR016") (unit 1)
-        )
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0102") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR028") (unit 1)
         )
@@ -3925,7 +3916,7 @@
   (symbol (lib_id "FPGA_Lattice:ICE40HX4K-TQ144") (at 325.12 63.5 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0f6efd1f-94a0-441a-9b6c-070436fba7a1)
-    (property "Reference" "U2" (at 332.74 59.69 0)
+    (property "Reference" "U5" (at 332.74 59.69 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "ICE40HX4K-TQ144" (at 332.74 62.23 0)
@@ -4083,9 +4074,6 @@
     (pin "92" (uuid 2b1734d9-987f-42ae-93f8-4de7ebeef32a))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U2") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U5") (unit 1)
         )
@@ -4217,9 +4205,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0108") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR094") (unit 1)
         )
@@ -4251,9 +4236,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "D1") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "D1") (unit 1)
         )
@@ -4360,9 +4342,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR025") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0105") (unit 1)
         )
@@ -4373,7 +4352,7 @@
   (symbol (lib_id "FPGA_Lattice:ICE40HX4K-TQ144") (at 264.16 63.5 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 45dd5cb1-1db6-4962-a4e9-2c35782c2323)
-    (property "Reference" "U2" (at 271.78 60.96 0)
+    (property "Reference" "U5" (at 271.78 60.96 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "ICE40HX4K-TQ144" (at 271.78 63.5 0)
@@ -4531,9 +4510,6 @@
     (pin "92" (uuid 81f051d2-199d-4282-8ca8-49d82ff5cbe6))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U2") (unit 4)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U5") (unit 4)
         )
@@ -4544,7 +4520,7 @@
   (symbol (lib_id "68040:SN74ALVC164245") (at 134.62 30.48 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4768143d-ff0d-4281-8c1b-725f5379a771)
-    (property "Reference" "U18" (at 153.67 45.72 0)
+    (property "Reference" "U2" (at 153.67 45.72 0)
       (effects (font (size 1.524 1.524)) (justify left))
     )
     (property "Value" "SN74ALVC164245" (at 153.67 48.26 0)
@@ -4606,9 +4582,6 @@
     (pin "7" (uuid f9c0addf-4298-4978-bc83-1265330dbe20))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U18") (unit 2)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U2") (unit 2)
         )
@@ -4639,9 +4612,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR026") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0211") (unit 1)
         )
@@ -4652,7 +4622,7 @@
   (symbol (lib_id "power:+5V") (at 127 25.4 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4c6368c7-e3c6-4844-a418-f75a917180cf)
-    (property "Reference" "#PWR016" (at 127 29.21 0)
+    (property "Reference" "#PWR091" (at 127 29.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 127 20.32 0)
@@ -4667,12 +4637,6 @@
     (pin "1" (uuid 3bb17240-96c6-4252-864e-1792ee139093))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7"
-          (reference "#PWR016") (unit 1)
-        )
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0102") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR091") (unit 1)
         )
@@ -4703,9 +4667,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR024") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0102") (unit 1)
         )
@@ -4736,9 +4697,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR027") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0110") (unit 1)
         )
@@ -4807,9 +4765,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0110") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0109") (unit 1)
         )
@@ -4840,9 +4795,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0107") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR095") (unit 1)
         )
@@ -4873,9 +4825,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR027") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0103") (unit 1)
         )
@@ -4983,9 +4932,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "C3") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "C3") (unit 1)
         )
@@ -4996,7 +4942,7 @@
   (symbol (lib_id "FPGA_Lattice:ICE40HX4K-TQ144") (at 264.16 144.78 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 87f8ed1f-eced-4e4d-9123-92b32e7ff097)
-    (property "Reference" "U2" (at 273.05 140.97 0)
+    (property "Reference" "U5" (at 273.05 140.97 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "ICE40HX4K-TQ144" (at 273.05 143.51 0)
@@ -5154,9 +5100,6 @@
     (pin "92" (uuid 30397c0e-348b-4a76-8140-35dab4238728))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U2") (unit 3)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U5") (unit 3)
         )
@@ -5290,9 +5233,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "R3") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "R3") (unit 1)
         )
@@ -5323,9 +5263,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR028") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0130") (unit 1)
         )
@@ -5520,9 +5457,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U5") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U17") (unit 1)
         )
@@ -5646,9 +5580,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0109") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR024") (unit 1)
         )
@@ -5717,9 +5648,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR0110") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR093") (unit 1)
         )
@@ -5789,9 +5717,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "R1") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "R1") (unit 1)
         )
@@ -5852,7 +5777,7 @@
   (symbol (lib_id "68040:SN74ALVC164245") (at 71.12 58.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e7db9ccc-4578-4743-b6f5-43588ea7ad37)
-    (property "Reference" "U17" (at 71.12 22.86 0)
+    (property "Reference" "U2" (at 71.12 22.86 0)
       (effects (font (size 1.524 1.524)))
     )
     (property "Value" "SN74ALVC164245" (at 71.12 25.4 0)
@@ -5914,9 +5839,6 @@
     (pin "7" (uuid 98469d47-c110-4b7d-a539-97872b5813cb))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U17") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U2") (unit 1)
         )
@@ -5927,7 +5849,7 @@
   (symbol (lib_id "FPGA_Lattice:ICE40HX4K-TQ144") (at 139.7 256.54 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ead85ff2-222f-4b67-acef-6609146d2b2c)
-    (property "Reference" "U2" (at 160.02 238.76 0)
+    (property "Reference" "U5" (at 160.02 238.76 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "ICE40HX4K-TQ144" (at 165.1 241.3 0)
@@ -6085,9 +6007,6 @@
     (pin "92" (uuid e09acf93-60a9-4387-95aa-1a7b7b31bcf2))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U2") (unit 5)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U5") (unit 5)
         )
@@ -6124,7 +6043,7 @@
   (symbol (lib_id "FPGA_Lattice:ICE40HX4K-TQ144") (at 375.92 66.04 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f392c63d-e44e-4ae4-8b22-40ad1b07c5f4)
-    (property "Reference" "U2" (at 383.54 62.23 0)
+    (property "Reference" "U5" (at 383.54 62.23 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "ICE40HX4K-TQ144" (at 383.54 64.77 0)
@@ -6282,9 +6201,6 @@
     (pin "92" (uuid 5aee5ee9-2e23-4ffb-ab5d-c39e0212d872))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "U2") (unit 2)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "U5") (unit 2)
         )
@@ -6315,9 +6231,6 @@
         )
       )
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR026") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
           (reference "#PWR0104") (unit 1)
         )

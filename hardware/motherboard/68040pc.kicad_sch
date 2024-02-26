@@ -3027,7 +3027,7 @@
   (symbol (lib_id "Device:C") (at 144.78 138.43 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 44360ab0-f9de-4803-94e6-99b4dc5497cc)
-    (property "Reference" "C22" (at 140.97 137.16 0)
+    (property "Reference" "C56" (at 140.97 137.16 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100nF" (at 140.97 139.7 0)
@@ -3043,9 +3043,6 @@
     (pin "1" (uuid 2fd6b960-1637-4856-bd41-0fe596560f2a))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "C22") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7"
           (reference "C56") (unit 1)
         )
@@ -3242,12 +3239,6 @@
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7"
           (reference "#PWR0198") (unit 1)
         )
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR099") (unit 1)
-        )
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
-          (reference "#PWR025") (unit 1)
-        )
       )
     )
   )
@@ -3417,12 +3408,6 @@
       (project "68040pc"
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7"
           (reference "#PWR0196") (unit 1)
-        )
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
-          (reference "#PWR099") (unit 1)
-        )
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/fdc28cb7-1567-43bd-b2d6-75893fb1e0c5"
-          (reference "#PWR025") (unit 1)
         )
       )
     )

@@ -5762,7 +5762,7 @@
   (symbol (lib_id "power:+5V") (at 81.28 165.1 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2b8e1118-e10b-42cb-84ed-e803c1a78eac)
-    (property "Reference" "#PWR016" (at 81.28 168.91 0)
+    (property "Reference" "#PWR030" (at 81.28 168.91 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 81.28 160.02 0)
@@ -5777,9 +5777,6 @@
     (pin "1" (uuid a4a90752-a12b-4321-bd7d-7041de5bc86d))
     (instances
       (project "68040pc"
-        (path "/3006deba-2100-40f8-9f39-987a5c2c14c7"
-          (reference "#PWR016") (unit 1)
-        )
         (path "/3006deba-2100-40f8-9f39-987a5c2c14c7/f9007ce6-1d62-4428-abf8-f7bfb8f1e86d"
           (reference "#PWR030") (unit 1)
         )
