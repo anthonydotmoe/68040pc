@@ -503,6 +503,10 @@
     [
       "f63660fb-144c-49f2-b80d-d496ab444a51",
       "AddressBuffer"
+    ],
+    [
+      "3d1958e7-1e26-4e3f-942c-9ed02aebba31",
+      "DataTRX"
     ]
   ],
   "text_variables": {}
