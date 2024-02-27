@@ -3801,9 +3801,6 @@
     (pin "1" (uuid 753bfe1b-cd8c-4e03-ae30-1eb137e7479c))
     (instances
       (project "testboard"
-        (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7"
-          (reference "C19") (unit 1)
-        )
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/c3c6cc86-f502-4327-a18c-59fb2b41e513"
           (reference "C19") (unit 1)
         )
@@ -3860,9 +3857,6 @@
     (pin "1" (uuid 4a544454-42bf-4a3b-9aaa-cb2afe85d7d5))
     (instances
       (project "testboard"
-        (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7"
-          (reference "#PWR045") (unit 1)
-        )
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/c3c6cc86-f502-4327-a18c-59fb2b41e513"
           (reference "#PWR045") (unit 1)
         )
@@ -3873,7 +3867,7 @@
   (symbol (lib_id "power:+5V") (at 236.22 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7b5afa60-f401-49fc-ad55-b5d84666e39e)
-    (property "Reference" "#PWR037" (at 236.22 54.61 0)
+    (property "Reference" "#PWR036" (at 236.22 54.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 236.22 45.72 0)
@@ -3888,9 +3882,6 @@
     (pin "1" (uuid eb7c0d78-0cd0-4a37-b709-96f9986ea6b8))
     (instances
       (project "testboard"
-        (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7"
-          (reference "#PWR037") (unit 1)
-        )
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/c3c6cc86-f502-4327-a18c-59fb2b41e513"
           (reference "#PWR036") (unit 1)
         )
@@ -4027,7 +4018,7 @@
   (symbol (lib_id "power:+5V") (at 243.84 33.02 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8c716a32-0be9-47b5-981c-652c7fb6ce5a)
-    (property "Reference" "#PWR036" (at 243.84 36.83 0)
+    (property "Reference" "#PWR037" (at 243.84 36.83 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 243.84 27.94 0)
@@ -4042,9 +4033,6 @@
     (pin "1" (uuid 74c1912e-4cf5-449a-9ebf-8b2c8a28fecc))
     (instances
       (project "testboard"
-        (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7"
-          (reference "#PWR036") (unit 1)
-        )
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/c3c6cc86-f502-4327-a18c-59fb2b41e513"
           (reference "#PWR037") (unit 1)
         )
@@ -4391,9 +4379,6 @@
     (pin "5" (uuid dd1cb60b-1622-4466-900b-973fbb17b0f5))
     (instances
       (project "testboard"
-        (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7"
-          (reference "U5") (unit 1)
-        )
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/c3c6cc86-f502-4327-a18c-59fb2b41e513"
           (reference "U5") (unit 1)
         )

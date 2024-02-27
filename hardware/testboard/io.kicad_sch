@@ -1565,7 +1565,7 @@
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid c57782a6-60f3-4b81-9e27-b0cfe608c7a8)
   )
-  (hierarchical_label "~{IACK}" (shape input) (at 71.12 172.72 180) (fields_autoplaced)
+  (hierarchical_label "~{IACK}" (shape output) (at 71.12 172.72 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid dbf46fd7-fe27-4ec6-952e-ea00410adefe)
   )
