@@ -832,10 +832,6 @@
       (effects (font (size 1.27 1.27)) (justify left))
       (uuid dbab526f-fd63-4b87-8808-e4ebe8a69e8f)
     )
-    (pin "IPL[0..2]" output (at 137.16 96.52 180)
-      (effects (font (size 1.27 1.27)) (justify left))
-      (uuid 8f6314a4-2b5b-466b-9d39-fb03c294c50c)
-    )
     (pin "TM[0..2]" input (at 137.16 93.98 180)
       (effects (font (size 1.27 1.27)) (justify left))
       (uuid 57d39834-8d8f-46cd-b20e-58165137d7cc)
@@ -847,6 +843,10 @@
     (pin "~{COM_IACK}" input (at 187.96 99.06 0)
       (effects (font (size 1.27 1.27)) (justify right))
       (uuid 42110328-a233-41bc-b1e2-2d0c86537aa9)
+    )
+    (pin "~{IPL[0..2]}" output (at 137.16 96.52 180)
+      (effects (font (size 1.27 1.27)) (justify left))
+      (uuid 27bcf3b4-5586-4726-a45b-4f94f3d2cbc5)
     )
     (instances
       (project "testboard"
