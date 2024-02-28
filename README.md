@@ -8,6 +8,12 @@ charm of vintage computing into the modern era with a twist of power and
 utility. Call me crazy, but I expect to be able to use this machine when it's
 done.
 
+## Status
+
+The `testboard` design is almost complete. Most of the logic checks out in the
+schematic. Need to add a 3.3V power supply and reset, interrupt, and user
+button circuitry.
+
 ## Objectives
 
 The `68040pc` aims to be versatile and user-friendly, with the following
