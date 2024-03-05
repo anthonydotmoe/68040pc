@@ -2,9 +2,9 @@
 
 	include "sys.i"
 
-	section bss
+	section .bss
 	org	SRAMBSS
-	section	vectors
+	section	.vectors
 
 VECTORS:
 	org	ROM
@@ -62,7 +62,7 @@ VECTORS:
 	endr
 		; User deviced vectors (192)
 
-	section	text
+	section	.text
 
 RESET:
 
