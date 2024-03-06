@@ -540,14 +540,6 @@
       "FPGA"
     ],
     [
-      "f63660fb-144c-49f2-b80d-d496ab444a51",
-      "AddressBuffer"
-    ],
-    [
-      "3d1958e7-1e26-4e3f-942c-9ed02aebba31",
-      "DataTRX"
-    ],
-    [
       "ed13931f-56ea-4f95-b129-e0c6d78034e8",
       "Reset"
     ]
