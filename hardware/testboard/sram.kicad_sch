@@ -1269,7 +1269,7 @@
   (symbol (lib_id "Memory_RAM:IS61C5128AS-25TLI") (at 104.14 68.58 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2a3534a7-f119-4a78-a09b-9d91c1a8fe6a)
-    (property "Reference" "U6" (at 106.3341 33.02 0)
+    (property "Reference" "U301" (at 106.3341 33.02 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "IS61C5128AS-25TLI" (at 106.3341 35.56 0)
@@ -1316,7 +1316,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "U6") (unit 1)
+          (reference "U301") (unit 1)
         )
       )
     )
@@ -1325,7 +1325,7 @@
   (symbol (lib_id "power:GND") (at 104.14 182.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4b3ae2f7-b3d1-439c-b973-e53c814cd1d7)
-    (property "Reference" "#PWR022" (at 104.14 189.23 0)
+    (property "Reference" "#PWR0304" (at 104.14 189.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 104.14 187.96 0)
@@ -1341,7 +1341,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "#PWR022") (unit 1)
+          (reference "#PWR0304") (unit 1)
         )
       )
     )
@@ -1350,7 +1350,7 @@
   (symbol (lib_id "power:+5V") (at 121.92 177.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 76d71f32-6566-4a8f-baa2-dc0a17d4ac04)
-    (property "Reference" "#PWR021" (at 121.92 181.61 0)
+    (property "Reference" "#PWR0306" (at 121.92 181.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 121.92 172.72 0)
@@ -1366,7 +1366,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "#PWR021") (unit 1)
+          (reference "#PWR0306") (unit 1)
         )
       )
     )
@@ -1375,7 +1375,7 @@
   (symbol (lib_id "power:+5V") (at 121.92 96.52 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8d3d2cb1-fd9f-47a0-b0e0-7fd1d3760123)
-    (property "Reference" "#PWR018" (at 121.92 100.33 0)
+    (property "Reference" "#PWR0305" (at 121.92 100.33 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 121.92 91.44 0)
@@ -1391,7 +1391,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "#PWR018") (unit 1)
+          (reference "#PWR0305") (unit 1)
         )
       )
     )
@@ -1400,7 +1400,7 @@
   (symbol (lib_id "power:+5V") (at 104.14 35.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 94bb424c-e6ff-4d1b-8321-d81ae6dc4894)
-    (property "Reference" "#PWR017" (at 104.14 39.37 0)
+    (property "Reference" "#PWR0301" (at 104.14 39.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 104.14 30.48 0)
@@ -1416,7 +1416,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "#PWR017") (unit 1)
+          (reference "#PWR0301") (unit 1)
         )
       )
     )
@@ -1425,7 +1425,7 @@
   (symbol (lib_id "power:+5V") (at 104.14 116.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a58b1861-e6e4-4fd9-97cf-d281a7b0ac1b)
-    (property "Reference" "#PWR020" (at 104.14 120.65 0)
+    (property "Reference" "#PWR0303" (at 104.14 120.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 104.14 111.76 0)
@@ -1441,7 +1441,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "#PWR020") (unit 1)
+          (reference "#PWR0303") (unit 1)
         )
       )
     )
@@ -1450,7 +1450,7 @@
   (symbol (lib_id "Device:C_Small") (at 121.92 99.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c0b94324-107a-4b9b-8223-d7143434f45a)
-    (property "Reference" "C21" (at 124.46 97.7963 0)
+    (property "Reference" "C301" (at 124.46 97.7963 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100nF" (at 124.46 100.3363 0)
@@ -1467,7 +1467,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "C21") (unit 1)
+          (reference "C301") (unit 1)
         )
       )
     )
@@ -1476,7 +1476,7 @@
   (symbol (lib_id "Memory_RAM:IS61C5128AS-25TLI") (at 104.14 149.86 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid da559b08-1234-49b4-8b46-ba84269897f9)
-    (property "Reference" "U7" (at 106.3341 114.3 0)
+    (property "Reference" "U302" (at 106.3341 114.3 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "IS61C5128AS-25TLI" (at 106.3341 116.84 0)
@@ -1523,7 +1523,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "U7") (unit 1)
+          (reference "U302") (unit 1)
         )
       )
     )
@@ -1532,7 +1532,7 @@
   (symbol (lib_id "power:GND") (at 104.14 101.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid eafe130c-df34-48d8-a1ea-97217171a950)
-    (property "Reference" "#PWR019" (at 104.14 107.95 0)
+    (property "Reference" "#PWR0302" (at 104.14 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 104.14 106.68 0)
@@ -1548,7 +1548,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "#PWR019") (unit 1)
+          (reference "#PWR0302") (unit 1)
         )
       )
     )
@@ -1557,7 +1557,7 @@
   (symbol (lib_id "Device:C_Small") (at 121.92 180.34 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd65a5ab-4fdf-4a50-9ec7-8d748c5e72d3)
-    (property "Reference" "C22" (at 124.46 179.0763 0)
+    (property "Reference" "C302" (at 124.46 179.0763 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100nF" (at 124.46 181.6163 0)
@@ -1574,7 +1574,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/e8f69379-7c84-47d9-8ed8-3fe10fcd197b"
-          (reference "C22") (unit 1)
+          (reference "C302") (unit 1)
         )
       )
     )

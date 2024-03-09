@@ -596,7 +596,7 @@
   (symbol (lib_id "power:+3.3V") (at 99.06 33.02 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 064a4bcc-176f-49b5-9f50-c8e4c00b5c7f)
-    (property "Reference" "#PWR023" (at 99.06 36.83 0)
+    (property "Reference" "#PWR0401" (at 99.06 36.83 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 99.06 27.94 0)
@@ -612,7 +612,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "#PWR023") (unit 1)
+          (reference "#PWR0401") (unit 1)
         )
       )
     )
@@ -621,7 +621,7 @@
   (symbol (lib_id "power:+3.3V") (at 134.62 35.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 10c8ee0c-cee6-4913-a5f2-e611a34740f7)
-    (property "Reference" "#PWR024" (at 134.62 39.37 0)
+    (property "Reference" "#PWR0404" (at 134.62 39.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 134.62 30.48 0)
@@ -637,7 +637,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "#PWR024") (unit 1)
+          (reference "#PWR0404") (unit 1)
         )
       )
     )
@@ -646,7 +646,7 @@
   (symbol (lib_id "Oscillator:CXO_DIP14") (at 60.96 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 30c64b5f-0152-4fbf-889c-2136d90fa662)
-    (property "Reference" "X2" (at 71.12 36.9921 0)
+    (property "Reference" "X402" (at 71.12 36.9921 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "33MHz" (at 71.12 39.5321 0)
@@ -665,7 +665,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "X2") (unit 1)
+          (reference "X402") (unit 1)
         )
       )
     )
@@ -674,7 +674,7 @@
   (symbol (lib_id "power:GND") (at 99.06 48.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3398b6f6-9335-44cb-9530-2757b1364b45)
-    (property "Reference" "#PWR025" (at 99.06 54.61 0)
+    (property "Reference" "#PWR0402" (at 99.06 54.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 99.06 53.34 0)
@@ -690,7 +690,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "#PWR025") (unit 1)
+          (reference "#PWR0402") (unit 1)
         )
       )
     )
@@ -699,7 +699,7 @@
   (symbol (lib_id "Oscillator:ASE-xxxMHz") (at 33.02 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4077a917-390e-4d9e-8e27-55709b4fdfa8)
-    (property "Reference" "X1" (at 45.72 36.9921 0)
+    (property "Reference" "X401" (at 45.72 36.9921 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "ASE-33MHz" (at 45.72 39.5321 0)
@@ -718,7 +718,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "X1") (unit 1)
+          (reference "X401") (unit 1)
         )
       )
     )
@@ -727,7 +727,7 @@
   (symbol (lib_id "Device:C") (at 116.84 52.07 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 879db995-7bc6-4df6-84a1-fd989bf1b815)
-    (property "Reference" "C24" (at 113.03 50.8 0)
+    (property "Reference" "C402" (at 113.03 50.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100nF" (at 113.03 53.34 0)
@@ -744,7 +744,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "C24") (unit 1)
+          (reference "C402") (unit 1)
         )
       )
     )
@@ -753,7 +753,7 @@
   (symbol (lib_id "power:GND") (at 134.62 55.88 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8f42cd1e-886e-41f6-8ed5-db958dc212f2)
-    (property "Reference" "#PWR027" (at 134.62 62.23 0)
+    (property "Reference" "#PWR0405" (at 134.62 62.23 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 134.62 60.96 0)
@@ -769,7 +769,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "#PWR027") (unit 1)
+          (reference "#PWR0405") (unit 1)
         )
       )
     )
@@ -778,7 +778,7 @@
   (symbol (lib_id "power:+3.3V") (at 116.84 48.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid aaa336f0-3658-4738-ac44-d5c5c940d898)
-    (property "Reference" "#PWR026" (at 116.84 52.07 0)
+    (property "Reference" "#PWR0403" (at 116.84 52.07 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 116.84 43.18 0)
@@ -794,7 +794,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "#PWR026") (unit 1)
+          (reference "#PWR0403") (unit 1)
         )
       )
     )
@@ -803,7 +803,7 @@
   (symbol (lib_id "Device:C") (at 81.28 39.37 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c5aa8713-81f1-4fb2-8061-ebe5147c708c)
-    (property "Reference" "C23" (at 85.09 38.1 0)
+    (property "Reference" "C401" (at 85.09 38.1 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100nF" (at 85.09 40.64 0)
@@ -820,7 +820,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "C23") (unit 1)
+          (reference "C401") (unit 1)
         )
       )
     )
@@ -829,7 +829,7 @@
   (symbol (lib_id "Oscillator:CXO_DIP8") (at 99.06 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d6dd8fb4-bc9d-4a57-b61e-fb70c1595bbf)
-    (property "Reference" "X3" (at 110.49 36.9921 0)
+    (property "Reference" "X403" (at 110.49 36.9921 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "33MHz" (at 110.49 39.5321 0)
@@ -848,7 +848,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "X3") (unit 1)
+          (reference "X403") (unit 1)
         )
       )
     )
@@ -857,7 +857,7 @@
   (symbol (lib_id "68040:NB3N502") (at 134.62 45.72 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd4e0bfe-f87f-4676-bb50-3e59087b1d0f)
-    (property "Reference" "U8" (at 136.8141 33.02 0)
+    (property "Reference" "U401" (at 136.8141 33.02 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "NB3N502" (at 136.8141 35.56 0)
@@ -880,7 +880,7 @@
     (instances
       (project "testboard"
         (path "/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858"
-          (reference "U8") (unit 1)
+          (reference "U401") (unit 1)
         )
       )
     )
