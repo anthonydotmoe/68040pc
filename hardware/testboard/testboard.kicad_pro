@@ -45,7 +45,7 @@
         "silk_text_thickness": 0.15,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.0
+          "min_clearance": 0.5
         }
       },
       "diff_pair_dimensions": [
@@ -55,7 +55,15 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "silk_overlap|165960000|125710000|f4484dcd-fcc3-49ae-ba63-5c7e14ee2361|69127547-c53b-43f5-9275-85bb6cd668cb",
+        "silk_overlap|165960000|125710000|f4484dcd-fcc3-49ae-ba63-5c7e14ee2361|6e55856f-2ff2-4cc5-af0b-8508a1aec7e1",
+        "silk_overlap|165971484|125522909|c5c16dad-3699-4a56-acb4-44864f53c176|6e55856f-2ff2-4cc5-af0b-8508a1aec7e1",
+        "silk_overlap|178848516|125522909|e680b664-046d-408e-bf18-d96b780a96be|3a51ae88-a63f-44b4-a9ff-5091ca6ed9d5",
+        "silk_overlap|178860000|125710000|2415420a-47c5-453b-a063-690a53f6cb60|3a51ae88-a63f-44b4-a9ff-5091ca6ed9d5",
+        "silk_overlap|178860000|137860000|2415420a-47c5-453b-a063-690a53f6cb60|91fafee5-04d0-4b0d-81e5-2c08c7bed5f6",
+        "silk_overlap|178860000|137860000|72573376-adde-4677-b59d-dfac45abe92e|2415420a-47c5-453b-a063-690a53f6cb60"
+      ],
       "meta": {
         "version": 2
       },
@@ -429,6 +437,23 @@
       },
       {
         "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.35,
+        "microvia_drill": 0.2,
+        "name": "Bus",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.25,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
         "clearance": 0.5,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
@@ -477,8 +502,8 @@
         "pattern": "GND"
       },
       {
-        "netclass": "Clock",
-        "pattern": "*CLK*"
+        "netclass": "Bus",
+        "pattern": "/.*[A|D]\\d+.*"
       }
     ]
   },
