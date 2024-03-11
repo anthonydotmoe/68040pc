@@ -1,0 +1,49 @@
+Reference,Value,JLCPCB,Footprint,Datasheet,Qty
+"C1, C701-C704, C809, C812, C815, C821, C835, C839, C842",4.7uF,,Capacitor_SMD:C_0603_1608Metric,~,12
+"C201, C204",0.22uF,,Capacitor_SMD:C_0603_1608Metric,~,2
+"C202, C205",22uF,,Capacitor_THT:CP_Radial_D5.0mm_P2.00mm,~,2
+"C203, C206",220pF,,Capacitor_SMD:C_0603_1608Metric,~,2
+"C207, C301, C302, C401, C402, C510, C601, C801-C808, C810, C811, C813, C814, C816-C820, C822-C834, C836-C838, C840, C841, C901-C903",100nF,,Capacitor_SMD:C_0603_1608Metric,~,45
+"C501, C502, C505-C509, C512-C514",1uF,,Capacitor_SMD:C_0805_2012Metric,~,10
+"C503, C504",15pF,,Capacitor_SMD:C_0603_1608Metric,~,2
+C511,C_Polarized_Small_US,,Capacitor_THT:CP_Radial_D5.0mm_P2.00mm,~,1
+C705,220uF,,Capacitor_THT:CP_Radial_D8.0mm_P2.50mm,~,1
+D801,LTST-C191KGKT,C125098,LED_SMD:LED_0603_1608Metric,~,1
+D802,D_Schottky,C2886023,Diode_SMD:D_0603_1608Metric,~,1
+D803,LED,,LED_THT:LED_D3.0mm,~,1
+FB201,FerriteBead,,Inductor_SMD:L_0805_2012Metric_Pad1.15x1.40mm_HandSolder,~,1
+J701,Barrel_Jack,,Connector_BarrelJack:BarrelJack_GCT_DCJ200-10-A_Horizontal,~,1
+J801,Conn_01x06,,Connector_JST:JST_PH_B6B-PH-K_1x06_P2.00mm_Vertical,~,1
+"JS501, JS502",DE9_Plug_MountingHoles,,Connector_Dsub:DSUB-9_Male_Horizontal_P2.77x2.84mm_EdgePinOffset4.94mm_Housed_MountingHolesOffset7.48mm, ~,2
+R201-R215,4.7k,,Resistor_SMD:R_0603_1608Metric,~,15
+"R501, R601, R602, R802, R901, R902",1k,,Resistor_SMD:R_0603_1608Metric,~,6
+"R801, R809",2.2K,,Resistor_SMD:R_0603_1608Metric,~,2
+"R803, R804",10K,,Resistor_SMD:R_0603_1608Metric,~,2
+"R805, R806",10k,,Resistor_SMD:R_0603_1608Metric,~,2
+R807,R_Small_US,,Resistor_SMD:R_0603_1608Metric,~,1
+R808,100,,Resistor_SMD:R_0603_1608Metric,~,1
+RN201,1k,,Resistor_THT:R_Array_SIP10,http://www.vishay.com/docs/31509/csc.pdf,1
+SW801,BUTTON,,Button_Switch_THT:SW_PUSH_6mm,~,1
+SW901,RESET,,Button_Switch_THT:SW_PUSH_6mm,~,1
+U1,~,,68040:DACMOD,,1
+U2,MAX98306 Amp,,68040:AMP,,1
+U201,68LC040,,68040:PGA179,,1
+U202,74LVC1G04,C7827,Package_TO_SOT_SMD:SOT-23-5,https://www.ti.com/lit/ds/symlink/sn74lvc1g04.pdf,1
+"U301, U302",IS61C5128AS-25TLI,,Package_SO:TSOP-II-32_21.0x10.2mm_P1.27mm,http://www.issi.com/WW/pdf/61-64C5128AL.pdf,2
+U401,NB3N502,C462878,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,https://www.onsemi.com/download/data-sheet/pdf/nb3n502-d.pdf,1
+"U501, U503",MAX232,C59824,Package_SO:SOIC-16_3.9x9.9mm_P1.27mm,http://www.ti.com/lit/ds/symlink/max232.pdf,2
+U502,68681,,Package_DIP:DIP-40_W15.24mm,,1
+U601,~,,Package_LCC:PLCC-68_THT-Socket,,1
+U701,AP2112K-3.3,C51118,Package_TO_SOT_SMD:SOT-23-5,https://www.diodes.com/assets/Datasheets/AP2112.pdf,1
+U702,AP2112K-1.2,NO STOCK,Package_TO_SOT_SMD:SOT-23-5,https://www.diodes.com/assets/Datasheets/AP2112.pdf,1
+U801,SST26VF023BA,,Package_SO:SOP-8_5.28x5.23mm_P1.27mm,"https://www.macronix.com/Lists/Datasheet/Attachments/8377/MX25L3233F,%203V,%2032Mb,%20v1.1.pdf",1
+"U802, U804-U807",SN74ALVC164245,C3755042,Package_SO:TSSOP-48_6.1x12.5mm_P0.5mm,SN74ALVC164245DLR,5
+U803,ICE40HX4K-TQ144,C1521989,Package_QFP:TQFP-144_20x20mm_P0.5mm,http://www.latticesemi.com/Products/FPGAandCPLD/iCE40,1
+"U808, U810",SN74LVC07,C7809,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,https://www.ti.com/lit/ds/symlink/sn74lvc07a.pdf,2
+U809,74AHCT04,C554474,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,https://assets.nexperia.com/documents/data-sheet/74AHC_AHCT04.pdf,1
+U901,TL7705A,C350569,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://www.ti.com.cn/cn/lit/ds/symlink/tl7705a.pdf,1
+U902,74LVC1G08,C7666,Package_TO_SOT_SMD:SOT-23-5,https://www.ti.com/lit/ds/symlink/sn74lvc1g08.pdf,1
+X401,ASE-33MHz,,Oscillator:Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm,http://www.abracon.com/Oscillators/ASV.pdf,1
+X402,33MHz,,Oscillator:Oscillator_DIP-14,http://cdn-reichelt.de/documents/datenblatt/B400/OSZI.pdf,1
+X403,33MHz,,Oscillator:Oscillator_DIP-8,http://cdn-reichelt.de/documents/datenblatt/B400/OSZI.pdf,1
+Y501,3.6864MHz,,Crystal:Crystal_C38-LF_D3.0mm_L8.0mm_Vertical,~,1
