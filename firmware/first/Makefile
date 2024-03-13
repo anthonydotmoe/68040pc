@@ -27,8 +27,8 @@ rom: $(ROM_BIN)
 #	srec_cat $< -o $@ -binary
 
 #$(ROM_DASM): $(ROM_SREC)
-	srec_cat $< -o $<.bin -binary
-	$(DAS) $<.bin > $(ROM_DASM)
+	#srec_cat $< -o $<.bin -binary
+	#$(DAS) $<.bin > $(ROM_DASM)
 
 #$(ROM_SREC): $(ROM_OBJ)
 

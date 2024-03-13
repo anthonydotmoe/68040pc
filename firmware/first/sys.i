@@ -2,3 +2,4 @@
 
 	include	"memory.i"
 	include "duart.i"
+	include "fpga.i"

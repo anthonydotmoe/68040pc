@@ -3,7 +3,22 @@
 	include "sys.i"
 
 	section .bss
-	org	SRAMBSS
+
+INT1_CHECK:
+		ds.l	1
+INT2_CHECK:
+		ds.l	1
+INT3_CHECK:
+		ds.l	1
+INT4_CHECK:
+		ds.l	1
+INT5_CHECK:
+		ds.l	1
+INT6_CHECK:
+		ds.l	1
+INT7_CHECK:
+		ds.l	1
+
 	section	.vectors
 
 VECTORS:
@@ -69,8 +84,44 @@ RESET:
 DELAY10000:
 		move.l	#10000,d2	; Wait for a bit (for some reason)
 .1:
-		subq.l	#1,d2
-		bne	.1
+		dbra	d2,.1
+
+TEST_INTS:
+		; Clear test bits
+		movea.l	#INT1_CHECK,a0
+		clr.l	$00(a0)
+		clr.l	$04(a0)
+		clr.l	$08(a0)
+		clr.l	$0c(a0)
+		clr.l	$10(a0)
+		clr.l	$04(a0)
+		clr.l	$08(a0)
+
+		; Initiate interrupts to be autovectored through FPGA
+		movea.l	#FPGA_BASE,a1
+		move.b	#1,F_INT(a1)
+		move.b	#2,F_INT(a1)
+		move.b	#3,F_INT(a1)
+		move.b	#4,F_INT(a1)
+		move.b	#5,F_INT(a1)
+		move.b	#6,F_INT(a1)
+		move.b	#7,F_INT(a1)
+
+		; Print message to screen for each interrupt
+		; printf("int %d: %s", int_no, status);
+		;
+		; push status_str
+		; push int_no
+		; push "format string"
+
+		tst	$00(a0)
+		beq	.no_interrupt
+		pea	str_int_ok
+		bra	.2
+.no_interrupt:	pea	str_int_fail
+.2:		move.l	#0,-(sp)
+		pea	str_int_n
+		jsr	printf_
 
 INIT_DUART:
 		
@@ -116,24 +167,15 @@ FPU_IDENT:
 		jsr	get_fpu		; d0 = 1: FPU, 0: LC (no FPU)
 		move.b	d0,d0
 		beq	.no_fpu
-		pea	.cpu_text_b
+		pea	str_cpu_b
 		jmp	.print
-.no_fpu:	pea	.cpu_text_lc
-.print:		pea	.cpu_text
+.no_fpu:	pea	str_cpu_lc
+.print:		pea	str_cpu
 		jsr	printf_
 
-		bra	DIE
-
-.cpu_text:	dc.b	"CPU: Motorola 68%s040\n",0
-		even
-.cpu_text_lc:	dc.b	"LC",0
-		even
-.cpu_text_b:	dc.b	0
-		even
-
-
-
 DIE:		bra	DIE
+
+		even
 
 
 VEC_ILLINSTR:
@@ -152,12 +194,26 @@ VEC_FMTERROR:
 VEC_UNINIVEC:
 VEC_SPURIOUS:
 VEC_AUTOVEC1:
+		move.l	#1,INT1_CHECK
+		rte
 VEC_AUTOVEC2:
+		move.l	#1,INT2_CHECK
+		rte
 VEC_AUTOVEC3:
+		move.l	#1,INT3_CHECK
+		rte
 VEC_AUTOVEC4:
+		move.l	#1,INT4_CHECK
+		rte
 VEC_AUTOVEC5:
+		move.l	#1,INT5_CHECK
+		rte
 VEC_AUTOVEC6:
+		move.l	#1,INT6_CHECK
+		rte
 VEC_AUTOVEC7:
+		move.l	#1,INT7_CHECK
+		rte
 VEC_TRAP0:
 VEC_TRAP1:
 VEC_TRAP2:
@@ -174,7 +230,6 @@ VEC_TRAP12:
 VEC_TRAP13:
 VEC_TRAP14:
 VEC_TRAP15:
-		even
 		bra	VEC_RESERVED
 
 _putchar::
@@ -204,3 +259,15 @@ get_fpu:	; d0 = get_fpu(void)
 		move.l	(sp)+,$2c(a1)	; restore trap vector
 		move.w	(sp)+,sr	; restore IPL
 		rts
+
+str_cpu:	dc.b	"CPU: Motorola 68%s040\n",0
+		even
+str_cpu_lc:	dc.b	"LC",0
+		even
+str_cpu_b:	dc.b	0
+		even
+str_int_n:	dc.b	"Interrupt %d: %s\n",0
+		even
+str_int_ok:	dc.b	"OK!",0
+		even
+str_int_fail:	dc.b	"FAILED",0

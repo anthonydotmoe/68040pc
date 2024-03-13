@@ -1,0 +1,13 @@
+- Expose interrupt generator peripheral from FPGA
+
+POST Routine:
+
+- Do test of SRAM
+	- SRAM works -> relocate VBR to SRAM
+- Test interrupts
+	- Interrupts work, serial port can use them
+- Test serial port?
+
+FPGA BASE:0x80000000
+	* 0x00.l - Status
+	* 0x04.b - Fire interrupt (number written, one cycle)
