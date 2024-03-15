@@ -10,9 +10,12 @@ done.
 
 ## Status
 
-The `testboard` design is almost complete. Most of the logic checks out in the
-schematic. Need to add a 3.3V power supply and reset, interrupt, and user
-button circuitry.
+The `testboard` design is almost complete. I'm going to sleep on the design
+before ordering boards. The FPGA does address decoding and interrupt
+management and will contain a sound core to output some cool beeps through
+the I2S DAC module. I'm pleased with how the project is going so far!
+
+![testboard Render](./testboard.jpg)
 
 ## Objectives
 
