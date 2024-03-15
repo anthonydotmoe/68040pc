@@ -197,7 +197,12 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      "label_dangling|1320800|939800|ecc234c2-1107-49b7-93c7-1d1129f99d59|00000000-0000-0000-0000-000000000000|||",
+      "pin_to_pin|406400|406400|c6684d58-030a-4b3e-b0c2-5164a414e43e|c238eba2-299b-46cd-9642-c507e96544a3|/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858|/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858|/a1ce156a-fb78-423b-b05a-d07384e5c8a7/9c02df45-eefc-4cd9-a46c-364699428858",
+      "power_pin_not_driven|1600200|990600|aab422bf-13df-4ecc-accd-6e8ea56a0625|00000000-0000-0000-0000-000000000000|||",
+      "power_pin_not_driven|1625600|990600|6c55f54e-8987-402b-ac10-c4f3d31c2aa9|00000000-0000-0000-0000-000000000000|||"
+    ],
     "meta": {
       "version": 0
     },

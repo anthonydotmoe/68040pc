@@ -39,4 +39,19 @@
   (pad "8" thru_hole circle (at 24.13 -13.335) (size 1.524 1.524) (drill 0.762) (layers "*.Cu" "*.Mask") (tstamp 39e4cb0f-3f9b-4ac0-ad80-706d5e0e9f4b))
   (pad "9" thru_hole circle (at 21.59 -13.335) (size 1.524 1.524) (drill 0.762) (layers "*.Cu" "*.Mask") (tstamp 08dda4dc-ec54-486b-83c0-5c6442db7734))
   (pad "10" thru_hole circle (at 19.05 -13.335) (size 1.524 1.524) (drill 0.762) (layers "*.Cu" "*.Mask") (tstamp c4ffaf3b-dd9d-4ff2-aa82-cf1e837c30c7))
+  (model "${KIPRJMOD}/../lib/3d/DAC.wrl"
+    (offset (xyz 0 0 2.54))
+    (scale (xyz 0.254 0.254 0.254))
+    (rotate (xyz 0 0 0))
+  )
+  (model ":KICAD7_3DMODEL_DIR:Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x06_P2.54mm_Vertical.wrl"
+    (offset (xyz 0 12.7 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
+  (model ":KICAD7_3DMODEL_DIR:Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.wrl"
+    (offset (xyz 26.67 13.335 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 90))
+  )
 )
