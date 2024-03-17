@@ -116,12 +116,13 @@ TEST_INTS:
 
 		tst	$00(a0)
 		beq	.no_interrupt
-		pea	str_int_ok
+		pea	str_ok
 		bra	.2
-.no_interrupt:	pea	str_int_fail
+.no_interrupt:	pea	str_fail
 .2:		move.l	#0,-(sp)
 		pea	str_int_n
 		jsr	printf_
+		add.l	#12,sp
 
 INIT_DUART:
 		
@@ -146,7 +147,41 @@ INIT_DUART:
 		move.b	#$30,CRB(a0)	; reset the transmitter
 					; Channel B is disabled
 
+TEST_MEMORY:
+		xref	detect_memory
+		xref	test_memory
 
+		move.l	#SRAM,a0	; Base address
+
+		; TODO: Using printf requires working RAM. I just hope RAM works so I can see something here
+		move.l	a0,-(sp)
+		pea	str_membase
+		jsr	printf_
+		add.l	#4,sp
+		move.l	(sp)+,a0	; Get membase back from stack
+
+		jsr	detect_memory	; A0 input - memory base address
+		; Now A1 has the detected end of memory
+		
+		; Print the supposed end of memory
+		move.l	a1,-(sp)
+		pea	str_memdet
+		jsr	printf_
+		add.l	#4,sp
+		move.l	(sp)+,a1	; Get memory end back from stack
+
+		; Test memory
+		jsr	test_memory
+		tst.l	d0
+		beq	.memtest_ok
+		pea	str_fail
+		bra	.print_result
+.memtest_ok:	
+		pea	str_ok
+.print_result:
+		pea	str_memtest_s
+		jsr	printf_
+		add.l	#8,sp
 		
 COPY_VECTORS:
 		moveq.l	#$FF,d0		; Load count 255 vectors
@@ -172,27 +207,13 @@ FPU_IDENT:
 .no_fpu:	pea	str_cpu_lc
 .print:		pea	str_cpu
 		jsr	printf_
+		add.l	#8,sp
 
 DIE:		bra	DIE
 
 		even
 
 
-VEC_ILLINSTR:
-VEC_BUSFAULT:
-VEC_ADERROR:
-VEC_DIVBY0:
-VEC_CHK:
-VEC_TRAPV:
-VEC_PRIVVIOL:
-VEC_TRACE:
-VEC_LINE1010:
-VEC_LINE1111:
-VEC_RESERVED:
-VEC_CCPUVIOL:
-VEC_FMTERROR:
-VEC_UNINIVEC:
-VEC_SPURIOUS:
 VEC_AUTOVEC1:
 		move.l	#1,INT1_CHECK
 		rte
@@ -214,6 +235,21 @@ VEC_AUTOVEC6:
 VEC_AUTOVEC7:
 		move.l	#1,INT7_CHECK
 		rte
+VEC_ILLINSTR:
+VEC_BUSFAULT:
+VEC_ADERROR:
+VEC_DIVBY0:
+VEC_CHK:
+VEC_TRAPV:
+VEC_PRIVVIOL:
+VEC_TRACE:
+VEC_LINE1010:
+VEC_LINE1111:
+VEC_RESERVED:
+VEC_CCPUVIOL:
+VEC_FMTERROR:
+VEC_UNINIVEC:
+VEC_SPURIOUS:
 VEC_TRAP0:
 VEC_TRAP1:
 VEC_TRAP2:
@@ -260,6 +296,8 @@ get_fpu:	; d0 = get_fpu(void)
 		move.w	(sp)+,sr	; restore IPL
 		rts
 
+	section .rodata
+
 str_cpu:	dc.b	"CPU: Motorola 68%s040\n",0
 		even
 str_cpu_lc:	dc.b	"LC",0
@@ -268,6 +306,15 @@ str_cpu_b:	dc.b	0
 		even
 str_int_n:	dc.b	"Interrupt %d: %s\n",0
 		even
-str_int_ok:	dc.b	"OK!",0
+str_ok:		dc.b	"OK!",0
 		even
-str_int_fail:	dc.b	"FAILED",0
+str_fail:	dc.b	"FAILED",0
+		even
+str_membase:	dc.b	"Memory base: %08x\n",0
+		even
+str_memdet:	dc.b	"Memory end?: %08x\n",0
+		even
+str_memok:	dc.b	"Memory end?: %08x\n",0
+		even
+str_memtest_s:	dc.b	"Memory test: %s\n",0
+		even

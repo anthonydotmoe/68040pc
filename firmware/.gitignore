@@ -1,2 +1,3 @@
 *.srec
 *.lst
+obj/*
