@@ -2,6 +2,7 @@
 
 	include "sys.i"
 
+
 	section .bss
 
 INT1_CHECK:
@@ -18,6 +19,11 @@ INT6_CHECK:
 		ds.l	1
 INT7_CHECK:
 		ds.l	1
+
+	section .bss.vectors
+
+RAMVECTORS:
+		dcb.l	256
 
 	section	.vectors
 
@@ -100,12 +106,19 @@ TEST_INTS:
 		; Initiate interrupts to be autovectored through FPGA
 		movea.l	#FPGA_BASE,a1
 		move.b	#1,F_INT(a1)
+		nop
 		move.b	#2,F_INT(a1)
+		nop
 		move.b	#3,F_INT(a1)
+		nop
 		move.b	#4,F_INT(a1)
+		nop
 		move.b	#5,F_INT(a1)
+		nop
 		move.b	#6,F_INT(a1)
+		nop
 		move.b	#7,F_INT(a1)
+		nop
 
 		; Print message to screen for each interrupt
 		; printf("int %d: %s", int_no, status);
@@ -184,15 +197,15 @@ TEST_MEMORY:
 		add.l	#8,sp
 		
 COPY_VECTORS:
-		moveq.l	#$FF,d0		; Load count 255 vectors
-		move.l	#ROM,a0		; ROM base in a0
-		move.l	#SRAM,a1	; RAM base in a1
+		moveq.l	#$FF,d0		; Load count 256 - 1 vectors
+		move.l	#VECTORS,a0	; ROM base in a0
+		move.l	#RAMVECTORS,a1	; RAM base in a1
 .loop:
 		move.l	(a0)+,(a1)+	; move a vector
-		dbra	d0,.loop
+		dbra	d0,.loop	; decrement d0 and loop (executes 256 times)
 
 		; now we can move the VBR to SRAM
-		move.l	#SRAM,a0
+		move.l	#RAMVECTORS,a0
 		movec.l	a0,vbr
 
 

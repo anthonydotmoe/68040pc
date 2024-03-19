@@ -8,4 +8,3 @@ INITIAL_SP	equ	RAMEND
 ; Base addresses
 ROM		equ	$00000000
 SRAM		equ	$30000000
-SRAMBSS		equ	$30000400

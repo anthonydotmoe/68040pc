@@ -1,15 +1,10 @@
 OUTPUT_FORMAT("binary")
 
 rom_bot		= 0x00000000;
-rom_top		= 0x001FFFFF;
-
-sram_bot	= 0x30000400;	/* With room for vectors */
-sram_top	= 0x3007FFFF;
-
-stack_top	= sram_top + 1;
+sram_bot	= 0x30000000;
 
 MEMORY {
-	sram	(rwx)	: ORIGIN = sram_bot, LENGTH = 512K
+	sram	(rwx)	: ORIGIN = sram_bot, LENGTH = 1M
 	rom	(rx)	: ORIGIN = rom_bot,  LENGTH = 2M
 }
 
@@ -21,6 +16,7 @@ SECTIONS {
 	} > rom
 
 	.bss (NOLOAD) : {
+		KEEP(*(.bss.vectors))
 		*(.bss*)
 		*(COMMON)
 	} > sram
