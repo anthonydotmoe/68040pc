@@ -1,4 +1,5 @@
 *.out
 *.vcd
 *.dblite
+*.asc
 hardware.json
