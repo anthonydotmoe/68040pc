@@ -1262,6 +1262,11 @@
     (uuid ff29858f-c90d-438d-b0a9-8f8b67248290)
   )
 
+  (text "~{TA} is not open-collector!" (at 66.04 147.32 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid a7e38d28-a552-4bb9-a600-d9681120b8da)
+  )
+
   (label "D4" (at 88.9 58.42 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 01eaa44e-143e-4441-a4d9-af1ef7fb516d)

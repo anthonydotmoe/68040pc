@@ -7193,6 +7193,11 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 067a15ec-852e-4bd7-b316-bc4ef5b4e3aa)
   )
+  (text "ERROR!\n1A[8:1] is supposed to be\nsame order as 1B[8:1]\nLV_SIZ1 -> R/~{W}\nLV_SIZ0 -> SIZ0\nLV_R/~{W} -> SIZ1"
+    (at 139.7 474.98 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 107bf692-c217-4257-9dc8-f7a39c435a2a)
+  )
   (text "V_{CC} at 27, 40, 92, 111" (at 160.02 294.64 0)
     (effects (font (size 1.27 1.27)) (justify right bottom))
     (uuid 6eaeb8bb-d0e1-45c3-96ce-1ffda9073952)
