@@ -1,0 +1,116 @@
+set_io	clk		94
+set_io	rst		52
+set_io	led		95
+
+set_io	dbg1		60
+set_io	dbg2		62
+set_io	dbg3		61
+
+set_io	spi_mosi	67
+set_io	spi_miso	68
+set_io	spi_sck		70
+set_io	spi_ss		71
+set_io	spi_io2		64
+set_io	spi_io3		63
+
+set_io	d_dir		110
+set_io	d_oe		112
+
+set_io	ts		45
+set_io	tip		47
+set_io	tbi		31
+set_io	tci		32
+set_io	tea		33
+set_io	ta		34
+
+set_io	tt[0]		49
+set_io	tt[1]		48
+
+set_io	tm[0]		41
+set_io	tm[1]		39
+set_io	tm[2]		38
+
+set_io	IPL[0]		98
+set_io	IPL[1]		99
+set_io	IPL[2]		101
+
+set_io	rw		44
+set_io	siz[0]		43
+set_io	siz[1]		42
+
+set_io	DSACK[0]	96
+set_io	DSACK[1]	97
+set_io	RESIZ_CS	104
+set_io	RESIZ_DS	56
+
+set_io	COM_CS		102
+set_io	COM_IRQ		55
+set_io	COM_IACK	105
+set_io	RAM_CS		106
+set_io	AVEC		107
+
+set_io	a[0]		91
+set_io	a[1]		90
+set_io	a[2]		88
+set_io	a[3]		87
+set_io	a[4]		85
+set_io	a[5]		84
+set_io	a[6]		82
+set_io	a[7]		83
+set_io	a[8]		10
+set_io	a[9]		11
+set_io	a[10]		29
+set_io	a[11]		28
+set_io	a[12]		26
+set_io	a[13]		25
+set_io	a[14]		24
+set_io	a[15]		22
+set_io	a[16]		23
+set_io	a[17]		21
+set_io	a[18]		18
+set_io	a[19]		19
+set_io	a[20]		16
+set_io	a[21]		12
+set_io	a[22]		81
+set_io	a[23]		17
+set_io	a[24]		78
+set_io	a[25]		15
+set_io	a[26]		80
+set_io	a[27]		75
+set_io	a[28]		79
+set_io	a[29]		74
+set_io	a[30]		76
+set_io	a[31]		73
+
+set_io 	d[0]		138
+set_io 	d[1]		136
+set_io 	d[2]		139
+set_io 	d[3]		135
+set_io 	d[4]		137
+set_io 	d[5]		141
+set_io 	d[6]		142
+set_io 	d[7]		143
+set_io 	d[8]		144
+set_io 	d[9]		1
+set_io 	d[10]		2
+set_io 	d[11]		3
+set_io 	d[12]		4
+set_io 	d[13]		7
+set_io 	d[14]		8
+set_io 	d[15]		9
+set_io 	d[16]		134
+set_io 	d[17]		130
+set_io 	d[18]		129
+set_io 	d[19]		128
+set_io 	d[20]		125
+set_io 	d[21]		124
+set_io 	d[22]		122
+set_io 	d[23]		121
+set_io 	d[24]		120
+set_io 	d[25]		119
+set_io 	d[26]		118
+set_io 	d[27]		117
+set_io 	d[28]		116
+set_io 	d[29]		115
+set_io 	d[30]		114
+set_io 	d[31]		113

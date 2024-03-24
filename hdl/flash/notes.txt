@@ -1,0 +1,2 @@
+FPGA config takes three 64K blocks:	64k, 128k, 192k
+Program ROM starts at next block:	256k
