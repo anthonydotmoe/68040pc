@@ -44,7 +44,7 @@ module flash (
 	output	spi_mosi,
 	input	spi_miso,
 	output	spi_io2,
-	output	spi_io3,
+	output	spi_io3
 );
 
 // Assign default states
@@ -79,11 +79,11 @@ reg i_ta;
 assign ta = ~i_ta;
 
 // Yellow
-assign dbg1 = flash_ack;
+assign dbg1 = spi_ss;
 // Blue
-assign dbg2 = spi_mosi;
+assign dbg2 = a[2];
 // Purple
-assign dbg3 = spi_miso;
+assign dbg3 = ts;
 
 wire rom_sel;
 assign rom_sel = (addr[31:28] == 4'b0000);
@@ -93,14 +93,21 @@ reg d_oe;
 reg flash_stb, flash_cyc;
 wire [31:0] flash_data;
 wire flash_ack, flash_stall;
-//reg flash_reset;
-wire flash_reset = ~rst;
+reg flash_reset;
+//wire flash_reset = ~rst;
 
 wire spi_sck_en;
 reg [21:0] flash_addr; // 24 bits minus two for long word reads
 oclkddr spi_ddr_sck(clk, {!spi_sck_en, 1'b1}, spi_sck);
 
 reg [3:0] flash_sel, flash_c_sel;
+
+wire flash_c_stall, flash_c_ack;
+wire [31:0] flash_c_data, flash_idata;
+reg flash_c_stb, flash_c_cyc, flash_c_we;
+reg [31:0] flash_c_idata;
+
+assign flash_idata = 0;
 
 spixpress #(
 	.OPT_CFG(1'b1),
@@ -134,32 +141,43 @@ spixpress #(
 	.i_spi_miso(spi_miso)
 );
 
-reg [1:0] state;
+reg [3:0] state;
 
 //reg [3:0] count;
 
 localparam	START = 0,
-		GET_DATA = 1,
-		WAIT_DATA = 2,
-		START_TA = 3,
-		FINISH_TA = 4;
+		SEND_WAKE = 1,
+		WAIT_WAKE1 = 2,
+		WAIT_WAKE2 = 3,
+		GET_DATA = 4,
+		WAIT_DATA = 5,
+		START_TA = 6,
+		FINISH_TA = 7;
 
-localparam FLASH_BASE = 24'h040000;
+localparam FLASH_PAGE = 8'h04;
 
 reg flash_awake;
-initial begin flash_awake = 0;
+initial flash_awake = 0;
+
+reg [7:0] wake_wait;
+initial wake_wait = 0;
 
 always @(posedge clk or negedge rst) begin
 	if (~rst) begin
 		flash_awake <= 0;
 		state <= START;
 		i_ta <= 1'b0;
+		d_oe <= 1;
 		flash_stb <= 0;
 		flash_cyc <= 0;
 		flash_sel <= 0;
 		flash_c_stb <= 0;
 		flash_c_cyc <= 0;
 		flash_c_sel <= 0;
+		flash_c_idata <= 32'b0;
+		flash_c_we <= 0;
+		flash_reset <= 1;
+		wake_wait <= 0;
 	end else begin
 		case (state)
 			START: begin
@@ -171,20 +189,26 @@ always @(posedge clk or negedge rst) begin
 				flash_c_stb <= 0;
 				flash_c_cyc <= 0;
 				flash_c_sel <= 0;
+				flash_c_we <= 0;
+				flash_reset <= 0;
 
-				if( flash_awake == 0 ) begin
-					state <= SEND_WAKE;
+				if( (tip == 0) && (rom_sel == 1) ) begin
+					if( flash_awake == 0 ) begin
+						flash_c_idata[7:0] <= 8'hAB;	// Wake command
+						state <= SEND_WAKE;
+					end else begin
+						flash_addr <= { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
+						state <= GET_DATA;
+					end
 				end
-				else if( (ts == 0) && (rom_sel == 1) ) begin
-					flash_addr <= addr[21:2] + (FLASH_BASE >> 2);
-					state <= GET_DATA;
-				end
+
+				state <= START;
 			end
 			GET_DATA: begin
 				i_ta <= 0;
 				d_oe <= 1;
 
-				flash_sel <= 4'1111;
+				flash_sel <= 4'b1111;
 				flash_stb <= 1;
 				flash_cyc <= 1;
 				state <= WAIT_DATA;
@@ -213,19 +237,29 @@ always @(posedge clk or negedge rst) begin
 				state <= START;
 			end
 			SEND_WAKE: begin
-				flash_c_sel <= 4'b0000;		// Don't care for output
-				flash_c_datai[7:0] <= 8'hAB;	// Wake command
 				flash_c_cyc <= 1;
 				flash_c_stb <= 1;
-				state <= WAIT_WAKE;
+				flash_c_we <= 1;
+				state <= WAIT_WAKE1;
 			end
-			WAIT_WAKE: begin
+			WAIT_WAKE1: begin
 				flash_c_stb <= 0;
+				state <= WAIT_WAKE1;
 
 				if( flash_c_ack == 1 ) begin
 					flash_c_cyc <= 0;
-					flash_c_sel <= 0;
-					state <= IDLE;
+					flash_c_we <= 0;
+					wake_wait <= 0;
+					state <= WAIT_WAKE2;
+				end
+			end
+			WAIT_WAKE2: begin
+				if (wake_wait == 8'hFF) begin
+					flash_awake <= 1;
+					state <= START;
+				end else begin
+					wake_wait <= wake_wait + 1;
+					state <= WAIT_WAKE2;
 				end
 			end
 		endcase

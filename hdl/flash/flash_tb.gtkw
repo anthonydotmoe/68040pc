@@ -1,0 +1,40 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Tue Mar 26 00:24:36 2024
+[*]
+[dumpfile] "/mnt/hdd/Projects/68k/68040pc/hdl/flash/flash_tb.vcd"
+[dumpfile_mtime] "Tue Mar 26 00:21:40 2024"
+[dumpfile_size] 11283
+[savefile] "/mnt/hdd/Projects/68k/68040pc/hdl/flash/flash_tb.gtkw"
+[timestart] 0
+[size] 1385 651
+[pos] -1 -1
+*-16.500000 60000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] flash_tb.
+[treeopen] flash_tb.dut.
+[treeopen] flash_tb.dut.reader.
+[sst_width] 273
+[signals_width] 158
+[sst_expanded] 1
+[sst_vpaned_height] 215
+@28
+flash_tb.dut.clk
+flash_tb.dut.flash_awake
+@22
+flash_tb.dut.state[3:0]
+@28
+flash_tb.dut.flash_reset
+flash_tb.dut.reader.ARBITER.cfg_bus_grant
+flash_tb.dut.reader.actual_sck
+flash_tb.dut.reader.o_spi_sck
+@22
+flash_tb.dut.reader.i_cfg_data[31:0]
+flash_tb.dut.reader.i_cfg_sel[3:0]
+flash_tb.dut.reader.bus_sel[3:0]
+@28
+flash_tb.dut.reader.bus_request
+flash_tb.dut.reader.cfg_user_mode
+@29
+flash_tb.dut.reader.user_request
+[pattern_trace] 1
+[pattern_trace] 0

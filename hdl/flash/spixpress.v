@@ -139,9 +139,9 @@ module	spixpress(i_clk, i_reset,
 		//
 		wbarbiter #(
 			// {{{
-			.DW(DW), .AW(AW+1), .SCHEME("PRIORITY"),
+			.DW(DW), .AW(AW+1), .SCHEME("PRIORITY")
 `ifdef	FORMAL
-			.F_MAX_STALL(0), .F_MAX_ACK_DELAY(0)
+			,.F_MAX_STALL(0), .F_MAX_ACK_DELAY(0)
 `endif
 			// }}}
 		) arbiter(

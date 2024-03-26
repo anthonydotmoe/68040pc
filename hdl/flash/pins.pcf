@@ -1,4 +1,5 @@
 set_io	clk		94
+set_frequency clk	33
 set_io	rst		52
 set_io	led		95
 
