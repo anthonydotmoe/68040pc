@@ -2,6 +2,7 @@ set_io	clk		94
 set_frequency clk	33
 set_io	rst		52
 set_io	led		95
+set_io	btn		93
 
 set_io	dbg1		60
 set_io	dbg2		62
