@@ -63,12 +63,12 @@ assign spi_io3 = 1;
 assign IPL = 3'b111;
 assign AVEC = 1'b1;
 
-assign RAM_CS = 0;
-assign COM_CS = 0;
-assign RESIZ_CS = 0;
 assign COM_IACK = 0;
 
-assign DSACK = 2'b11;
+reg ram_ack;
+wire [1:0] DSACK;
+assign DSACK[0] = 1'b1;
+assign DSACK[1] = ~ram_ack;
 
 // End assign
 
@@ -84,9 +84,9 @@ assign ta = ~i_ta;
 // Yellow
 assign dbg1 = ts;
 // Blue
-assign dbg2 = ram_access;
+assign dbg2 = ram_ack;
 // Dark
-assign dbg3 = spi_mosi;
+assign dbg3 = ram_sel;
 `endif
 
 
@@ -132,13 +132,14 @@ spixpress #(
 
 reg [2:0] state;
 
-//reg [3:0] count;
+reg [3:0] count;
 
 localparam	START = 0,
 		GET_DATA = 1,
 		WAIT_DATA = 2,
 		START_TA = 3,
-		FINISH_TA = 4;
+		FINISH_TA = 4,
+		RAM_ACCESS = 5;
 
 localparam FLASH_PAGE = 8'h04;
 
@@ -156,7 +157,20 @@ assign fpga_sel = (addr[31:28] == 4'h8);
 
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
 wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
-wire uart_access = ( (tip == 0) && (ram_sel == 1) );
+wire uart_access = ( (tip == 0) && (duart_sel == 1) );
+
+// Do the following for non-rom accesses:
+//
+// Assert RESIZ_CS
+// Assign RESIZ_DS to the selected peripheral's CS line and start counting
+// After the count expires, assert DSACKn for two CLK falling edges
+// Deassert DSACKn
+
+wire COM_CS, RAM_CS, RESIZ_CS;
+assign COM_CS = uart_access ? ~RESIZ_DS : 1'b0;
+assign RAM_CS = ram_access ? ~RESIZ_DS : 1'b0;
+
+assign RESIZ_CS = duart_sel || ram_sel;
 
 always @(posedge clk or negedge rst) begin
 	if (~rst) begin
@@ -166,6 +180,8 @@ always @(posedge clk or negedge rst) begin
 		flash_stb <= 0;
 		flash_cyc <= 0;
 		flash_sel <= 0;
+		ram_ack <= 0;
+		count <= 0;
 	end else begin
 		case (state)
 			START: begin
@@ -174,10 +190,14 @@ always @(posedge clk or negedge rst) begin
 				flash_stb <= 0;
 				flash_cyc <= 0;
 				flash_sel <= 0;
+				ram_ack <= 0;
+				count <= 0;
 
 				if( rom_access == 1'b1 && ts == 1 ) begin
 					flash_addr <= { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
 					state <= GET_DATA;
+				end else if( ram_access == 1'b1 && ts == 1 ) begin
+					state <= RAM_ACCESS;
 				end else begin
 					state <= START;
 				end
@@ -213,6 +233,16 @@ always @(posedge clk or negedge rst) begin
 				d_oe <= 1;
 
 				state <= START;
+			end
+			RAM_ACCESS: begin
+				if( count == 3'b101 ) begin
+					ram_ack <= 1;
+				end
+				if( count == 3'b111 ) begin
+					ram_ack <= 0;
+					state <= START;
+				end
+				count <= count + 1;
 			end
 		endcase
 	end
