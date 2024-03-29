@@ -103,9 +103,33 @@ INT7_CHECK:
 RESET:
 
 DELAY10000:
-		move.l	#10000,d2	; Wait for a bit (for some reason)
+		move.l	#4,d2	; Wait for a bit (for some reason)
 .1:
 		dbra	d2,.1
+
+INIT_DUART:
+		
+		movea.l	#DUART_BASE,a0
+		move.b	#$00,IMR(a0)		; reset interrupt mask register
+
+		; Initialize channel A
+		move.b	#$10,CRA(a0)		; reset mode register pointer
+		move.b	#$13,MR1A(a0)		; no parity, 8 bits/char
+		move.b	#$07,MR2A(a0)		; 1 stop bit
+		move.b	#$BB,CSRA(a0)		; 9600-baud XMIT and RCV
+		move.b	#$20,CRA(a0)		; reset the receiver
+		move.b	#$30,CRA(a0)		; reset the transmitter
+		move.b	#$05,CRA(a0)		; enable XMIT and RCV
+
+		; Initialize channel B
+		move.b	#$10,CRB(a0)		; reset mode register pointer
+		move.b	#$13,MR1B(a0)		; no parity, 8 bits/char
+		move.b	#$07,MR2B(a0)		; 1 stop bit
+		move.b	#$BB,CSRB(a0)		; 9600-baud XMIT and RCV
+		move.b	#$20,CRB(a0)		; reset the receiver
+		move.b	#$30,CRB(a0)		; reset the transmitter
+
+		move.b	#$41,TBA(a0)		; Send an 'A'
 
 	section .rodata
 
@@ -201,28 +225,6 @@ TEST_INTS:
 	
 .end:
 
-INIT_DUART:
-		
-		movea.l	#DUART_BASE,a0
-		move.b	#$00,IMR(a0)		; reset interrupt mask register
-
-		; Initialize channel A
-		move.b	#$10,CRA(a0)		; reset mode register pointer
-		move.b	#$13,MR1A(a0)		; no parity, 8 bits/char
-		move.b	#$07,MR2A(a0)		; 1 stop bit
-		move.b	#$BB,CSRA(a0)		; 9600-baud XMIT and RCV
-		move.b	#$20,CRA(a0)		; reset the receiver
-		move.b	#$30,CRA(a0)		; reset the transmitter
-		move.b	#$05,CRA(a0)		; enable XMIT and RCV
-
-		; Initialize channel B
-		move.b	#$10,CRB(a0)		; reset mode register pointer
-		move.b	#$13,MR1B(a0)		; no parity, 8 bits/char
-		move.b	#$07,MR2B(a0)		; 1 stop bit
-		move.b	#$BB,CSRB(a0)		; 9600-baud XMIT and RCV
-		move.b	#$20,CRB(a0)		; reset the receiver
-		move.b	#$30,CRB(a0)		; reset the transmitter
-						; Channel B is disabled
 
 TEST_MEMORY:
 		xref	detect_memory
