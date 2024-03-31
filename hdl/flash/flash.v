@@ -84,9 +84,9 @@ assign ta = ~i_ta;
 // Yellow
 assign dbg1 = ts;
 // Blue
-assign dbg2 = ram_ack;
+assign dbg2 = spi_mosi;
 // Dark
-assign dbg3 = ram_sel;
+assign dbg3 = ram_access;
 `endif
 
 
@@ -146,8 +146,8 @@ localparam FLASH_PAGE = 8'h04;
 wire rom_sel;
 assign rom_sel = (addr[31:28] == 4'h0);
 
-wire duart_sel;
-assign duart_sel = (addr[31:28] == 4'h2);
+wire uart_sel;
+assign uart_sel = (addr[31:28] == 4'h2);
 
 wire ram_sel;
 assign ram_sel = (addr[31:28] == 4'h3);
@@ -157,7 +157,9 @@ assign fpga_sel = (addr[31:28] == 4'h8);
 
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
 wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
-wire uart_access = ( (tip == 0) && (duart_sel == 1) );
+wire uart_access = ( (tip == 0) && (uart_sel == 1) );
+
+wire resiz_access = ( ram_access || uart_access );
 
 // Do the following for non-rom accesses:
 //
@@ -170,7 +172,8 @@ wire COM_CS, RAM_CS, RESIZ_CS;
 assign COM_CS = uart_access ? ~RESIZ_DS : 1'b0;
 assign RAM_CS = ram_access ? ~RESIZ_DS : 1'b0;
 
-assign RESIZ_CS = duart_sel || ram_sel;
+reg [1:0] resiz_count;
+assign RESIZ_CS = ts && (uart_access || ram_access);
 
 always @(posedge clk or negedge rst) begin
 	if (~rst) begin
@@ -181,6 +184,7 @@ always @(posedge clk or negedge rst) begin
 		flash_cyc <= 0;
 		flash_sel <= 0;
 		ram_ack <= 0;
+		resiz_count <= 0;
 		count <= 0;
 	end else begin
 		case (state)
@@ -197,6 +201,18 @@ always @(posedge clk or negedge rst) begin
 					flash_addr <= { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
 					state <= GET_DATA;
 				end else if( ram_access == 1'b1 && ts == 1 ) begin
+					case (siz)
+						2'b11,
+						2'b00: begin
+							resiz_count <= 2'b01;	// two accesses
+						end
+						2'b10: begin
+							resiz_count <= 2'b00;	// one access
+						end
+						2'b01: begin
+							resiz_count <= 2'b00;	// one access
+						end
+					endcase
 					state <= RAM_ACCESS;
 				end else begin
 					state <= START;
@@ -235,14 +251,23 @@ always @(posedge clk or negedge rst) begin
 				state <= START;
 			end
 			RAM_ACCESS: begin
+				count <= count + 1;
 				if( count == 3'b101 ) begin
 					ram_ack <= 1;
 				end
 				if( count == 3'b111 ) begin
+					// Done
 					ram_ack <= 0;
-					state <= START;
+
+					// If this is the last transfer
+					if( resiz_count == 2'b00 ) begin
+						state <= START;
+					end else begin
+						// Else, reset counters
+						resiz_count <= resiz_count - 1;
+						count <= -1;
+					end
 				end
-				count <= count + 1;
 			end
 		endcase
 	end
