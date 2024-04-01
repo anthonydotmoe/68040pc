@@ -1,7 +1,6 @@
-`define DEBUG
-
+//`define SOUND
 (* top *)
-module flash (
+module top (
 	input	clk,
 	input	rst,
 	input	btn,
@@ -13,10 +12,10 @@ module flash (
 	input	[31:0]	a,
 	output	[31:0]	d,
 
-`ifdef DEBUG
-	output	dbg1,
-	output	dbg2,
-	output	dbg3,
+`ifdef SOUND
+	output	i2s_bclk,
+	output	i2s_dat,
+	output	i2s_lrclk,
 `endif
 
 	input	ts,
@@ -56,7 +55,6 @@ module flash (
 assign d_dir = 1;
 assign tci = 1;
 assign tbi = 0;
-assign tea = 1;
 assign spi_io2 = 1;
 assign spi_io3 = 1;
 
@@ -76,20 +74,22 @@ assign DSACK[1] = ~ram_ack;
 reg [31:0] addr;
 reg [31:0] d;
 
-reg i_ta;
+reg i_tea;
+assign tea = ~i_tea;
 
+reg i_ta;
 assign ta = ~i_ta;
 
-`ifdef DEBUG
-// Yellow
-assign dbg1 = ts;
-// Blue
-assign dbg2 = spi_mosi;
-// Dark
-assign dbg3 = ram_access;
+
+`ifdef SOUND
+// Noisemaker
+i2s_tx sound(
+	.clk(clk),
+	.sck(i2s_bclk),
+	.lrclk(i2s_lrclk),
+	.dat(i2s_dat)
+);
 `endif
-
-
 
 reg d_oe;
 reg flash_stb, flash_cyc;
@@ -139,7 +139,9 @@ localparam	START = 0,
 		WAIT_DATA = 2,
 		START_TA = 3,
 		FINISH_TA = 4,
-		RAM_ACCESS = 5;
+		RAM_ACCESS = 5,
+		ILLEGAL_ACCESS = 6,
+		ILLEGAL_ACCESS_END = 7;
 
 localparam FLASH_PAGE = 8'h04;
 
@@ -158,6 +160,7 @@ assign fpga_sel = (addr[31:28] == 4'h8);
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
 wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
 wire uart_access = ( (tip == 0) && (uart_sel == 1) );
+wire illegal_access = (!rom_access && !ram_access && !uart_access);
 
 wire resiz_access = ( ram_access || uart_access );
 
@@ -179,6 +182,7 @@ always @(posedge clk or negedge rst) begin
 	if (~rst) begin
 		state <= START;
 		i_ta <= 1'b0;
+		i_tea <= 0;
 		d_oe <= 1;
 		flash_stb <= 0;
 		flash_cyc <= 0;
@@ -190,6 +194,7 @@ always @(posedge clk or negedge rst) begin
 		case (state)
 			START: begin
 				i_ta <= 0;
+				i_tea <= 0;
 				d_oe <= 1;
 				flash_stb <= 0;
 				flash_cyc <= 0;
@@ -214,6 +219,10 @@ always @(posedge clk or negedge rst) begin
 						end
 					endcase
 					state <= RAM_ACCESS;
+					/*
+				end else if ( illegal_access == 1'b1 && ts == 1 ) begin
+					state <= ILLEGAL_ACCESS;
+					*/
 				end else begin
 					state <= START;
 				end
@@ -268,6 +277,14 @@ always @(posedge clk or negedge rst) begin
 						count <= -1;
 					end
 				end
+			end
+			ILLEGAL_ACCESS: begin
+				i_tea <= 1;
+				state <= ILLEGAL_ACCESS_END;
+			end
+			ILLEGAL_ACCESS_END: begin
+				i_tea <= 0;
+				state <= START;
 			end
 		endcase
 	end
