@@ -3,30 +3,18 @@
 	include "sys.i"
 
 
-; Define macro for jsr without stack RAM
-bl		macro
-		lea	(.ret\@,pc),a6
-		bra	\1
-.ret\@:
-		endm
-
-; Return from subroutine to address in A6.
-rl		macro
-		jmp	(a6)
-		endm
-
 
 ; ------------------------------------------------------------------------------
-; Vectors
-		
+; 
 	section .bss.vectors
 
-RAMVECTORS::
+RAMVECTORS:
 		dcb.l	256
 
 	section	.vectors
 
-VECTORS::
+VECTORS:
+	org	ROM
 		dc.l	INITIAL_SP	;  0
 		dc.l	RESET		;  1
 		dc.l	VEC_BUSFAULT	;  2
@@ -83,6 +71,9 @@ VECTORS::
 	rept	192
 		dc.l	VEC_RESERVED	; 192-255 - User deviced vectors
 	endr
+		
+
+	section	.text
 
 ;-------------------------------------------------------------------------------
 ; Global Variables
@@ -111,22 +102,10 @@ INT7_CHECK:
 
 RESET:
 
-		; Try enabling instruction cache
-		;move.l	#$00008000,d0
-		;movec	d0,cacr
-
-;DELAY10000:
-		;move.l	#4,d2	; Wait for a bit (for some reason)
-;.1:
-		;dbra	d2,.1
-
-		; Try reading continously from RAM
-
-		;moveq.l	#$FF,d0			; Load count 256
-		;move.l	#RAMVECTORS,a0		; RAM base in a0
-;.loop:
-		;move.l	(a0)+,d2		; move a word
-		;dbra	d0,.loop		; decrement d0 and loop (executes 256 times)
+DELAY10000:
+		move.l	#4,d2	; Wait for a bit (for some reason)
+.1:
+		dbra	d2,.1
 
 INIT_DUART:
 		
@@ -150,22 +129,17 @@ INIT_DUART:
 		move.b	#$20,CRB(a0)		; reset the receiver
 		move.b	#$30,CRB(a0)		; reset the transmitter
 
+		move.b	#$41,TBA(a0)		; Send an 'A'
+
 	section .rodata
 
-.s_welcome:	dc.b	"\r\n68040pc booting...\r\n",0
+.s_welcome:	dc.b	"68040pc booting...\n\n",0
 		even
 
 	section .text
 
-		; Welcome!
 		lea	.s_welcome,a0
-		bl	early_puts
-
-
- ; Skip interrupt testing and RAM test
- ;	TODO: FPGA isn't ready for interrupts
- ;	TODO: Memory test isn't stable
-		bra	COPY_VECTORS
+		jsr	puts
 
 TEST_INTS:
 
@@ -194,22 +168,21 @@ TEST_INTS:
 		dc.l	.s_int6
 		dc.l	.s_int7
 
-.s_checkints:	dc.b	"\r\nChecking Interrupts...\r\n",0
+.s_checkints:	dc.b	"Checking Interrupts...\n",0
 		even
-.s_pass:	dc.b	"pass\r\n",0
+.s_pass:	dc.b	"pass\n",0
 		even
-.s_fail:	dc.b	"FAIL!\r\n",0
+.s_fail:	dc.b	"FAIL!\n",0
 		even
 
 	section .text
 
 		lea	.s_checkints,a0
-		bl	early_puts
+		jsr	puts
 
 
 		move.l	#.s_int_jmp,a3		; Base address of interrupt messages
 		move.l	#INT1_CHECK,a4		; Base address for interrupt check flags
-		move.l	#FPGA_BASE,a5
 
 		; Clear test bits
 		clr.l	$00(a4)
@@ -228,11 +201,11 @@ TEST_INTS:
 
 		; Print "INTn: "
 		move.l	(a3)+,a0		; Load address of the next interrupt message
-		bl	early_puts		; Call puts function to print the message
+		jsr	puts			; Call puts function to print the message
 
 		; Trigger interrupt
 		nop				; nop to synchronize pipeline
-		move.b	d1,F_INT(a5)		; Write interrupt number to trigger it
+		move.b	d1,F_INT(a1)		; Write interrupt number to trigger it
 		nop				; nop to synchronize pipeline
 
 		; Check if the interrupt was successfully handled
@@ -245,7 +218,7 @@ TEST_INTS:
 
 .fail:		move.l	#.s_fail,a0		; Address of "FAIL!\n" message
 
-.print:		bl	early_puts		; Print result
+.print:		jsr	puts			; Print result
 
 		addq	#1,d1			; Increment interrupt number
 		bra	.loop
@@ -254,21 +227,8 @@ TEST_INTS:
 
 
 TEST_MEMORY:
-
-	section .rodata
-
-.s_doneprint:	dc.b	"\r\nMade it out of printf!\r\n",0
-		even
-.s_begin:	dc.b	"\r\nTesting memory...\r\n",0
-		even
-
-	section	.text
-
 		xref	detect_memory
 		xref	test_memory
-
-		move.l	#.s_begin,a0
-		bl	early_puts
 
 		move.l	#SRAM,a0		; Base address
 
@@ -276,8 +236,6 @@ TEST_MEMORY:
 		move.l	a0,-(sp)
 		pea	str_membase
 		jsr	printf_
-		move.l	#.s_doneprint,a0
-		bl	early_puts
 		add.l	#4,sp
 		move.l	(sp)+,a0		; Get membase back from stack
 
@@ -321,7 +279,7 @@ FPU_IDENT:
 
 	section	.rodata
 
-.s_cpu:		dc.b	"CPU: Motorola 68%s040\r\n",0
+.s_cpu:		dc.b	"CPU: Motorola 68%s040\n",0
 		even
 .s_cpu_lc:	dc.b	"LC",0
 		even
@@ -340,40 +298,12 @@ FPU_IDENT:
 		jsr	printf_
 		add.l	#8,sp
 
-		; Enable instruction cache
-		;cinva	ic
-		;move.l	#$00008000,d0
-		;movec	d0,cacr
-
-		;move.l	#FPGA_BASE,d0
-
 DIE:		bra	DIE
 
 		even
 
 
 
-
-; --------------------------------------
-; early_puts - Print a string to UART A
-;
-; Inputs
-; a0 - Address of the null-terminated string to print
-; --------------------------------------
-early_puts:
-		movea.l	#DUART_BASE,a1		; DUART_BASE address in a0
-.start:
-		move.b	(a0)+,d0		; Load the next character from the 
-						; string d0 and increment
-
-		beq	.exit			; If the loaded byte is 0, exit.
-.1		btst.b	#2,SRA(a1)		; Check if SR[2] is zero
-		beq	.1			; If so, check again
-
-		move.b	d0,TBA(a1)		; Move char to transmit buffer
-		bra	.start
-.exit:
-		rl
 
 ; --------------------------------------
 ; puts - Print a string to UART A
@@ -399,7 +329,7 @@ puts:
 ; d0 - Character to print
 ; --------------------------------------
 putchar:
-		movea.l	#DUART_BASE,a0		; DUART_BASE address in a0
+		movea.l	DUART_BASE,a0		; DUART_BASE address in a0
 .1		btst.b	#2,SRA(a0)		; Check if SR[2] is zero
 		beq	.1			; If so, check again
 
@@ -437,16 +367,12 @@ print_long:
 		lsr.l	d2,d3			; Shift right to isolate the most significant hex digit
 		andi.l	#$0F,d3			; Isolate a single hex digit
 		move.b	(a1,d3.w),d0		; Get ASCII character from map
-		movea.l	#DUART_BASE,a0		; DUART_BASE address in a0
-.1		btst.b	#2,SRA(a0)		; Check if SR[2] is zero
-		beq	.1			; If so, check again
-
-		move.b	d0,TBA(a0)		; Move char to transmit buffer
+		jsr	putchar			; Print character
 
 		subq.l	#4,d2			; Move to the next hex digit
 		bpl	.loop			; Loop until all digits are processed
 
-		rl
+		rts
 
 ; --------------------------------------
 ; get_fpu - Determine if an FPU is present
@@ -471,7 +397,6 @@ get_fpu:
 .1		move.l	a0,sp			; restore stack pointer
 		move.l	(sp)+,$2c(a1)		; restore trap vector
 		move.w	(sp)+,sr		; restore IPL
-		unlk	a5
 		rts
 
 VEC_AUTOVEC1:
@@ -495,293 +420,38 @@ VEC_AUTOVEC6:
 VEC_AUTOVEC7:
 		move.l	#1,INT7_CHECK
 		rte
-
 VEC_ILLINSTR:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Illegal instruction\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_BUSFAULT:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Bus fault\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_ADERROR:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Address error\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_DIVBY0:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Division by zero\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_CHK:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Check\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAPV:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: TRAPV\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_PRIVVIOL:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Privilege violation\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRACE:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trace\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_LINE1010:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Line 1010 emulator\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_LINE1111:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Line 1111 emulator\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_RESERVED:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Reserved\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_CCPUVIOL:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: CCPUVIOL\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_FMTERROR:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Format error\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_UNINIVEC:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Unitialized interrupt\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_SPURIOUS:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Spurious interrupt\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP0:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #0\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP1:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #1\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP2:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #2\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP3:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #3\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP4:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #4\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP5:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #5\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP6:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #6\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP7:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #7\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP8:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #8\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP9:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #9\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP10:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #10\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP11:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #11\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP12:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #12\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP13:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #13\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP14:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #14\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
 VEC_TRAP15:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #15\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
-
-PRINT_PC:
-		; Print the address which caused the exception
-		move.l	2(sp),d0
-		bl	print_long
-		bra	DIE
-		
+		bra	VEC_RESERVED
 
 	section .rodata
 
