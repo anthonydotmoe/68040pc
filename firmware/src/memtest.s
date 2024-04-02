@@ -55,7 +55,7 @@ test_memory::
 		bne	.test_fail
 
 		; Swap pattern
-		eor.l	d7,d1
+		not.l	d1
 		bra	.test_loop
 
 .test_fail:

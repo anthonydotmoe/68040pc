@@ -103,6 +103,8 @@ INT6_CHECK:
 		ds.l	1
 INT7_CHECK:
 		ds.l	1
+RAM_COUNT:
+		ds.l	1
 
 ;-------------------------------------------------------------------------------
 ; ENTRY POINT
@@ -137,7 +139,7 @@ INIT_DUART:
 		move.b	#$10,CRA(a0)		; reset mode register pointer
 		move.b	#$13,MR1A(a0)		; no parity, 8 bits/char
 		move.b	#$07,MR2A(a0)		; 1 stop bit
-		move.b	#$BB,CSRA(a0)		; 9600-baud XMIT and RCV
+		move.b	#$CC,CSRA(a0)		; 38.4k-baud XMIT and RCV
 		move.b	#$20,CRA(a0)		; reset the receiver
 		move.b	#$30,CRA(a0)		; reset the transmitter
 		move.b	#$05,CRA(a0)		; enable XMIT and RCV
@@ -146,7 +148,7 @@ INIT_DUART:
 		move.b	#$10,CRB(a0)		; reset mode register pointer
 		move.b	#$13,MR1B(a0)		; no parity, 8 bits/char
 		move.b	#$07,MR2B(a0)		; 1 stop bit
-		move.b	#$BB,CSRB(a0)		; 9600-baud XMIT and RCV
+		move.b	#$CC,CSRB(a0)		; 38.4k-baud XMIT and RCV
 		move.b	#$20,CRB(a0)		; reset the receiver
 		move.b	#$30,CRB(a0)		; reset the transmitter
 
@@ -162,10 +164,10 @@ INIT_DUART:
 		bl	early_puts
 
 
- ; Skip interrupt testing and RAM test
+ ; Skip interrupt testing and RAM count
  ;	TODO: FPGA isn't ready for interrupts
- ;	TODO: Memory test isn't stable
-		bra	COPY_VECTORS
+ ;	TODO: Memory count isn't stable
+		bra	TEST_MEMORY
 
 TEST_INTS:
 
@@ -253,14 +255,14 @@ TEST_INTS:
 .end:
 
 
-TEST_MEMORY:
+DETECT_MEMORY:
 
 	section .rodata
 
-.s_doneprint:	dc.b	"\r\nMade it out of printf!\r\n",0
-		even
 .s_begin:	dc.b	"\r\nTesting memory...\r\n",0
 		even
+
+		
 
 	section	.text
 
@@ -276,13 +278,33 @@ TEST_MEMORY:
 		move.l	a0,-(sp)
 		pea	str_membase
 		jsr	printf_
-		move.l	#.s_doneprint,a0
-		bl	early_puts
 		add.l	#4,sp
 		move.l	(sp)+,a0		; Get membase back from stack
 
 		jsr	detect_memory		; A0 input - memory base address
 		; Now A1 has the detected end of memory
+TEST_MEMORY:
+
+	section .rodata
+
+.s_begin:	dc.b	"\r\nTesting memory...\r\n",0
+		even
+
+	section	.text
+
+		move.l	#.s_begin,a0
+		bl	early_puts
+
+		move.l	#SRAM,a0		; Base address
+
+		; TODO: Using printf requires working RAM. I just hope RAM works so I can see something here
+		move.l	a0,-(sp)
+		pea	str_membase
+		jsr	printf_
+		add.l	#4,sp
+		move.l	(sp)+,a0		; Get membase back from stack
+
+		move.l	#$300FFFFF,a1
 		
 		; Print the supposed end of memory
 		move.l	a1,-(sp)
@@ -327,6 +349,7 @@ FPU_IDENT:
 		even
 .s_cpu_b:	dc.b	0
 		even
+.s_ram_count:	dc.b	"RAM: 0x%x bytes\r\n",0
 
 	section	.text
 
@@ -339,6 +362,17 @@ FPU_IDENT:
 .print:		pea	.s_cpu
 		jsr	printf_
 		add.l	#8,sp
+
+		; Cheating!
+		move.l	#$FFFFF,RAM_COUNT
+
+		; Print RAM count
+		move.l	RAM_COUNT,d0
+		move.l	d0,-(sp)
+		pea	.s_ram_count
+		jsr	printf_
+		add.l	#8,sp
+
 
 		; Enable instruction cache
 		;cinva	ic
@@ -474,312 +508,131 @@ get_fpu:
 		unlk	a5
 		rts
 
+	;VEC_AUTOVEC1:
+			;move.l	#1,INT1_CHECK
+			;rte
+	;VEC_AUTOVEC2:
+			;move.l	#1,INT2_CHECK
+			;rte
+	;VEC_AUTOVEC3:
+			;move.l	#1,INT3_CHECK
+			;rte
+	;VEC_AUTOVEC4:
+			;move.l	#1,INT4_CHECK
+			;rte
+	;VEC_AUTOVEC5:
+			;move.l	#1,INT5_CHECK
+			;rte
+	;VEC_AUTOVEC6:
+			;move.l	#1,INT6_CHECK
+			;rte
+
+asciz:		macro
+		rept	\#
+		dc.b	\+
+		endr
+		dc.b	0
+		even
+		endm
+
+vecstub:	macro
+		movem.l	d0-d7/a0-a7,-(sp)
+		lea.l	(.str,pc),a0
+		bra	crash
+	.str:	dc.w	$0A2A
+		asciz	\1
+		even
+		endm
+
 VEC_AUTOVEC1:
-		move.l	#1,INT1_CHECK
-		rte
+		vecstub	"AUTOVECTOR 1"
 VEC_AUTOVEC2:
-		move.l	#1,INT2_CHECK
-		rte
+		vecstub	"AUTOVECTOR 2"
 VEC_AUTOVEC3:
-		move.l	#1,INT3_CHECK
-		rte
+		vecstub	"AUTOVECTOR 3"
 VEC_AUTOVEC4:
-		move.l	#1,INT4_CHECK
-		rte
+		vecstub	"AUTOVECTOR 4"
 VEC_AUTOVEC5:
-		move.l	#1,INT5_CHECK
-		rte
+		vecstub	"AUTOVECTOR 5"
 VEC_AUTOVEC6:
-		move.l	#1,INT6_CHECK
-		rte
+		vecstub	"AUTOVECTOR 6"
 VEC_AUTOVEC7:
-		move.l	#1,INT7_CHECK
-		rte
-
+		vecstub	"AUTOVECTOR 7"
 VEC_ILLINSTR:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Illegal instruction\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Illegal instruction"
 VEC_BUSFAULT:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Bus fault\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Bus fault"
 VEC_ADERROR:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Address error\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Address error"
 VEC_DIVBY0:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Division by zero\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Division by zero"
 VEC_CHK:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Check\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Check"
 VEC_TRAPV:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: TRAPV\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"TRAPV"
 VEC_PRIVVIOL:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Privilege violation\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Privilege violation"
 VEC_TRACE:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trace\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trace"
 VEC_LINE1010:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Line 1010 emulator\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Line 1010 emulator"
 VEC_LINE1111:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Line 1111 emulator\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Line 1111 emulator"
 VEC_RESERVED:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Reserved\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Reserved"
 VEC_CCPUVIOL:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: CCPUVIOL\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"CCPUVIOL"
 VEC_FMTERROR:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Format error\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Format error"
 VEC_UNINIVEC:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Unitialized interrupt\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Unitialized interrupt"
 VEC_SPURIOUS:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Spurious interrupt\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Spurious interrupt"
 VEC_TRAP0:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #0\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #0"
 VEC_TRAP1:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #1\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #1"
 VEC_TRAP2:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #2\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #2"
 VEC_TRAP3:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #3\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #3"
 VEC_TRAP4:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #4\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #4"
 VEC_TRAP5:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #5\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #5"
 VEC_TRAP6:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #6\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #6"
 VEC_TRAP7:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #7\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #7"
 VEC_TRAP8:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #8\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #8"
 VEC_TRAP9:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #9\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #9"
 VEC_TRAP10:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #10\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #10"
 VEC_TRAP11:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #11\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #11"
 VEC_TRAP12:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #12\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #12"
 VEC_TRAP13:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #13\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #13"
 VEC_TRAP14:
-	section .rodata
-
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #14\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
-		bl	early_puts
-		bra	PRINT_PC
+		vecstub	"Trap #14"
 VEC_TRAP15:
-	section .rodata
+		vecstub	"Trap #15"
 
-.s_VECNAME:	dc.b	"\r\nEXCEPTION: Trap #15\r\n"
-		even
-	section .text
-		lea	.s_VECNAME,a0
+crash:
+		; Print exception name
 		bl	early_puts
-		bra	PRINT_PC
 
-PRINT_PC:
-		; Print the address which caused the exception
-		move.l	2(sp),d0
-		bl	print_long
+		; Try doing a cool print all regs thing
+		pea	str_regs
+		jsr	printf_
+
+		add.l	#64+4,sp	; Clean stacked registers and string
+		
+		; Since we aren't returning, clean the exception stack frame
+		add.l	#8,sp
 		bra	DIE
 		
 
@@ -789,11 +642,20 @@ str_ok:		dc.b	"OK!",0
 		even
 str_fail:	dc.b	"FAILED",0
 		even
-str_membase:	dc.b	"Memory base: %08x\n",0
+str_membase:	dc.b	"Memory base: %08x\r\n",0
 		even
-str_memdet:	dc.b	"Memory end?: %08x\n",0
+str_memdet:	dc.b	"Memory end?: %08x\r\n",0
 		even
-str_memok:	dc.b	"Memory end?: %08x\n",0
+str_memok:	dc.b	"Memory end?: %08x\r\n",0
 		even
-str_memtest_s:	dc.b	"Memory test: %s\n",0
+str_memtest_s:	dc.b	"Memory test: %s\r\n\r\n",0
 		even
+str_regs:	dc.b	"\r\nD0=%08X D1=%08X D2=%08X D3=%08X\r\n"
+		dc.b	  "D4=%08X D5=%08X D6=%08X D7=%08X\r\n"
+		dc.b	  "A0=%08X A1=%08X A2=%08X A3=%08X\r\n"
+		dc.b	  "A4=%08X A5=%08X A6=%08X A7=%08X\r\n"
+		;dc.b	  "FLAGS=%08X ADDR=%08X IR=%08X\r\n"
+		dc.b	  "SR=%04hX PC=%08X\r\n",0
+		; Printing status register doesn't work (printf/GCC ABI doesn't
+		; support popping a word from the stack?)
+str_usp:	dc.b	"USP=%08X\r\n",0
