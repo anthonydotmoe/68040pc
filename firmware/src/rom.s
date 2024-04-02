@@ -313,6 +313,8 @@ TEST_MEMORY:
 		add.l	#4,sp
 		move.l	(sp)+,a1		; Get memory end back from stack
 
+		trap	#0
+
 		; Test memory
 		jsr	test_memory
 		tst.l	d0
@@ -535,8 +537,23 @@ asciz:		macro
 		even
 		endm
 
-vecstub:	macro
+trapstub:	macro
+		move.w	#0,-(sp)		; Hack for printf
 		movem.l	d0-d7/a0-a7,-(sp)
+		movec	vbr,d0
+		move.l	d0,-(sp)
+		lea.l	(.str,pc),a0
+		bra	trapret
+	.str:	dc.w	$0A2A
+		asciz	\1
+		even
+		endm
+
+vecstub:	macro
+		move.w	#0,-(sp)		; Hack for printf
+		movem.l	d0-d7/a0-a7,-(sp)
+		movec	vbr,d0
+		move.l	d0,-(sp)
 		lea.l	(.str,pc),a0
 		bra	crash
 	.str:	dc.w	$0A2A
@@ -589,37 +606,37 @@ VEC_UNINIVEC:
 VEC_SPURIOUS:
 		vecstub	"Spurious interrupt"
 VEC_TRAP0:
-		vecstub	"Trap #0"
+		trapstub "Trap #0"
 VEC_TRAP1:
-		vecstub	"Trap #1"
+		trapstub "Trap #1"
 VEC_TRAP2:
-		vecstub	"Trap #2"
+		trapstub "Trap #2"
 VEC_TRAP3:
-		vecstub	"Trap #3"
+		trapstub "Trap #3"
 VEC_TRAP4:
-		vecstub	"Trap #4"
+		trapstub "Trap #4"
 VEC_TRAP5:
-		vecstub	"Trap #5"
+		trapstub "Trap #5"
 VEC_TRAP6:
-		vecstub	"Trap #6"
+		trapstub "Trap #6"
 VEC_TRAP7:
-		vecstub	"Trap #7"
+		trapstub "Trap #7"
 VEC_TRAP8:
-		vecstub	"Trap #8"
+		trapstub "Trap #8"
 VEC_TRAP9:
-		vecstub	"Trap #9"
+		trapstub "Trap #9"
 VEC_TRAP10:
-		vecstub	"Trap #10"
+		trapstub "Trap #10"
 VEC_TRAP11:
-		vecstub	"Trap #11"
+		trapstub "Trap #11"
 VEC_TRAP12:
-		vecstub	"Trap #12"
+		trapstub "Trap #12"
 VEC_TRAP13:
-		vecstub	"Trap #13"
+		trapstub "Trap #13"
 VEC_TRAP14:
-		vecstub	"Trap #14"
+		trapstub "Trap #14"
 VEC_TRAP15:
-		vecstub	"Trap #15"
+		trapstub "Trap #15"
 
 crash:
 		; Print exception name
@@ -629,11 +646,25 @@ crash:
 		pea	str_regs
 		jsr	printf_
 
-		add.l	#64+4,sp	; Clean stacked registers and string
+		add.l	#64+2+4,sp	; Clean stacked registers, dummy word, and string
 		
 		; Since we aren't returning, clean the exception stack frame
 		add.l	#8,sp
 		bra	DIE
+
+trapret:
+		; Print exception name
+		bl	early_puts
+
+		; Try doing a cool print all regs thing
+		pea	str_regs
+		jsr	printf_
+
+		add.l	#8,sp			; Clean vbr, and string
+		move.w	(sp)+,d0		; Clean dummy word
+		movem.l	(sp)+,d0-d7/a0-a7	; Restore registers
+
+		rte
 		
 
 	section .rodata
@@ -650,12 +681,11 @@ str_memok:	dc.b	"Memory end?: %08x\r\n",0
 		even
 str_memtest_s:	dc.b	"Memory test: %s\r\n\r\n",0
 		even
-str_regs:	dc.b	"\r\nD0=%08X D1=%08X D2=%08X D3=%08X\r\n"
-		dc.b	  "D4=%08X D5=%08X D6=%08X D7=%08X\r\n"
-		dc.b	  "A0=%08X A1=%08X A2=%08X A3=%08X\r\n"
-		dc.b	  "A4=%08X A5=%08X A6=%08X A7=%08X\r\n"
-		;dc.b	  "FLAGS=%08X ADDR=%08X IR=%08X\r\n"
-		dc.b	  "SR=%04hX PC=%08X\r\n",0
-		; Printing status register doesn't work (printf/GCC ABI doesn't
-		; support popping a word from the stack?)
+str_regs:	dc.b	"\r\nVBR=%08X\r\n"
+		dc.b	"D0=%08X D1=%08X D2=%08X D3=%08X\r\n"
+		dc.b	"D4=%08X D5=%08X D6=%08X D7=%08X\r\n"
+		dc.b	"A0=%08X A1=%08X A2=%08X A3=%08X\r\n"
+		dc.b	"A4=%08X A5=%08X A6=%08X A7=%08X\r\n"
+		dc.b	"SR=%04hX     PC=%08X\r\n",0
+		even
 str_usp:	dc.b	"USP=%08X\r\n",0
