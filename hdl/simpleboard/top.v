@@ -18,6 +18,8 @@ module top (
 	output	i2s_lrclk,
 `endif
 
+	output	i2s_bclk,
+
 	input	ts,
 	output	ta,
 	output	tea,
@@ -58,8 +60,6 @@ assign tbi = 0;
 assign spi_io2 = 1;
 assign spi_io3 = 1;
 
-assign IPL = 3'b111;
-assign AVEC = 1'b1;
 
 assign COM_IACK = 0;
 
@@ -90,6 +90,31 @@ i2s_tx sound(
 	.dat(i2s_dat)
 );
 `endif
+
+// Button input
+wire btn_pressed;
+debounce btn_db(
+	.clk(clk),
+	.button(~btn),
+	.btn_out(btn_pressed)
+);
+
+//reg [2:0] int_lvl;
+assign IPL = { ~btn_pressed, ~btn_pressed, ~btn_pressed };
+assign AVEC = 1'b1;
+
+assign i2s_bclk = btn_pressed;
+
+// Generate an interrupt when the button is pressed
+/*
+always @(posedge clk) begin
+	if (btn_pressed == 1'b1) begin
+		int_lvl <= 3'b111;
+	end else begin
+		int_lvl <= 3'b000;
+	end
+end
+*/
 
 reg d_oe;
 reg flash_stb, flash_cyc;
@@ -157,6 +182,8 @@ assign ram_sel = (addr[31:28] == 4'h3);
 wire fpga_sel;
 assign fpga_sel = (addr[31:28] == 4'h8);
 
+wire vector_access = ( (tip == 0) && (addr == 32'hFFFFFFFF) );
+
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
 wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
 wire uart_access = ( (tip == 0) && (uart_sel == 1) );
@@ -202,7 +229,9 @@ always @(posedge clk or negedge rst) begin
 				ram_ack <= 0;
 				count <= 0;
 
-				if( rom_access == 1'b1 && ts == 1 ) begin
+				if( vector_access == 1'b1 && ts == 1 ) begin
+					state <= START_TA;
+				end else if( rom_access == 1'b1 && ts == 1 ) begin
 					flash_addr <= { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
 					state <= GET_DATA;
 				end else if( ram_access == 1'b1 && ts == 1 ) begin
