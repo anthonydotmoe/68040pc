@@ -50,7 +50,7 @@ VECTORS::
 		dc.l	VEC_AUTOVEC1	; 25
 		dc.l	VEC_AUTOVEC2	; 26
 		dc.l	VEC_AUTOVEC3	; 27
-		dc.l	VEC_AUTOVEC4	; 28
+		dc.l	uart_isr	; 28
 		dc.l	VEC_AUTOVEC5	; 29
 		dc.l	VEC_AUTOVEC6	; 30
 		dc.l	VEC_AUTOVEC7	; 31
