@@ -14,18 +14,18 @@ C_OBJ		= $(patsubst src/%.c,obj/%.o,$(C_SRC))
 LIB_OBJ		= $(wildcard lib/*.o)
 ROM_OBJ		= $(ASM_OBJ) $(C_OBJ)
 
-ASFLAGS		= -esc -m68040
+ASFLAGS		= -esc -m68040 -Iinc
 ASFLAGS_ELF	= -Felf
 
-CFLAGS		= -m68040 -O2 -Iinc
+CFLAGS		= -m68040 -Os -Iinc
 
 #-------------------------------------------------------------------------------
 
 $(TARGET): $(ROM_OBJ) $(LIB_OBJ)
-	m68k-elf-ld -o $@ $(ROM_OBJ) $(LIB_OBJ) -T link.ld
+	m68k-elf-ld -o $@ $(ROM_OBJ) $(LIB_OBJ) -T link.ld -Map=output.map
 
 $(ASM_OBJ): obj/%.o : src/%.s
-	$(AS) $(ASFLAGS) -Iinc -o $@ $(ASFLAGS_ELF) $<
+	$(AS) $(ASFLAGS) -o $@ $(ASFLAGS_ELF) $<
 
 $(C_OBJ): obj/%.o : src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
