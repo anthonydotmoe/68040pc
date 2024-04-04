@@ -4,10 +4,16 @@
 enum { bufsiz = 256 };
 
 static unsigned char txbuf[bufsiz];
-static int write_indx = 0;
-static int read_indx  = 0;
+int write_indx;
+int read_indx;
 
-void putchar_(unsigned char c) {
+void init_txbuf(void) {
+	write_indx = 0;
+	read_indx = 0;
+	return;
+}
+
+void _putchar(unsigned char c) {
     while ((write_indx + 1) % bufsiz == read_indx); // Buffer is full, hang around and wait
 
     // Critical section
@@ -18,7 +24,7 @@ void putchar_(unsigned char c) {
 
     // If the buffer is empty, we enable the transmit-ready interrupt
     if (read_indx == write_indx) {
-        uart->imr |= (1 << 0);
+        uart->imr = 0x01; // set Transmitter A ready interrupt
     }
 
     txbuf[write_indx] = c;
@@ -34,7 +40,7 @@ void __attribute__((interrupt)) uart_isr() {
     // If the buffer is empty, disable the interrupt
     if (read_indx == write_indx) {
         // buffer is empty
-        uart->imr &= ~(1 << 0); // I would prefer a `bclr.b #0,5(a0)`
+        uart->imr = 0x00; // clear interrupts
         return;
     }
 

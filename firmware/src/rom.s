@@ -1,20 +1,7 @@
 ; vim:noet:sw=8:ts=8:sts=8:ai:syn=asm68k
 
 	include "sys.i"
-
-
-; Define macro for jsr without stack RAM
-bl		macro
-		lea	(.ret\@,pc),a6
-		bra	\1
-.ret\@:
-		endm
-
-; Return from subroutine to address in A6.
-rl		macro
-		jmp	(a6)
-		endm
-
+	include "macros.i"
 
 ; ------------------------------------------------------------------------------
 ; Vectors
@@ -117,10 +104,10 @@ RESET:
 		;move.l	#$00008000,d0
 		;movec	d0,cacr
 
-;DELAY10000:
-		;move.l	#4,d2	; Wait for a bit (for some reason)
-;.1:
-		;dbra	d2,.1
+DELAY10000:
+		move.l	#100000,d2	; Wait for a bit (for some reason)
+.1:
+		dbra	d2,.1
 
 		; Try reading continously from RAM
 
@@ -133,7 +120,7 @@ RESET:
 INIT_DUART:
 		
 		movea.l	#DUART_BASE,a0
-		move.b	#$00,IMR(a0)		; reset interrupt mask register
+		move.b	#$00,IMR(a0)			; reset interrupt mask register
 
 		; Initialize channel A
 		move.b	#$10,CRA(a0)		; reset mode register pointer
@@ -152,9 +139,10 @@ INIT_DUART:
 		move.b	#$20,CRB(a0)		; reset the receiver
 		move.b	#$30,CRB(a0)		; reset the transmitter
 
+
 	section .rodata
 
-.s_welcome:	dc.b	"\r\n68040pc booting...\r\n",0
+.s_welcome:	dc.b	27,"[2J68040pc booting...\r\n",0
 		even
 
 	section .text
@@ -164,10 +152,8 @@ INIT_DUART:
 		bl	early_puts
 
 
- ; Skip interrupt testing and RAM count
- ;	TODO: FPGA isn't ready for interrupts
- ;	TODO: Memory count isn't stable
-		bra	TEST_MEMORY
+		; Skip interrupt testing (FPGA isn't ready for that)
+		;bra	COPY_VECTORS
 
 TEST_INTS:
 
@@ -234,7 +220,7 @@ TEST_INTS:
 
 		; Trigger interrupt
 		nop				; nop to synchronize pipeline
-		move.b	d1,F_INT(a5)		; Write interrupt number to trigger it
+		;move.b	d1,F_INT(a5)		; Write interrupt number to trigger it
 		nop				; nop to synchronize pipeline
 
 		; Check if the interrupt was successfully handled
@@ -254,81 +240,22 @@ TEST_INTS:
 	
 .end:
 
-
-DETECT_MEMORY:
-
-	section .rodata
-
-.s_begin:	dc.b	"\r\nTesting memory...\r\n",0
-		even
-
-		
-
-	section	.text
-
-		xref	detect_memory
-		xref	test_memory
-
-		move.l	#.s_begin,a0
-		bl	early_puts
-
-		move.l	#SRAM,a0		; Base address
-
-		; TODO: Using printf requires working RAM. I just hope RAM works so I can see something here
-		move.l	a0,-(sp)
-		pea	str_membase
-		jsr	printf_
-		add.l	#4,sp
-		move.l	(sp)+,a0		; Get membase back from stack
-
-		jsr	detect_memory		; A0 input - memory base address
-		; Now A1 has the detected end of memory
-TEST_MEMORY:
-
-	section .rodata
-
-.s_begin:	dc.b	"\r\nTesting memory...\r\n",0
-		even
-
-	section	.text
-
-		move.l	#.s_begin,a0
-		bl	early_puts
-
-		move.l	#SRAM,a0		; Base address
-
-		; TODO: Using printf requires working RAM. I just hope RAM works so I can see something here
-		move.l	a0,-(sp)
-		pea	str_membase
-		jsr	printf_
-		add.l	#4,sp
-		move.l	(sp)+,a0		; Get membase back from stack
-
-		move.l	#$300FFFFF,a1
-		
-		; Print the supposed end of memory
-		move.l	a1,-(sp)
-		pea	str_memdet
-		jsr	printf_
-		add.l	#4,sp
-		move.l	(sp)+,a1		; Get memory end back from stack
-
-		trap	#0
-
-		; Test memory
-		jsr	test_memory
-		tst.l	d0
-		beq	.memtest_ok
-		pea	str_fail
-		bra	.print_result
-.memtest_ok:	
-		pea	str_ok
-.print_result:
-		pea	str_memtest_s
-		jsr	printf_
-		add.l	#8,sp
 		
 COPY_VECTORS:
+
+	section	.rodata
+
+.s_copy:	dc.b	"\r\nCopying vectors...\r\n",0
+		even
+.s_setvbr:	dc.b	"Setting VBR to 0x",0
+		even
+.s_vbrdone:	dc.b	"\r\ndone.",0
+		even
+
+	section	.text
+
+		lea	.s_copy,a0
+		bl	early_puts
 		moveq.l	#$FF,d0			; Load count 256 - 1 vectors
 		move.l	#VECTORS,a0		; ROM base in a0
 		move.l	#RAMVECTORS,a1		; RAM base in a1
@@ -337,23 +264,42 @@ COPY_VECTORS:
 		dbra	d0,.loop		; decrement d0 and loop (executes 256 times)
 
 		; now we can move the VBR to SRAM
+		lea	.s_setvbr,a0
+		bl	early_puts
+		move.l	#RAMVECTORS,d0
+		bl	print_long
+
 		move.l	#RAMVECTORS,a0
 		movec.l	a0,vbr
+
+		lea	.s_vbrdone,a0
+		bl	early_puts
 
 
 FPU_IDENT:
 
 	section	.rodata
 
-.s_cpu:		dc.b	"CPU: Motorola 68%s040\r\n",0
+.s_cpu:		dc.b	"\r\n\r\nCPU: Motorola 68%s040\r\n",0
 		even
 .s_cpu_lc:	dc.b	"LC",0
 		even
 .s_cpu_b:	dc.b	0
 		even
 .s_ram_count:	dc.b	"RAM: 0x%x bytes\r\n",0
+		even
+.s_succ:	dc.b	"Made it out of printf!\r\n",0
 
 	section	.text
+
+		; Initialize txbuf from src/uart.c
+		; TODO: I tried putting this at the very top and it didn't work.
+		; The only thing I can think of is the read_indx and write_indx's
+		; are getting corrupted somehow.
+		jsr	init_txbuf
+
+		; Set interrupt level so _putchar works
+		and.w	#$F8FF,sr	; Stay in supervisor mode, clear interrupt mask
 
 		jsr	get_fpu			; d0 = 1: FPU, 0: LC (no FPU)
 		move.b	d0,d0
@@ -375,13 +321,24 @@ FPU_IDENT:
 		jsr	printf_
 		add.l	#8,sp
 
-
 		; Enable instruction cache
 		;cinva	ic
 		;move.l	#$00008000,d0
 		;movec	d0,cacr
 
 		;move.l	#FPGA_BASE,d0
+
+		lea	.s_succ,a0
+		bl	early_puts
+
+		move.l	#write_indx,d0
+		bl	print_long
+
+		lea	str_crlf,a0
+		bl	early_puts
+
+		move.l	#read_indx,d0
+		bl	print_long
 
 DIE:		bra	DIE
 
@@ -442,11 +399,11 @@ putchar:
 		move.b	d0,TBA(a0)		; Move char to transmit buffer
 		rts
 
-; External putchar for printf
-_putchar::
-		move.l	4(sp),d0
-		jsr	putchar
-		rts
+; putchar for printf (for when memtest runs)
+ ;_putchar::
+		;move.l	4(sp),d0
+		;jsr	putchar
+		;rts
 
 ; --------------------------------------
 ; print_long
@@ -529,13 +486,6 @@ get_fpu:
 			;move.l	#1,INT6_CHECK
 			;rte
 
-asciz:		macro
-		rept	\#
-		dc.b	\+
-		endr
-		dc.b	0
-		even
-		endm
 
 trapstub:	macro
 		move.w	#0,-(sp)		; Hack for printf
@@ -649,7 +599,8 @@ crash:
 		add.l	#64+2+4,sp	; Clean stacked registers, dummy word, and string
 		
 		; Since we aren't returning, clean the exception stack frame
-		add.l	#8,sp
+		add.l	#12,sp
+		and.w	#$F8FF,sr	; Stay in supervisor mode, clear interrupt mask
 		bra	DIE
 
 trapret:
@@ -669,18 +620,6 @@ trapret:
 
 	section .rodata
 
-str_ok:		dc.b	"OK!",0
-		even
-str_fail:	dc.b	"FAILED",0
-		even
-str_membase:	dc.b	"Memory base: %08x\r\n",0
-		even
-str_memdet:	dc.b	"Memory end?: %08x\r\n",0
-		even
-str_memok:	dc.b	"Memory end?: %08x\r\n",0
-		even
-str_memtest_s:	dc.b	"Memory test: %s\r\n\r\n",0
-		even
 str_regs:	dc.b	"\r\nVBR=%08X\r\n"
 		dc.b	"D0=%08X D1=%08X D2=%08X D3=%08X\r\n"
 		dc.b	"D4=%08X D5=%08X D6=%08X D7=%08X\r\n"
@@ -689,3 +628,5 @@ str_regs:	dc.b	"\r\nVBR=%08X\r\n"
 		dc.b	"SR=%04hX     PC=%08X\r\n",0
 		even
 str_usp:	dc.b	"USP=%08X\r\n",0
+		even
+str_crlf:	dc.b	"\r\n",0
