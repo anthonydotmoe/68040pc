@@ -109,14 +109,6 @@ DELAY10000:
 .1:
 		dbra	d2,.1
 
-		; Try reading continously from RAM
-
-		;moveq.l	#$FF,d0			; Load count 256
-		;move.l	#RAMVECTORS,a0		; RAM base in a0
-;.loop:
-		;move.l	(a0)+,d2		; move a word
-		;dbra	d0,.loop		; decrement d0 and loop (executes 256 times)
-
 INIT_DUART:
 		
 		movea.l	#DUART_BASE,a0
@@ -139,10 +131,13 @@ INIT_DUART:
 		move.b	#$20,CRB(a0)		; reset the receiver
 		move.b	#$30,CRB(a0)		; reset the transmitter
 
+		; Initialize txbuf from src/uart.c
+		jsr	init_txbuf
+
 
 	section .rodata
 
-.s_welcome:	dc.b	27,"[2J68040pc booting...\r\n",0
+.s_welcome:	dc.b	27,"[2J\r68040pc booting...\r\n",0
 		even
 
 	section .text
@@ -150,10 +145,6 @@ INIT_DUART:
 		; Welcome!
 		lea	.s_welcome,a0
 		bl	early_puts
-
-
-		; Skip interrupt testing (FPGA isn't ready for that)
-		;bra	COPY_VECTORS
 
 TEST_INTS:
 
@@ -256,7 +247,7 @@ COPY_VECTORS:
 
 		lea	.s_copy,a0
 		bl	early_puts
-		moveq.l	#$FF,d0			; Load count 256 - 1 vectors
+		move.l	#$FF,d0			; Load count 256 - 1 vectors
 		move.l	#VECTORS,a0		; ROM base in a0
 		move.l	#RAMVECTORS,a1		; RAM base in a1
 .loop:
@@ -288,15 +279,9 @@ FPU_IDENT:
 		even
 .s_ram_count:	dc.b	"RAM: 0x%x bytes\r\n",0
 		even
-.s_succ:	dc.b	"Made it out of printf!\r\n",0
 
 	section	.text
 
-		; Initialize txbuf from src/uart.c
-		; TODO: I tried putting this at the very top and it didn't work.
-		; The only thing I can think of is the read_indx and write_indx's
-		; are getting corrupted somehow.
-		jsr	init_txbuf
 
 		; Set interrupt level so _putchar works
 		and.w	#$F8FF,sr	; Stay in supervisor mode, clear interrupt mask
@@ -328,21 +313,7 @@ FPU_IDENT:
 
 		;move.l	#FPGA_BASE,d0
 
-		lea	.s_succ,a0
-		bl	early_puts
-
-		move.l	#write_indx,d0
-		bl	print_long
-
-		lea	str_crlf,a0
-		bl	early_puts
-
-		move.l	#read_indx,d0
-		bl	print_long
-
 DIE:		bra	DIE
-
-		even
 
 
 
