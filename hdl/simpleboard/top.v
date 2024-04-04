@@ -100,7 +100,8 @@ debounce btn_db(
 );
 
 //reg [2:0] int_lvl;
-assign IPL = { ~btn_pressed, ~btn_pressed, ~btn_pressed };
+assign IPL[2] = ~(~COM_IRQ | btn_pressed);
+assign IPL[1:0] = { ~btn_pressed, ~btn_pressed };
 assign AVEC = 1'b1;
 
 assign i2s_bclk = btn_pressed;
@@ -185,9 +186,10 @@ assign fpga_sel = (addr[31:28] == 4'h8);
 wire vector_access = ( (tip == 0) && (addr == 32'hFFFFFFFF) );
 
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
-wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
 wire uart_access = ( (tip == 0) && (uart_sel == 1) );
-wire illegal_access = (!rom_access && !ram_access && !uart_access);
+wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
+wire fpga_access = ( (tip == 0) && (fpga_sel == 1) );
+wire illegal_access = (!rom_access && !ram_access && !uart_access && !fpga_access);
 
 wire resiz_access = ( ram_access || uart_access );
 
@@ -248,10 +250,10 @@ always @(posedge clk or negedge rst) begin
 						end
 					endcase
 					state <= RAM_ACCESS;
-					/*
-				end else if ( illegal_access == 1'b1 && ts == 1 ) begin
+				/*	
+				end else if ( illegal_access == 1'b1 ) begin
 					state <= ILLEGAL_ACCESS;
-					*/
+				*/
 				end else begin
 					state <= START;
 				end
@@ -333,6 +335,8 @@ always @(posedge clk) begin
 end
 
 //assign led = (blink_en == 1'b1) ? blink_count[22] : 1'b1;
-assign led = (blink_en == 1'b1) ? 1'b0 : 1'b1;
+//assign led = (blink_en == 1'b1) ? 1'b0 : 1'b1;
+//assign led = ~(IPL[2]);
+assign led = ~COM_IRQ;
 
 endmodule
