@@ -1,4 +1,5 @@
 //`define SOUND
+
 (* top *)
 module top (
 	input	clk,
@@ -17,8 +18,6 @@ module top (
 	output	i2s_dat,
 	output	i2s_lrclk,
 `endif
-
-	output	i2s_bclk,
 
 	input	ts,
 	output	ta,
@@ -60,7 +59,6 @@ assign tbi = 0;
 assign spi_io2 = 1;
 assign spi_io3 = 1;
 
-
 assign COM_IACK = 0;
 
 reg ram_ack;
@@ -70,18 +68,13 @@ assign DSACK[1] = ~ram_ack;
 
 // End assign
 
-// A/D Buffer
-reg [31:0] addr;
-reg [31:0] d;
+// --- Debug lines ---
+`ifdef DEBUG
+assign i2s_bclk = 1'b0;
+assign i2s_lrclk = 1'b0;
+assign i2s_dat = 1'b0;
+`elsif SOUND
 
-reg i_tea;
-assign tea = ~i_tea;
-
-reg i_ta;
-assign ta = ~i_ta;
-
-
-`ifdef SOUND
 // Noisemaker
 i2s_tx sound(
 	.clk(clk),
@@ -89,7 +82,23 @@ i2s_tx sound(
 	.lrclk(i2s_lrclk),
 	.dat(i2s_dat)
 );
+
+`else
+assign i2s_bclk = 1'b0;
+assign i2s_lrclk = 1'b0;
+assign i2s_dat = 1'b0;
 `endif
+
+// A/D Buffer
+reg [31:0] addr;
+reg [31:0] d;
+reg d_oe;
+
+// Transfer Ack
+reg i_tea;
+assign tea = ~i_tea;
+reg i_ta;
+assign ta = ~i_ta;
 
 // Button input
 wire btn_pressed;
@@ -104,60 +113,9 @@ assign IPL[2] = ~(~COM_IRQ | btn_pressed);
 assign IPL[1:0] = { ~btn_pressed, ~btn_pressed };
 assign AVEC = 1'b1;
 
-assign i2s_bclk = btn_pressed;
 
-// Generate an interrupt when the button is pressed
-/*
-always @(posedge clk) begin
-	if (btn_pressed == 1'b1) begin
-		int_lvl <= 3'b111;
-	end else begin
-		int_lvl <= 3'b000;
-	end
-end
-*/
-
-reg d_oe;
-reg flash_stb, flash_cyc;
-wire [31:0] flash_data;
-wire flash_ack, flash_stall;
-wire flash_reset = ~rst;
-
-wire spi_sck_en;
-reg [21:0] flash_addr; // 24 bits minus two for long word reads
-oclkddr spi_ddr_sck(clk, {!spi_sck_en, 1'b1}, spi_sck);
-
-reg [3:0] flash_sel;
-
-wire [31:0] flash_idata;
-
-assign flash_idata = 32'b0;
-
-spixpress #(
-	.OPT_CFG(1'b0),
-	.OPT_PIPE(1'b0)
-) reader(
-	.i_clk(clk),
-	.i_reset(flash_reset),
-
-	.i_wb_cyc(flash_cyc),
-	.i_wb_stb(flash_stb),
-	.i_wb_we(1'b0),
-	.i_wb_addr(flash_addr),
-	.i_wb_data(flash_idata),
-	.i_wb_sel(flash_sel),
-	.o_wb_stall(flash_stall),
-	.o_wb_ack(flash_ack),
-	.o_wb_data(flash_data),
-
-	.o_spi_cs_n(spi_ss),
-	.o_spi_sck(spi_sck_en),
-	.o_spi_mosi(spi_mosi),
-	.i_spi_miso(spi_miso)
-);
 
 reg [2:0] state;
-
 reg [3:0] count;
 
 localparam	START = 0,
@@ -193,7 +151,7 @@ wire illegal_access = (!rom_access && !ram_access && !uart_access && !fpga_acces
 
 wire resiz_access = ( ram_access || uart_access );
 
-// Do the following for non-rom accesses:
+// Do the following for 68150 accesses:
 //
 // Assert RESIZ_CS
 // Assign RESIZ_DS to the selected peripheral's CS line and start counting
@@ -335,8 +293,6 @@ always @(posedge clk) begin
 end
 
 //assign led = (blink_en == 1'b1) ? blink_count[22] : 1'b1;
-//assign led = (blink_en == 1'b1) ? 1'b0 : 1'b1;
-//assign led = ~(IPL[2]);
-assign led = ~COM_IRQ;
+assign led = (blink_en == 1'b1) ? 1'b0 : 1'b1;
 
 endmodule

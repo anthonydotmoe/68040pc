@@ -4,9 +4,9 @@ set_io	rst		52
 set_io	led		95
 set_io	btn		93
 
-set_io	i2s_bclk	60
-set_io	i2s_dat		61
-set_io	i2s_lrclk	62
+set_io	-nowarn i2s_bclk	60
+set_io	-nowarn i2s_dat		61
+set_io	-nowarn i2s_lrclk	62
 
 set_io	spi_mosi	67
 set_io	spi_miso	68
