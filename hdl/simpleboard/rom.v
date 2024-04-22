@@ -2,10 +2,11 @@ module rom(
 	input clk,
 	input rst,
 
-	input access_stb,
-	input access_ack,
-	input [21:0] access_addr,
-	output [31:0] access_odata,
+	input rom_stb,
+	output rom_ack,
+	input [3:0] rom_sel,
+	input [21:0] rom_addr,
+	output [31:0] rom_odata,
 
 	// SPI lines
 	output	spi_ss,
@@ -27,13 +28,8 @@ oclkddr spi_ddr_sck(clk, {!spi_sck_en, 1'b1}, spi_sck);
 
 // Setup SPI reader lines
 reg flash_stb, flash_cyc;
-wire [31:0] flash_data;
-wire flash_ack, flash_stall;
-wire flash_reset = ~rst;
-reg [21:0] flash_addr; // 24 bits minus two for long word reads
-reg [3:0] flash_sel;
-wire [31:0] flash_idata;
-assign flash_idata = 32'b0;
+wire flash_stall, flash_reset;
+assign flash_reset = ~rst;
 
 // Instantiate SPI reader
 spixpress #(
@@ -46,12 +42,12 @@ spixpress #(
 	.i_wb_cyc(flash_cyc),
 	.i_wb_stb(flash_stb),
 	.i_wb_we(1'b0),
-	.i_wb_addr(flash_addr),
-	.i_wb_data(flash_idata),
-	.i_wb_sel(flash_sel),
+	.i_wb_addr(rom_addr),
+	.i_wb_data(32'b0),
+	.i_wb_sel(rom_sel),
 	.o_wb_stall(flash_stall),
-	.o_wb_ack(flash_ack),
-	.o_wb_data(flash_data),
+	.o_wb_ack(rom_ack),
+	.o_wb_data(rom_odata),
 
 	.o_spi_cs_n(spi_ss),
 	.o_spi_sck(spi_sck_en),
@@ -59,10 +55,31 @@ spixpress #(
 	.i_spi_miso(spi_miso)
 );
 
+reg waitstate;
+
 always @(posedge clk) begin
-	if(rst) begin
-		access_ack <= 0;
+	if(~rst) begin
 		flash_stb <= 0;
 		flash_cyc <= 0;
-		flash_sel <= 0;
-	end else if( access_req == 1'b1 ) begin
+		waitstate <= 0;
+	end else begin
+		if (waitstate == 0) begin
+			flash_stb <= 0;
+			flash_cyc <= 0;
+
+			if( rom_stb == 1'b1 ) begin
+				flash_stb <= 1;
+				flash_cyc <= 1;
+				waitstate <= 1;
+			end
+		end else begin
+			flash_stb <= 0;
+				
+			if( rom_ack == 1 ) begin
+				flash_cyc <= 0;
+				waitstate <= 0;
+			end
+		end
+	end
+end
+endmodule

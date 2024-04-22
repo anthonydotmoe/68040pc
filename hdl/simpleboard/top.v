@@ -56,8 +56,6 @@ module top (
 assign d_dir = 1;
 assign tci = 1;
 assign tbi = 0;
-assign spi_io2 = 1;
-assign spi_io3 = 1;
 
 assign COM_IACK = 0;
 
@@ -108,19 +106,46 @@ debounce btn_db(
 	.btn_out(btn_pressed)
 );
 
+// DFF for TS
+reg i_ts;
+always @(posedge clk) i_ts <= !ts;
+
 //reg [2:0] int_lvl;
 assign IPL[2] = ~(~COM_IRQ | btn_pressed);
 assign IPL[1:0] = { ~btn_pressed, ~btn_pressed };
 assign AVEC = 1'b1;
 
+// ROM reader signals
+wire [21:0] flash_addr;
+wire [31:0] flash_data;
+assign flash_addr = { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
+wire flash_stb, flash_ack;
+assign flash_stb = rom_sel && i_ts;
+
+// Instantiate ROM reader
+rom rom_reader(
+	.clk(clk),
+	.rst(rst),
+
+	.rom_stb(flash_stb),
+	.rom_ack(flash_ack),
+	.rom_addr(flash_addr),
+	.rom_odata(flash_data),
+
+	.spi_ss(spi_ss),
+	.spi_sck(spi_sck),
+	.spi_mosi(spi_mosi),
+	.spi_miso(spi_miso),
+	.spi_io2(spi_io2),
+	.spi_io3(spi_io3)
+);
 
 
 reg [2:0] state;
 reg [3:0] count;
 
 localparam	START = 0,
-		GET_DATA = 1,
-		WAIT_DATA = 2,
+		WAIT_ROM = 2,
 		START_TA = 3,
 		FINISH_TA = 4,
 		RAM_ACCESS = 5,
@@ -129,25 +154,18 @@ localparam	START = 0,
 
 localparam FLASH_PAGE = 8'h04;
 
-wire rom_sel;
+wire rom_sel, uart_sel, ram_sel, fpga_sel;
 assign rom_sel = (addr[31:28] == 4'h0);
-
-wire uart_sel;
 assign uart_sel = (addr[31:28] == 4'h2);
-
-wire ram_sel;
 assign ram_sel = (addr[31:28] == 4'h3);
-
-wire fpga_sel;
 assign fpga_sel = (addr[31:28] == 4'h8);
-
-wire vector_access = ( (tip == 0) && (addr == 32'hFFFFFFFF) );
 
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
 wire uart_access = ( (tip == 0) && (uart_sel == 1) );
 wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
 wire fpga_access = ( (tip == 0) && (fpga_sel == 1) );
-wire illegal_access = (!rom_access && !ram_access && !uart_access && !fpga_access);
+wire vector_access = ( (tip == 0) && (addr == 32'hFFFFFFFF) );
+wire illegal_access = &{ !rom_access, !uart_access, !ram_access, !fpga_access, !vector_access };
 
 wire resiz_access = ( ram_access || uart_access );
 
@@ -171,9 +189,6 @@ always @(posedge clk or negedge rst) begin
 		i_ta <= 1'b0;
 		i_tea <= 0;
 		d_oe <= 1;
-		flash_stb <= 0;
-		flash_cyc <= 0;
-		flash_sel <= 0;
 		ram_ack <= 0;
 		resiz_count <= 0;
 		count <= 0;
@@ -183,30 +198,15 @@ always @(posedge clk or negedge rst) begin
 				i_ta <= 0;
 				i_tea <= 0;
 				d_oe <= 1;
-				flash_stb <= 0;
-				flash_cyc <= 0;
-				flash_sel <= 0;
 				ram_ack <= 0;
 				count <= 0;
 
 				if( vector_access == 1'b1 && ts == 1 ) begin
 					state <= START_TA;
 				end else if( rom_access == 1'b1 && ts == 1 ) begin
-					flash_addr <= { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
-					state <= GET_DATA;
+					state <= WAIT_ROM;
 				end else if( ram_access == 1'b1 && ts == 1 ) begin
-					case (siz)
-						2'b11,
-						2'b00: begin
-							resiz_count <= 2'b01;	// two accesses
-						end
-						2'b10: begin
-							resiz_count <= 2'b00;	// one access
-						end
-						2'b01: begin
-							resiz_count <= 2'b00;	// one access
-						end
-					endcase
+					resiz_count <= (siz[0] && siz[1])? 2'b01 : 2'b00;
 					state <= RAM_ACCESS;
 				/*	
 				end else if ( illegal_access == 1'b1 ) begin
@@ -216,23 +216,8 @@ always @(posedge clk or negedge rst) begin
 					state <= START;
 				end
 			end
-			GET_DATA: begin
-				i_ta <= 0;
-				d_oe <= 1;
-
-				flash_sel <= 4'b1111;
-				flash_stb <= 1;
-				flash_cyc <= 1;
-				state <= WAIT_DATA;
-			end
-			WAIT_DATA: begin
-				i_ta <= 0;
-				d_oe <= 1;
-				flash_stb <= 0;
-
-				if( flash_ack == 1 ) begin
-					flash_cyc <= 0;
-					flash_sel <= 0;
+			WAIT_ROM: begin
+				if( flash_ack == 1'b1 ) begin
 					d <= flash_data;
 					state <= START_TA;
 				end
