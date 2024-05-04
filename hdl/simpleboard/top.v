@@ -111,8 +111,12 @@ reg i_ts;
 always @(posedge clk) i_ts <= !ts;
 
 //reg [2:0] int_lvl;
-assign IPL[2] = ~(~COM_IRQ | btn_pressed);
-assign IPL[1:0] = { ~btn_pressed, ~btn_pressed };
+
+wire [3:0] com_btn_ipl;
+assign com_btn_ipl[2] = ~(~COM_IRQ | btn_pressed);
+assign com_btn_ipl[1:0] = { ~btn_pressed, ~btn_pressed };
+
+assign IPL[2:0] = com_btn_ipl & fpga_ipl;
 assign AVEC = 1'b1;
 
 // ROM reader signals
@@ -140,12 +144,32 @@ rom rom_reader(
 	.spi_io3(spi_io3)
 );
 
+wire fpga_stb, fpga_ack;
+wire [2:0] fpga_ipl;
+wire [7:0] fpga_data;
+assign fpga_stb = fpga_sel && i_ts;
+assign fpga_data = 8'h00;
+
+// Instantiate FPGA-CPU interface
+fpga_int fpga_interface(
+	.clk(clk),
+	.rst(rst),
+
+	.fpga_stb(fpga_stb),
+	.fpga_ack(fpga_ack),
+	.fpga_addr(addr[3:0]),
+	.fpga_data(fpga_data),
+	.fpga_odata(),
+
+	.out_ipl(fpga_ipl)
+);
 
 reg [2:0] state;
 reg [3:0] count;
 
 localparam	START = 0,
-		WAIT_ROM = 2,
+		WAIT_ROM = 1,
+		WAIT_FPGA = 2,
 		START_TA = 3,
 		FINISH_TA = 4,
 		RAM_ACCESS = 5,
@@ -212,6 +236,8 @@ always @(posedge clk or negedge rst) begin
 				end else if ( illegal_access == 1'b1 ) begin
 					state <= ILLEGAL_ACCESS;
 				*/
+			        end else if( fpga_access == 1'b1 && ts == 1 ) begin
+					state <= WAIT_FPGA;
 				end else begin
 					state <= START;
 				end
@@ -219,6 +245,11 @@ always @(posedge clk or negedge rst) begin
 			WAIT_ROM: begin
 				if( flash_ack == 1'b1 ) begin
 					d <= flash_data;
+					state <= START_TA;
+				end
+			end
+			WAIT_FPGA: begin
+				if( fpga_ack == 1'b1 ) begin
 					state <= START_TA;
 				end
 			end
