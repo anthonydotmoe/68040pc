@@ -11,12 +11,11 @@ module fpga_int(
 
 	// Interrupt lines
 	output [2:0] out_ipl,
-
-	output dbg_intsel,
 );
 
 assign fpga_odata = 0;
 
+reg [2:0] out_ipl;
 
 reg waitstate, fpga_ack;
 
@@ -37,13 +36,18 @@ always @(posedge clk) begin
 	end
 end
 
+always @(posedge clk) begin
+	if(~rst) begin
+		out_ipl <= 0;
+	end else begin
+		if (int_sel) begin
+			out_ipl <= ~fpga_data[2:0];
+		end
+	end
+end
+
 // IPL lines active when interrupt register is selected
 wire int_sel;
 assign int_sel = ( fpga_addr == 4'h4 && (fpga_stb || waitstate) );
-assign out_ipl[0] = ~( int_sel & fpga_data[0] );
-assign out_ipl[1] = ~( int_sel & fpga_data[1] );
-assign out_ipl[2] = ~( int_sel & fpga_data[2] );
-
-assign dbg_intsel = int_sel;
 
 endmodule

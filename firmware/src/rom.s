@@ -137,7 +137,7 @@ INIT_DUART:
 
 	section .rodata
 
-.s_welcome:	dc.b	27,"[2J\r68040pc booting...\r\n",0
+.s_welcome:	dc.b	27,"[2J68040pc booting...\r\n",0
 		even
 
 	section .text
@@ -146,6 +146,8 @@ INIT_DUART:
 		lea	.s_welcome,a0
 		bl	early_puts
 
+		; Let's try reading _something_ with the FPGA
+		;move.l	#$FFFFFFFF,FPGA_BASE+F_INT
 TEST_INTS:
 
 	section .rodata
@@ -185,6 +187,7 @@ TEST_INTS:
 		lea	.s_checkints,a0
 		bl	early_puts
 
+		and.w	#$F8FF,sr		; Set interrupt mask to allow all interrupts
 
 		move.l	#.s_int_jmp,a3		; Base address of interrupt messages
 		move.l	#INT1_CHECK,a4		; Base address for interrupt check flags
@@ -200,7 +203,7 @@ TEST_INTS:
 		clr.l	$18(a4)
 
 		; Start with interrupt 1
-		moveq	#1,d1
+		move.b	#1,d1
 
 .loop:		cmpi.l	#8,d1			; Check if we've gone past interrupt 7
 		beq	.end			; If yes, we're done
@@ -211,7 +214,7 @@ TEST_INTS:
 
 		; Trigger interrupt
 		nop				; nop to synchronize pipeline
-		;move.b	d1,F_INT(a5)		; Write interrupt number to trigger it
+		move.b	d1,F_INT(a5)		; Write interrupt number to trigger it
 		nop				; nop to synchronize pipeline
 
 		; Check if the interrupt was successfully handled
@@ -226,7 +229,7 @@ TEST_INTS:
 
 .print:		bl	early_puts		; Print result
 
-		addq	#1,d1			; Increment interrupt number
+		add.b	#1,d1			; Increment interrupt number
 		bra	.loop
 	
 .end:
@@ -483,19 +486,34 @@ vecstub:	macro
 		endm
 
 VEC_AUTOVEC1:
-		vecstub	"AUTOVECTOR 1"
+		;vecstub	"AUTOVECTOR 1"
+		move.l	#1,INT1_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_AUTOVEC2:
-		vecstub	"AUTOVECTOR 2"
+		move.l	#1,INT2_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_AUTOVEC3:
-		vecstub	"AUTOVECTOR 3"
+		move.l	#1,INT3_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_AUTOVEC4:
-		vecstub	"AUTOVECTOR 4"
+		move.l	#1,INT4_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_AUTOVEC5:
-		vecstub	"AUTOVECTOR 5"
+		move.l	#1,INT5_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_AUTOVEC6:
-		vecstub	"AUTOVECTOR 6"
+		move.l	#1,INT6_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_AUTOVEC7:
-		vecstub	"AUTOVECTOR 7"
+		move.l	#1,INT7_CHECK
+		move.b	#0,F_INT+FPGA_BASE
+		rte
 VEC_ILLINSTR:
 		vecstub	"Illegal instruction"
 VEC_BUSFAULT:

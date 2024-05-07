@@ -182,12 +182,14 @@ fpga_int fpga_interface(
 	.fpga_data(data_in[31:24]),
 	.fpga_odata(),
 
-	.out_ipl(fpga_ipl),
-	.dbg_intsel(dbg0)
+	.out_ipl(fpga_ipl)
 );
 
-assign dbg2 = IPL[0];
-assign dbg1 = data_in[24];
+//assign dbg2 = IPL[0];
+//assign dbg1 = data_in[24];
+assign dbg0 = IPL[0];
+assign dbg1 = IPL[1];
+assign dbg2 = IPL[2];
 
 reg [2:0] state;
 reg [3:0] count;
