@@ -1,4 +1,5 @@
 //`define SOUND
+`define DEBUG
 
 (* top *)
 module top (
@@ -11,13 +12,13 @@ module top (
 	output	d_oe,
 
 	input	[31:0]	a,
-	output	[31:0]	d,
+	inout	[31:0]	d,
 
-`ifdef SOUND
+//`ifdef SOUND
 	output	i2s_bclk,
 	output	i2s_dat,
 	output	i2s_lrclk,
-`endif
+//`endif
 
 	input	ts,
 	output	ta,
@@ -52,8 +53,7 @@ module top (
 	output	spi_io3
 );
 
-// Assign default states
-assign d_dir = 1;
+// Assign default states -------------------------------------------------------
 assign tci = 1;
 assign tbi = 0;
 
@@ -64,16 +64,16 @@ wire [1:0] DSACK;
 assign DSACK[0] = 1'b1;
 assign DSACK[1] = ~ram_ack;
 
-// End assign
-
-// --- Debug lines ---
+// Debug lines -----------------------------------------------------------------
 `ifdef DEBUG
-assign i2s_bclk = 1'b0;
-assign i2s_lrclk = 1'b0;
-assign i2s_dat = 1'b0;
+wire dbg0, dbg1, dbg2;
+
+assign i2s_bclk = dbg0;
+assign i2s_dat = dbg1;
+assign i2s_lrclk = dbg2;
 `elsif SOUND
 
-// Noisemaker
+// Noisemaker ------------------------------------------------------------------
 i2s_tx sound(
 	.clk(clk),
 	.sck(i2s_bclk),
@@ -87,18 +87,39 @@ assign i2s_lrclk = 1'b0;
 assign i2s_dat = 1'b0;
 `endif
 
-// A/D Buffer
+// Addr Buffer -----------------------------------------------------------------
 reg [31:0] addr;
-reg [31:0] d;
-reg d_oe;
 
-// Transfer Ack
+// Data transceiver ------------------------------------------------------------
+wire [31:0] data_in;
+reg [31:0] data_out;
+reg d_oe;
+wire d_dir;
+
+// rw is HIGH for DEVICE -> CPU
+//        LOW for    CPU -> DEVICE
+//
+// d_dir needs to be  HIGH for FPGA -> CPU
+//                     LOW for CPU  -> FPGA
+assign d_dir = rw;
+
+SB_IO #(
+	.PIN_TYPE(6'b1010_01),
+	.PULLUP(1'b1)
+) data_io [31:0] (
+	.PACKAGE_PIN(d[31:0]),
+	.OUTPUT_ENABLE(rw),
+	.D_OUT_0(data_out[31:0]),
+	.D_IN_0(data_in[31:0])
+);
+
+// Transfer Ack ----------------------------------------------------------------
 reg i_tea;
 assign tea = ~i_tea;
 reg i_ta;
 assign ta = ~i_ta;
 
-// Button input
+// Button input ----------------------------------------------------------------
 wire btn_pressed;
 debounce btn_db(
 	.clk(clk),
@@ -112,7 +133,7 @@ always @(posedge clk) i_ts <= !ts;
 
 //reg [2:0] int_lvl;
 
-wire [3:0] com_btn_ipl;
+wire [2:0] com_btn_ipl;
 assign com_btn_ipl[2] = ~(~COM_IRQ | btn_pressed);
 assign com_btn_ipl[1:0] = { ~btn_pressed, ~btn_pressed };
 
@@ -158,11 +179,15 @@ fpga_int fpga_interface(
 	.fpga_stb(fpga_stb),
 	.fpga_ack(fpga_ack),
 	.fpga_addr(addr[3:0]),
-	.fpga_data(fpga_data),
+	.fpga_data(data_in[31:24]),
 	.fpga_odata(),
 
-	.out_ipl(fpga_ipl)
+	.out_ipl(fpga_ipl),
+	.dbg_intsel(dbg0)
 );
+
+assign dbg2 = IPL[0];
+assign dbg1 = data_in[24];
 
 reg [2:0] state;
 reg [3:0] count;
@@ -237,6 +262,7 @@ always @(posedge clk or negedge rst) begin
 					state <= ILLEGAL_ACCESS;
 				*/
 			        end else if( fpga_access == 1'b1 && ts == 1 ) begin
+					d_oe <= 0;
 					state <= WAIT_FPGA;
 				end else begin
 					state <= START;
@@ -244,7 +270,7 @@ always @(posedge clk or negedge rst) begin
 			end
 			WAIT_ROM: begin
 				if( flash_ack == 1'b1 ) begin
-					d <= flash_data;
+					data_out <= flash_data;
 					state <= START_TA;
 				end
 			end
