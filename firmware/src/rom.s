@@ -37,7 +37,7 @@ VECTORS::
 		dc.l	VEC_AUTOVEC1	; 25
 		dc.l	VEC_AUTOVEC2	; 26
 		dc.l	VEC_AUTOVEC3	; 27
-		dc.l	uart_isr	; 28
+		dc.l	VEC_AUTOVEC4	; 28
 		dc.l	VEC_AUTOVEC5	; 29
 		dc.l	VEC_AUTOVEC6	; 30
 		dc.l	VEC_AUTOVEC7	; 31
@@ -269,6 +269,13 @@ COPY_VECTORS:
 		lea	.s_vbrdone,a0
 		bl	early_puts
 
+		; Replace AUTOVECTOR 4 with UART ISR
+		movec	vbr,a0
+		move.l	#uart_isr,$70(a0)
+		; Replace AUTOVECTOR 7 with Button ISR
+		move.l	#VEC_BUTTON,$7C(a0)
+		
+
 
 FPU_IDENT:
 
@@ -281,6 +288,10 @@ FPU_IDENT:
 .s_cpu_b:	dc.b	0
 		even
 .s_ram_count:	dc.b	"RAM: 0x%x bytes\r\n",0
+		even
+.s_stack:	dc.b	"\r\n\r\nStack pointer: 0x%x\r\n",0
+		even
+.s_done:	dc.b	"\r\nI'm done. Time to die.\r\n",0
 		even
 
 	section	.text
@@ -309,19 +320,28 @@ FPU_IDENT:
 		jsr	printf_
 		add.l	#8,sp
 
+		; Print stack pointer.
+		move.l	a7,-(sp)
+		pea	.s_stack
+		jsr	printf_
+		add.l	#8,sp
+
+		; Proclaim it's time to die.
+		pea	.s_done
+		jsr	printf_
+		add.l	#4,sp
+
 		; Enable instruction cache
 		;cinva	ic
 		;move.l	#$00008000,d0
 		;movec	d0,cacr
-
-		;move.l	#FPGA_BASE,d0
 
 DIE:		bra	DIE
 
 
 
 
-; --------------------------------------
+; ------------------------------------------------------------------------------
 ; early_puts - Print a string to UART A
 ;
 ; Inputs
@@ -441,25 +461,6 @@ get_fpu:
 		unlk	a5
 		rts
 
-	;VEC_AUTOVEC1:
-			;move.l	#1,INT1_CHECK
-			;rte
-	;VEC_AUTOVEC2:
-			;move.l	#1,INT2_CHECK
-			;rte
-	;VEC_AUTOVEC3:
-			;move.l	#1,INT3_CHECK
-			;rte
-	;VEC_AUTOVEC4:
-			;move.l	#1,INT4_CHECK
-			;rte
-	;VEC_AUTOVEC5:
-			;move.l	#1,INT5_CHECK
-			;rte
-	;VEC_AUTOVEC6:
-			;move.l	#1,INT6_CHECK
-			;rte
-
 
 trapstub:	macro
 		move.w	#0,-(sp)		; Hack for printf
@@ -486,7 +487,6 @@ vecstub:	macro
 		endm
 
 VEC_AUTOVEC1:
-		;vecstub	"AUTOVECTOR 1"
 		move.l	#1,INT1_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
@@ -514,6 +514,8 @@ VEC_AUTOVEC7:
 		move.l	#1,INT7_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
+VEC_BUTTON:
+		vecstub "NMI Button"
 VEC_ILLINSTR:
 		vecstub	"Illegal instruction"
 VEC_BUSFAULT:
