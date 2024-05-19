@@ -132,7 +132,7 @@ INIT_DUART:
 		move.b	#$30,CRB(a0)		; reset the transmitter
 
 		; Initialize txbuf from src/uart.c
-		jsr	init_txbuf
+		jsr	init_uartbuf
 
 
 	section .rodata
@@ -146,8 +146,6 @@ INIT_DUART:
 		lea	.s_welcome,a0
 		bl	early_puts
 
-		; Let's try reading _something_ with the FPGA
-		;move.l	#$FFFFFFFF,FPGA_BASE+F_INT
 TEST_INTS:
 
 	section .rodata
@@ -274,6 +272,9 @@ COPY_VECTORS:
 		move.l	#uart_isr,$70(a0)
 		; Replace AUTOVECTOR 7 with Button ISR
 		move.l	#VEC_BUTTON,$7C(a0)
+
+		;move.l	#$2000C040,d0
+		;movec	d0,dtt0
 		
 
 
@@ -291,7 +292,9 @@ FPU_IDENT:
 		even
 .s_stack:	dc.b	"\r\n\r\nStack pointer: 0x%x\r\n",0
 		even
-.s_done:	dc.b	"\r\nI'm done. Time to die.\r\n",0
+.s_done:	dc.b	"\r\nEntering C.\r\n",0
+		even
+.s_die:		dc.b	"\r\nI'm done. Time to die.\r\n",0
 		even
 
 	section	.text
@@ -310,6 +313,11 @@ FPU_IDENT:
 		jsr	printf_
 		add.l	#8,sp
 
+		; Enable cache
+		;cinva	bc
+		;move.l	#$80008000,d0
+		;movec	d0,cacr
+
 		; Cheating!
 		move.l	#$FFFFF,RAM_COUNT
 
@@ -326,15 +334,17 @@ FPU_IDENT:
 		jsr	printf_
 		add.l	#8,sp
 
-		; Proclaim it's time to die.
+		; Enter the C program
 		pea	.s_done
 		jsr	printf_
 		add.l	#4,sp
 
-		; Enable instruction cache
-		;cinva	ic
-		;move.l	#$00008000,d0
-		;movec	d0,cacr
+		jsr	c_prog_entry
+
+		; Proclaim its time to die.
+		pea	.s_die
+		jsr	printf_
+		add.l	#4,sp
 
 DIE:		bra	DIE
 
