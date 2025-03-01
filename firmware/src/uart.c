@@ -1,17 +1,30 @@
 #include <stdint.h>
+#include <string.h>
 #include "uart68681.h"
+#include "ring_buffer.h"
+#include "memcpy.h"
+
+/* Because we don't have kernel.h */
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 enum { bufsiz = 256 };
 
 static volatile unsigned char txbuf[bufsiz];
-static volatile unsigned char rxbuf[bufsiz];
-volatile int tx_write_indx, tx_read_indx, rx_write_indx, rx_read_indx;
+volatile int tx_write_indx, tx_read_indx;
+
+static rbd_t _rxbd;
+static char _rxbuf[8];
+//static rbd_t _txbd;
+//static char _txbuf[8];
 
 void init_uartbuf(void) {
 	tx_write_indx = 0;
 	tx_read_indx = 0;
-	rx_write_indx = 0;
-	rx_read_indx = 0;
+	
+	rb_attr_t attr_rx = {sizeof(_rxbuf[0]), ARRAY_SIZE(_rxbuf), _rxbuf};
+	//rb_attr_t attr_tx = {sizeof(_txbuf[0]), ARRAY_SIZE(_txbuf), _txbuf};
+	ring_buffer_init(&_rxbd, &attr_rx);
+	//ring_buffer_init(&_txbuf, &attr_tx);
 	return;
 }
 
@@ -23,6 +36,14 @@ void init_uartbuf(void) {
  * 		- When the cirqueue has more than 0 elements in it
  *
  */
+
+int uart_getchar(void) {
+	char c = -1;
+
+	ring_buffer_get(_rxbd, &c);
+
+	return c;
+}
 
 void _putchar(unsigned char c) {
 	while ((tx_write_indx + 1) % bufsiz == tx_read_indx); // Buffer is full, hang around and wait
@@ -47,34 +68,19 @@ void _putchar(unsigned char c) {
 }
 
 int _getchar(void) {
-	int ch = 0;
-	while (rx_read_indx == rx_write_indx); // Buffer is empty, hang around and wait
-
-	// Critical section
-	asm volatile(
-			"movew  %%sr,%-;"
-			"orw    #0x700,%%sr;"
-			: : :);
-
-
-	// Get character from the buffer and increment pointer
-	ch = (int)rxbuf[rx_read_indx];
-	rx_read_indx = (rx_read_indx + 1) % bufsiz;
-
+	char c = -1;
 	
-	// End critical section
-	asm ("movew  %+,%%sr": : :);
-	return ch;
+	ring_buffer_get(_rxbd, &c);
+	
+	return c;
 }
-
 
 void __attribute__((interrupt)) uart_isr() {
 
 	// If Ch.A Receiver Ready:
 	if (uart->sra & 0x01) {
-		// Place the received character in the recv cirqueue
-		rxbuf[rx_write_indx] = uart->rba;
-		rx_write_indx = (rx_write_indx + 1) % bufsiz;
+		const char c = uart->rba;
+		ring_buffer_put(_rxbd, &c);
 		return;
 	}
 
