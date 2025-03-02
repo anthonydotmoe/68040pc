@@ -11,3 +11,11 @@ POST Routine:
 FPGA BASE:0x80000000
 	* 0x00.l - Status
 	* 0x04.b - Fire interrupt (number written, one cycle)
+
+MMU Transparent translation
+
+Addr		Device		DataC		InstC
+0000_0000	ROM		01		01
+2000_0000	DUART		11		11
+3000_0000	SRAM		01		01
+8000_0000	FPGA		11		11

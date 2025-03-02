@@ -21,3 +21,6 @@ CSRB		equ	$09		; W	Clock select register
 CRB		equ	$0A		; W	Command register
 RBB		equ	$0B		; R	Receive buffer A
 TBB		equ	$0B		; W	Transmit buffer A
+
+OPRSET		equ	$0E		; W	Output Port Register Set
+OPRRST		equ	$0F		; W	Output Port Register Reset

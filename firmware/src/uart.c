@@ -1,8 +1,9 @@
 #include <stdint.h>
-#include <string.h>
 #include "uart68681.h"
 #include "ring_buffer.h"
 #include "memcpy.h"
+
+extern int printf_(const char *fmt, ...);
 
 /* Because we don't have kernel.h */
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
@@ -18,6 +19,9 @@ static char _rxbuf[8];
 //static char _txbuf[8];
 
 void init_uartbuf(void) {
+	uart->imr = 0;
+	return;
+
 	tx_write_indx = 0;
 	tx_read_indx = 0;
 	
@@ -36,16 +40,20 @@ void init_uartbuf(void) {
  * 		- When the cirqueue has more than 0 elements in it
  *
  */
-
-int uart_getchar(void) {
-	char c = -1;
-
-	ring_buffer_get(_rxbd, &c);
-
-	return c;
-}
-
 void _putchar(unsigned char c) {
+
+	// Slow polling method
+	uint8_t status_val;
+	do {
+		status_val = uart->sra;
+	}
+    	while (!(status_val & (1 << 2))); // Polling
+
+	uart->tba = c;
+	return;
+
+
+	/*
 	while ((tx_write_indx + 1) % bufsiz == tx_read_indx); // Buffer is full, hang around and wait
 
 	// Critical section
@@ -65,15 +73,52 @@ void _putchar(unsigned char c) {
 	// End critical section
 	asm ("movew  %+,%%sr": : :);
 	return;
+	*/
 }
 
+/*
 int _getchar(void) {
-	char c = -1;
+	char c;
 	
-	ring_buffer_get(_rxbd, &c);
-	
-	return c;
+	// Slow polling method
+	while ((uart->sra & (1 << 0)) == 0);
+	c = uart->rba;
+	return (int)c & 0xFF;
 }
+*/
+
+int _getchar(void) {
+    uint8_t status_val;
+    
+    // Wait for RX Ready
+    do {
+	    status_val = uart->sra;
+    }
+    while (!(status_val & (1 << 0))); // polling
+    
+    // Read the character
+    char c = uart->rba;
+
+    // Print status value
+    printf_("status before: 0x%02x\n", status_val);
+
+    // Read status
+    status_val = uart->sra;
+
+    // Print status value
+    printf_("status after: 0x%02x\n", status_val);
+ 
+    // Check error bits (Overrun=bit1, Parity=bit2, Framing=bit3)
+    // If any error is set, read the data register again to clear it.
+    /*
+    if (((status_val & 0x70) & (status_val & 0x01)) != 0) {
+	printf_("error? uart->sra: 0x%x\n", status_val);
+    }
+    */
+    
+    return (int) (c & 0xFF);
+}
+
 
 void __attribute__((interrupt)) uart_isr() {
 

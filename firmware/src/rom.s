@@ -109,27 +109,33 @@ DELAY10000:
 .1:
 		dbra	d2,.1
 
+;INIT_MMU:
+;		move.l	#$C0000000,d0	; Disable MMU with 4k page tables
+;		movec	d0,tc
+
 INIT_DUART:
 		
 		movea.l	#DUART_BASE,a0
 		move.b	#$00,IMR(a0)			; reset interrupt mask register
 
 		; Initialize channel A
-		move.b	#$10,CRA(a0)		; reset mode register pointer
-		move.b	#$13,MR1A(a0)		; no parity, 8 bits/char
-		move.b	#$07,MR2A(a0)		; 1 stop bit
-		move.b	#$CC,CSRA(a0)		; 38.4k-baud XMIT and RCV
 		move.b	#$20,CRA(a0)		; reset the receiver
 		move.b	#$30,CRA(a0)		; reset the transmitter
+		move.b	#$10,CRA(a0)		; reset mode register pointer
+		move.b	#$13,MR1A(a0)		; no parity, 8 bits/char
+		move.b	#$37,MR2A(a0)		; 1 stop bit, RTS/CTS
+		move.b	#$BB,CSRA(a0)		; 9600-baud XMIT and RCV
 		move.b	#$05,CRA(a0)		; enable XMIT and RCV
+		move.b	#$01,OPRSET(a0)		; assert RTS
 
 		; Initialize channel B
+		move.b	#$20,CRB(a0)		; reset the receiver
+		move.b	#$30,CRB(a0)		; reset the transmitter
 		move.b	#$10,CRB(a0)		; reset mode register pointer
 		move.b	#$13,MR1B(a0)		; no parity, 8 bits/char
 		move.b	#$07,MR2B(a0)		; 1 stop bit
-		move.b	#$CC,CSRB(a0)		; 38.4k-baud XMIT and RCV
-		move.b	#$20,CRB(a0)		; reset the receiver
-		move.b	#$30,CRB(a0)		; reset the transmitter
+		move.b	#$BB,CSRB(a0)		; 9600-baud XMIT and RCV
+		move.b	#$0A,CRB(a0)		; explicitly disable TX/RX
 
 		; Initialize txbuf from src/uart.c
 		jsr	init_uartbuf
@@ -137,7 +143,7 @@ INIT_DUART:
 
 	section .rodata
 
-.s_welcome:	dc.b	27,"[2J68040pc booting...\r\n",0
+.s_welcome:	dc.b	27,"[2J\r68040pc booting...\r\n",0
 		even
 
 	section .text
@@ -231,6 +237,9 @@ TEST_INTS:
 		bra	.loop
 	
 .end:
+		; Disable interrupts
+		move.w	#$2700,sr
+		
 
 		
 COPY_VECTORS:
@@ -269,7 +278,7 @@ COPY_VECTORS:
 
 		; Replace AUTOVECTOR 4 with UART ISR
 		movec	vbr,a0
-		move.l	#uart_isr,$70(a0)
+		;move.l	#uart_isr,$70(a0)
 		; Replace AUTOVECTOR 7 with Button ISR
 		move.l	#VEC_BUTTON,$7C(a0)
 
@@ -301,7 +310,7 @@ FPU_IDENT:
 
 
 		; Set interrupt level so _putchar works
-		and.w	#$F8FF,sr	; Stay in supervisor mode, clear interrupt mask
+		;and.w	#$F8FF,sr	; Stay in supervisor mode, clear interrupt mask
 
 		jsr	get_fpu			; d0 = 1: FPU, 0: LC (no FPU)
 		move.b	d0,d0
@@ -479,7 +488,7 @@ trapstub:	macro
 		move.l	d0,-(sp)
 		lea.l	(.str,pc),a0
 		bra	trapret
-	.str:	dc.w	$0A2A
+	.str:	dc.w	$0D0A,$2A2A
 		asciz	\1
 		even
 		endm
@@ -491,7 +500,7 @@ vecstub:	macro
 		move.l	d0,-(sp)
 		lea.l	(.str,pc),a0
 		bra	crash
-	.str:	dc.w	$0A2A
+	.str:	dc.w	$0D0A,$2A2A
 		asciz	\1
 		even
 		endm

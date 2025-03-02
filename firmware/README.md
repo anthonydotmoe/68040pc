@@ -1,5 +1,5 @@
 ## Building
 
 ```sh
-yay -S m68k-elf-gcc
+yay -S m68k-elf-gcc vasm
 ```

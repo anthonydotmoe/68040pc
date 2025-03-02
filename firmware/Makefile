@@ -17,7 +17,7 @@ ROM_OBJ		= $(ASM_OBJ) $(C_OBJ)
 ASFLAGS		= -esc -m68040 -Iinc
 ASFLAGS_ELF	= -Felf
 
-CFLAGS		= -m68040 -Os -Iinc
+CFLAGS		= -m68040 -msoft-float -Os -Iinc
 
 #-------------------------------------------------------------------------------
 
