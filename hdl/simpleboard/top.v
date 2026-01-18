@@ -3,47 +3,45 @@
 
 (* top *)
 module top (
-	input	clk,
+	input	clk,		// 68040 BCLK
 	input	rst,
 	input	btn,
 	output	led,
 
-	output	d_dir,
-	output	d_oe,
+	output	d_dir,		// D[31:0] 74ALVC16425 DIR
+	output	d_oe,		// D[31:0] 74ALVC16425 OE
 
-	input	[31:0]	a,
-	inout	[31:0]	d,
+	input	[31:0]	a,	// A[31:0] direct from CPU
+	inout	[31:0]	d,	// D[31:0] FPGA <-> 74ALVC16425 <-> CPU
 
-//`ifdef SOUND
-	output	i2s_bclk,
-	output	i2s_dat,
-	output	i2s_lrclk,
-//`endif
+	output	dbg0,
+	output	dbg1,
+	output	dbg2,
 
-	input	ts,
-	output	ta,
-	output	tea,
-	input	tip,
-	output	tci,
-	output	tbi,
-	input	[1:0]	tt,
-	input	[2:0]	tm,
-	input	[1:0]	siz,
+	input	ts,			// Transfer Start
+	output	ta,			// Transfer Acknowledge
+	output	tea,		// Transfer Error Acknowledge
+	input	tip,		// Transfer In Progress
+	output	tci,		// Transfer Cache Inhibit
+	output	tbi,		// Transfer Burst Inhibit
+	input	[1:0]	tt,	// Transfer Type
+	input	[2:0]	tm,	// Transfer Modifier
+	input	[1:0]	siz,// Transfer Size
 
 	input	rw,
 
-	output	[1:0]	DSACK,
-	input		RESIZ_DS,
-	output		RESIZ_CS,
+	output	[1:0]	DSACK,	// FPGA -> 74LVC07 -> 68150 DSACK
+	input		RESIZ_DS,	// 68150 -> DS
+	output		RESIZ_CS,	// FPGA -> 74AHCT04 -> 68150 CS
 
-	output		COM_CS,
-	input		COM_IRQ,
-	output		COM_IACK,
+	output		COM_CS,		// FPGA -> 74AHCT04 -> DUART CS
+	input		COM_IRQ,	// DUART -> FPGA
+	output		COM_IACK,	// FPGA -> 74AHCT04 -> DUART IACK
 
-	output		RAM_CS,
+	output		RAM_CS,		// FPGA -> 74AHCT04 -> RAM CS
 
-	output	[2:0]	IPL,
-	output		AVEC,
+	output	[2:0]	IPL,	// FPGA -> 74LVC07 -> 68040 IPL
+	output		AVEC,		// FPGA -> 74AHCT04 -> 68040 AVEC
 
 	output	spi_ss,
 	output	spi_sck,
@@ -59,33 +57,10 @@ assign tbi = 0;
 
 assign COM_IACK = 0;
 
-reg ram_ack;
-wire [1:0] DSACK;
-assign DSACK[0] = 1'b1;
-assign DSACK[1] = ~ram_ack;
-
 // Debug lines -----------------------------------------------------------------
-`ifdef DEBUG
-wire dbg0, dbg1, dbg2;
-
-assign i2s_bclk = dbg0;
-assign i2s_dat = dbg1;
-assign i2s_lrclk = dbg2;
-`elsif SOUND
-
-// Noisemaker ------------------------------------------------------------------
-i2s_tx sound(
-	.clk(clk),
-	.sck(i2s_bclk),
-	.lrclk(i2s_lrclk),
-	.dat(i2s_dat)
-);
-
-`else
-assign i2s_bclk = 1'b0;
-assign i2s_lrclk = 1'b0;
-assign i2s_dat = 1'b0;
-`endif
+assign dbg0 = a[29];
+assign dbg1 = a[30];
+assign dbg2 = a[31];
 
 // Addr Buffer -----------------------------------------------------------------
 reg [31:0] addr;
@@ -141,6 +116,7 @@ assign IPL[2:0] = com_btn_ipl & fpga_ipl;
 assign AVEC = 1'b1;
 
 // ROM reader signals
+localparam FLASH_PAGE = 8'h04;
 wire [21:0] flash_addr;
 wire [31:0] flash_data;
 assign flash_addr = { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
@@ -185,40 +161,29 @@ fpga_int fpga_interface(
 	.out_ipl(fpga_ipl)
 );
 
-//assign dbg2 = IPL[0];
-//assign dbg1 = data_in[24];
-assign dbg0 = IPL[0];
-assign dbg1 = IPL[1];
-assign dbg2 = IPL[2];
-
 reg [2:0] state;
-reg [3:0] count;
 
 localparam	START = 0,
 		WAIT_ROM = 1,
 		WAIT_FPGA = 2,
 		START_TA = 3,
 		FINISH_TA = 4,
-		RAM_ACCESS = 5,
-		ILLEGAL_ACCESS = 6,
-		ILLEGAL_ACCESS_END = 7;
+		ILLEGAL_ACCESS = 5,
+		ILLEGAL_ACCESS_END = 6;
 
-localparam FLASH_PAGE = 8'h04;
 
 wire rom_sel, uart_sel, ram_sel, fpga_sel;
 assign rom_sel = (addr[31:28] == 4'h0);
 assign uart_sel = (addr[31:28] == 4'h2);
-assign ram_sel = (addr[31:28] == 4'h3);
-assign fpga_sel = (addr[31:28] == 4'h8);
+assign ram_sel = (addr[31:28] == 4'h4);
+assign fpga_sel = (addr[31:28] == 4'h6);
 
 wire rom_access = ( (tip == 0) && (rom_sel == 1) );
 wire uart_access = ( (tip == 0) && (uart_sel == 1) );
 wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
 wire fpga_access = ( (tip == 0) && (fpga_sel == 1) );
 wire vector_access = ( (tip == 0) && (addr == 32'hFFFFFFFF) );
-wire illegal_access = &{ !rom_access, !uart_access, !ram_access, !fpga_access, !vector_access };
-
-wire resiz_access = ( ram_access || uart_access );
+wire illegal_access = ( (tip == 0) && &{ !rom_access, !uart_access, !ram_access, !fpga_access, !vector_access } );
 
 // Do the following for 68150 accesses:
 //
@@ -226,12 +191,57 @@ wire resiz_access = ( ram_access || uart_access );
 // Assign RESIZ_DS to the selected peripheral's CS line and start counting
 // After the count expires, assert DSACKn for two CLK falling edges
 // Deassert DSACKn
+reg [2:0] ram_wait_cnt;
+reg       ram_busy;
+reg       ram_ack;
+
+reg       ds_prev;
+wire      ds_now  = RESIZ_DS; // active low from 68150
+wire      ds_fall = ds_prev & ~ds_now;
+
+localparam integer RAM_WS     = 3'd1; // 60ns
+localparam integer RAM_WS_END = RAM_WS + 3'd1;
+
+always @(posedge clk or negedge rst) begin
+	if (!rst) begin
+		ds_prev      <= 1'b1;
+		ram_wait_cnt <= 3'b000;
+		ram_busy     <= 1'b0;
+		ram_ack      <= 1'b0;
+	end else begin
+		ds_prev <= ds_now;
+
+		if (!ram_busy) begin
+			// Start a new local access when 68150 asserts DS to RAM
+			if (!ds_now && ds_fall && ram_sel) begin
+				ram_busy     <= 1'b1;
+				ram_wait_cnt <= 3'b000;
+				ram_ack      <= 1'b0;
+			end
+		end else begin
+			// In a local RAM access wait
+			ram_wait_cnt <= ram_wait_cnt + 1;
+
+			if (ram_wait_cnt == RAM_WS) begin
+				ram_ack <= 1'b1;
+			end
+
+			if (ram_wait_cnt == RAM_WS_END || ds_now) begin
+				// finish this local access
+				ram_ack  <= 1'b0;
+				ram_busy <= 1'b0;
+			end
+		end
+	end
+end
+
+assign DSACK[0] = 1'b1;
+assign DSACK[1] = ~ram_ack;
 
 wire COM_CS, RAM_CS, RESIZ_CS;
 assign COM_CS = uart_access ? ~RESIZ_DS : 1'b0;
 assign RAM_CS = ram_access ? ~RESIZ_DS : 1'b0;
 
-reg [1:0] resiz_count;
 assign RESIZ_CS = ts && (uart_access || ram_access);
 
 always @(posedge clk or negedge rst) begin
@@ -240,30 +250,20 @@ always @(posedge clk or negedge rst) begin
 		i_ta <= 1'b0;
 		i_tea <= 0;
 		d_oe <= 1;
-		ram_ack <= 0;
-		resiz_count <= 0;
-		count <= 0;
 	end else begin
 		case (state)
 			START: begin
 				i_ta <= 0;
 				i_tea <= 0;
 				d_oe <= 1;
-				ram_ack <= 0;
-				count <= 0;
 
 				if( vector_access == 1'b1 && ts == 1 ) begin
 					state <= START_TA;
 				end else if( rom_access == 1'b1 && ts == 1 ) begin
 					state <= WAIT_ROM;
-				end else if( ram_access == 1'b1 && ts == 1 ) begin
-					resiz_count <= (siz[0] && siz[1])? 2'b01 : 2'b00;
-					state <= RAM_ACCESS;
-				/*	
 				end else if ( illegal_access == 1'b1 ) begin
 					state <= ILLEGAL_ACCESS;
-				*/
-			        end else if( fpga_access == 1'b1 && ts == 1 ) begin
+			    end else if( fpga_access == 1'b1 && ts == 1 ) begin
 					d_oe <= 0;
 					state <= WAIT_FPGA;
 				end else begin
@@ -292,25 +292,6 @@ always @(posedge clk or negedge rst) begin
 
 				state <= START;
 			end
-			RAM_ACCESS: begin
-				count <= count + 1;
-				if( count == 3'b101 ) begin
-					ram_ack <= 1;
-				end
-				if( count == 3'b111 ) begin
-					// Done
-					ram_ack <= 0;
-
-					// If this is the last transfer
-					if( resiz_count == 2'b00 ) begin
-						state <= START;
-					end else begin
-						// Else, reset counters
-						resiz_count <= resiz_count - 1;
-						count <= -1;
-					end
-				end
-			end
 			ILLEGAL_ACCESS: begin
 				i_tea <= 1;
 				state <= ILLEGAL_ACCESS_END;
@@ -323,20 +304,98 @@ always @(posedge clk or negedge rst) begin
 	end
 end
 
-// Latch address when TS is asserted
-always @(posedge clk) begin
-	if (ts == 1'b0)
-		addr <= a;
+// Latch address when TS is going low
+reg ts_prev;
+always @(posedge clk or negedge rst) begin
+	if (!rst) begin
+		ts_prev <= 1'b1;
+		addr    <= 32'h00000000;
+	end else begin
+		ts_prev <= ts;
+
+		// TS falling edge: valid address for new bus cycle
+		if (ts_prev == 1'b1 && ts == 1'b0)
+			addr <= a;
+	end
 end
 
-wire blink_en;
-assign blink_en = (state == START);
+// Blinky lights ---------------------------------------------------------------
+
+// Event: Read address 0x03 from DUART
+wire blink_event = ((uart_sel == 1'b1) &&
+                    (addr[3:0] == 4'b0011) &&
+                    (rw == 1'b1));
+
+// Timing
+localparam integer OFF_TICKS   = 23'd2_000_000;  // ~60 ms at 33 MHz
+localparam integer TOTAL_TICKS = 23'd4_000_000;  // total cycle time (~120 ms)
+
+// How many blink cycles we can queue up
+localparam integer BLINK_QUEUE_BITS = 4;         // up to 15 pending events
+
+// State
+reg        blink_active;    // 0 = idle, 1 = currently in a blink cycle
 reg [22:0] blink_count;
-always @(posedge clk) begin
-	blink_count <= blink_count + 1;
+reg        blink_event_d;   // for edge detection
+reg [BLINK_QUEUE_BITS-1:0] blink_queue;  // pending blink cycles
+
+// edge-detect blink_event so we only trigger on rising edges.
+wire blink_event_edge = blink_event & ~blink_event_d;
+
+always @(posedge clk or negedge rst) begin
+    if (!rst) begin
+        blink_active   <= 1'b0;
+        blink_count    <= 23'd0;
+        blink_event_d  <= 1'b0;
+        blink_queue    <= {BLINK_QUEUE_BITS{1'b0}};
+    end else begin
+        // Capture previous value for edge detection
+        blink_event_d <= blink_event;
+
+        // On every rising edge of blink_event, enqueue a blink cycle
+        // (saturating at the max representable value).
+        if (blink_event_edge) begin
+            if (blink_queue != {BLINK_QUEUE_BITS{1'b1}}) begin
+                blink_queue <= blink_queue + 1'b1;
+            end
+        end
+
+        if (!blink_active) begin
+            // Idle: if there are queued events, start a new cycle
+            if (blink_queue != {BLINK_QUEUE_BITS{1'b0}}) begin
+                blink_active <= 1'b1;
+                blink_count  <= 23'd0;
+                blink_queue  <= blink_queue - 1'b1;
+            end
+        end else begin
+            // In an off+on cycle
+            blink_count <= blink_count + 1'b1;
+
+            if (blink_count == (TOTAL_TICKS - 1)) begin
+                blink_active <= 1'b0;   // done; go back to idle
+            end
+        end
+    end
 end
 
-//assign led = (blink_en == 1'b1) ? blink_count[22] : 1'b1;
-assign led = (blink_en == 1'b1) ? 1'b0 : 1'b1;
+
+// Logical LED behavior (before polarity inversion):
+//
+// - When idle (blink_active = 0): LED is ON (steady).
+// - During the cycle (blink_active = 1):
+//     * First OFF_TICKS cycles: LED OFF
+//     * Remaining (TOTAL_TICKS - OFF_TICKS) cycles: LED ON
+//
+wire led_logical =
+    (!blink_active)                  ? 1'b1 :   // idle: ON
+    (blink_count < OFF_TICKS)        ? 1'b0 :   // first phase: OFF
+                                       1'b1;    // second phase: ON
+
+// Flip polarity for the physical LED:
+// If the board LED is active-low, then:
+//   led = 0 -> LED ON
+//   led = 1 -> LED OFF
+assign led = ~led_logical;
+
 
 endmodule

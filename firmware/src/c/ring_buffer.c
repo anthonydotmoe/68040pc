@@ -32,9 +32,9 @@ int ring_buffer_init(rbd_t *rbd, rb_attr_t *attr) {
                 err = 0;
             }
         }
-        
-        return err;
     }
+        
+    return err;
 }
 
 static int _ring_buffer_full(struct ring_buffer *rb) {

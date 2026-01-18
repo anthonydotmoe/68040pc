@@ -3,7 +3,6 @@
 #include <string.h>
 
 extern int printf_(const char* format, ...);
-extern int _getchar(void);
 
 /******************************************************************************
  * Simple Monitor Program for 68k
@@ -60,21 +59,27 @@ static int get_line(char *buf, int buf_size)
     }
 
     while (1) {
-        c = (char)_getchar();   /* read a character (blocking) */
+        c = _getchar();   /* read a character (blocking) */
         if (c == '\r' || c == '\n') {
             /* Echo if desired; here we’ll echo a newline. */
-            printf_("\n");
+            _putchar('\r');
+            _putchar('\n');
             break;
         } else if (c == 0x08 || c == 0x7F) {
             /* Handle backspace if you want. For simplicity, skip or implement as needed. */
-            if (i > 0) i--;
+            if (i > 0) {
+                i--;
+                _putchar('\b');
+                _putchar(' ');
+                _putchar('\b');
+            }
         } else {
             /* Store character if we have space */
             if (i < buf_size - 1) {
                 buf[i++] = c;
             }
             /* Echo the character back (optional) */
-            //printf_("%c", c);
+            _putchar(c);
         }
     }
 
@@ -149,7 +154,7 @@ static void dump_bytes(unsigned long addr, unsigned long count)
         printf_("|");
 
         /* Move to next line */
-        printf_("\n");
+        printf_("\r\n");
 
         p += line_count;
         addr += line_count;
@@ -175,7 +180,7 @@ static void dump_words(unsigned long addr, unsigned long count)
             /* For real 68k, ensure alignment or handle bus errors carefully. */
             printf_("%04X ", p[i]);
         }
-        printf_("\n");
+        printf_("\r\n");
 
         p += line_count;
         count -= line_count;
@@ -199,7 +204,7 @@ static void dump_longs(unsigned long addr, unsigned long count)
             /* For real 68k, ensure alignment. */
             printf_("%08lX ", p[i]);
         }
-        printf_("\n");
+        printf_("\r\n");
 
         p += line_count;
         count -= line_count;
@@ -242,16 +247,16 @@ static void process_command(char *line)
 
     /* "help" command */
     if (!strcmp(argv[0], "help")) {
-        printf_("Commands:\n");
-        printf_("  m.b <addr>            Read a byte\n");
-        printf_("  m.w <addr>            Read a word\n");
-        printf_("  m.l <addr>            Read a long\n");
-        printf_("  mw.b <addr> <val>     Write a byte\n");
-        printf_("  mw.w <addr> <val>     Write a word\n");
-        printf_("  mw.l <addr> <val>     Write a long\n");
-        printf_("  md.b <addr> <count>   Dump bytes\n");
-        printf_("  md.w <addr> <count>   Dump words\n");
-        printf_("  md.l <addr> <count>   Dump longs\n");
+        printf_("Commands:\r\n");
+        printf_("  m.b <addr>            Read a byte\r\n");
+        printf_("  m.w <addr>            Read a word\r\n");
+        printf_("  m.l <addr>            Read a long\r\n");
+        printf_("  mw.b <addr> <val>     Write a byte\r\n");
+        printf_("  mw.w <addr> <val>     Write a word\r\n");
+        printf_("  mw.l <addr> <val>     Write a long\r\n");
+        printf_("  md.b <addr> <count>   Dump bytes\r\n");
+        printf_("  md.w <addr> <count>   Dump words\r\n");
+        printf_("  md.l <addr> <count>   Dump longs\r\n");
         return;
     }
 
@@ -260,9 +265,9 @@ static void process_command(char *line)
         unsigned long addr;
         if (parseHex(argv[1], &addr)) {
             unsigned char val = *(volatile unsigned char *)addr;
-            printf_("Byte at 0x%08lX = 0x%02X\n", addr, val);
+            printf_("Byte at 0x%08lX = 0x%02X\r\n", addr, val);
         } else {
-            printf_("Parse error: invalid address.\n");
+            printf_("Parse error: invalid address.\r\n");
         }
         return;
     }
@@ -272,9 +277,9 @@ static void process_command(char *line)
         if (parseHex(argv[1], &addr)) {
             /* Beware alignment on real 68k */
             unsigned short val = *(volatile unsigned short *)addr;
-            printf_("Word at 0x%08lX = 0x%04X\n", addr, val);
+            printf_("Word at 0x%08lX = 0x%04X\r\n", addr, val);
         } else {
-            printf_("Parse error: invalid address.\n");
+            printf_("Parse error: invalid address.\r\n");
         }
         return;
     }
@@ -283,9 +288,9 @@ static void process_command(char *line)
         unsigned long addr;
         if (parseHex(argv[1], &addr)) {
             unsigned long val = *(volatile unsigned long *)addr;
-            printf_("Long at 0x%08lX = 0x%08lX\n", addr, val);
+            printf_("Long at 0x%08lX = 0x%08lX\r\n", addr, val);
         } else {
-            printf_("Parse error: invalid address.\n");
+            printf_("Parse error: invalid address.\r\n");
         }
         return;
     }
@@ -295,9 +300,9 @@ static void process_command(char *line)
         unsigned long addr, val;
         if (parseHex(argv[1], &addr) && parseHex(argv[2], &val)) {
             *(volatile unsigned char *)addr = (unsigned char)val;
-            printf_("Wrote 0x%02X to [0x%08lX]\n", (unsigned char)val, addr);
+            printf_("Wrote 0x%02X to [0x%08lX]\r\n", (unsigned char)val, addr);
         } else {
-            printf_("Parse error: usage: mw.b <addr> <val>\n");
+            printf_("Parse error: usage: mw.b <addr> <val>\r\n");
         }
         return;
     }
@@ -307,9 +312,9 @@ static void process_command(char *line)
         if (parseHex(argv[1], &addr) && parseHex(argv[2], &val)) {
             /* Beware alignment on real 68k */
             *(volatile unsigned short *)addr = (unsigned short)val;
-            printf_("Wrote 0x%04X to [0x%08lX]\n", (unsigned short)val, addr);
+            printf_("Wrote 0x%04X to [0x%08lX]\r\n", (unsigned short)val, addr);
         } else {
-            printf_("Parse error: usage: mw.w <addr> <val>\n");
+            printf_("Parse error: usage: mw.w <addr> <val>\r\n");
         }
         return;
     }
@@ -318,9 +323,9 @@ static void process_command(char *line)
         unsigned long addr, val;
         if (parseHex(argv[1], &addr) && parseHex(argv[2], &val)) {
             *(volatile unsigned long *)addr = val;
-            printf_("Wrote 0x%08lX to [0x%08lX]\n", val, addr);
+            printf_("Wrote 0x%08lX to [0x%08lX]\r\n", val, addr);
         } else {
-            printf_("Parse error: usage: mw.l <addr> <val>\n");
+            printf_("Parse error: usage: mw.l <addr> <val>\r\n");
         }
         return;
     }
@@ -331,7 +336,7 @@ static void process_command(char *line)
         if (parseHex(argv[1], &addr) && parseHex(argv[2], &count)) {
             dump_bytes(addr, count);
         } else {
-            printf_("Parse error: usage: md.b <addr> <count>\n");
+            printf_("Parse error: usage: md.b <addr> <count>\r\n");
         }
         return;
     }
@@ -341,7 +346,7 @@ static void process_command(char *line)
         if (parseHex(argv[1], &addr) && parseHex(argv[2], &count)) {
             dump_words(addr, count);
         } else {
-            printf_("Parse error: usage: md.w <addr> <count>\n");
+            printf_("Parse error: usage: md.w <addr> <count>\r\n");
         }
         return;
     }
@@ -351,13 +356,13 @@ static void process_command(char *line)
         if (parseHex(argv[1], &addr) && parseHex(argv[2], &count)) {
             dump_longs(addr, count);
         } else {
-            printf_("Parse error: usage: md.l <addr> <count>\n");
+            printf_("Parse error: usage: md.l <addr> <count>\r\n");
         }
         return;
     }
 
     /* If we get here, command not recognized */
-    printf_("Unknown command: %s\n", argv[0]);
+    printf_("Unknown command: %s\r\n", argv[0]);
 }
 
 /*---------------------------------------------------------------------------
@@ -367,7 +372,21 @@ void c_prog_entry(void) {
 
     char linebuf[MAX_LINE_LEN];
 
-    printf_("Simple 68k Monitor. Type 'help' for commands.\n");
+    uint8_t ret0, ret1, ret2, ret3, ret4;
+
+    ret0 = uart_get_set_ivr(0x00);
+    ret1 = uart_get_set_ivr(0xAA);
+    ret2 = uart_get_set_ivr(0x55);
+    ret3 = uart_get_set_ivr(0x69);
+    ret4 = uart_get_set_ivr(0x00);
+
+    printf_("IVR: 0x%02X   Setting to 0x00\r\n", ret0);
+    printf_("IVR: 0x%02X   Setting to 0xAA\r\n", ret1);
+    printf_("IVR: 0x%02X   Setting to 0x55\r\n", ret2);
+    printf_("IVR: 0x%02X   Setting to 0x69\r\n", ret3);
+    printf_("IVR: 0x%02X\r\n", ret4);
+
+    printf_("Simple 68k Monitor. Type 'help' for commands.\r\n");
 
     while (1) {
         printf_("> ");

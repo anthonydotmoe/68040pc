@@ -1,0 +1,103 @@
+; vim:noet:sw=8:ts=8:sts=8:ai:syn=asm68k
+
+	include "duart.i"
+	include "macros.i"
+
+;-------------------------------------------------------------------------------
+; ENTRY POINT
+
+	section	.text
+
+INIT_DUART:
+		; Most basic init. If DUART doesn't work with this, I need to
+		; figure out what the hardware is doing wrong.
+		; This sequence is what the rosco_m68k project uses for their
+		; XR68C681 init.
+
+		movea.l #DUART_BASE,a0
+
+		; Mask all DUART interrupts
+		move.b  #$00,IMR(a0)
+
+		;---------------------------------------------------------------
+		; Channel A basic reset and mode setup
+		;---------------------------------------------------------------
+
+		; Reset MR pointer, RX, TX, error status
+		move.b  #$10,CRA(a0)	; Reset MR pointer
+		move.b  #$20,CRA(a0)	; Reset receiver
+		move.b  #$30,CRA(a0)	; Reset transmitter
+		move.b  #$40,CRA(a0)	; Reset error status
+
+		; Extended rate setup (r2 / XR68C681 path in rosco)
+		move.b  #$A0,CRA(a0)	; Enable extended TX rates
+		move.b  #$80,CRA(a0)	; Enable extended RX rates
+		move.b  #$80,ACR(a0)	; Bit rate set 2
+		move.b  #$88,CSRA(a0)	; 115200 TX+RX from BRG set 2
+
+		; Mode registers: 8N1, no RTS/CTS flow control
+		move.b  #$13,MR1A(a0)	; Char mode, no parity, 8 data bits
+		move.b  #$07,MR2A(a0)	; Normal mode, no TX CTS/RTS, 1 stop bit
+
+		;---------------------------------------------------------------
+		; Channel B basic reset and mode setup (mirroring A)
+		;---------------------------------------------------------------
+
+		; Reset MR pointer, RX, TX, error status
+		move.b  #$10,CRB(a0)	; Reset MR pointer
+		move.b  #$20,CRB(a0)	; Reset receiver
+		move.b  #$30,CRB(a0)	; Reset transmitter
+		move.b  #$40,CRB(a0)	; Reset error status
+
+		; Extended rates for channel B (same as A)
+		move.b  #$A0,CRB(a0)	; Enable extended TX rates
+		move.b  #$80,CRB(a0)	; Enable extended RX rates
+		move.b  #$80,ACR(a0)	; Bit rate set 2 (same register)
+		move.b  #$88,CSRB(a0)	; 115200 TX+RX from BRG set 2
+
+		; Mode registers: 8N1 for B
+		move.b  #$13,MR1B(a0)
+		move.b  #$07,MR2B(a0)
+
+		;---------------------------------------------------------------
+		; Output ports / clocks
+		;---------------------------------------------------------------
+		; Rosco sets OPCR to 0: all GPIO-style, no clock outputs
+		move.b  #$00,OPCR(a0)
+		;move.b	#$01,OPRSET(a0)	; assert RTS on OP0
+
+		;---------------------------------------------------------------
+		; Finally enable TX/RX on both channels
+		;---------------------------------------------------------------
+		move.b  #$05,CRA(a0)	; Enable RX (bit 0) + TX (bit 2) on A
+		move.b  #$05,CRB(a0)	; Enable RX (bit 0) + TX (bit 2) on B
+
+		rts
+
+uart_testing:
+	 	bl	.getc
+		bl	.putc
+
+.getc:
+.get_loop	btst.b	#0,SRA(a0)	; Check if RxRDY is zero
+		beq	.get_loop	; If so, check again
+		move.b	RBA(a0),d0	; Move char from receive buffer
+
+.putc:
+.put_loop	btst.b	#2,SRA(a0)	; Check if TxRDY is zero
+		beq	.put_loop	; If so, check again
+
+		move.b	d0,TBA(a0)	; Move char to transmit buffer
+		rl
+
+main::
+		jsr	INIT_DUART
+
+		; small delay
+		move.l	#100,d0
+.1		dbra	d0,.1
+
+		movea.l	#DUART_BASE,a0
+		jsr	uart_testing
+
+.die		jmp	.die		; should never reach here

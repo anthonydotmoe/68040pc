@@ -20,3 +20,10 @@ asciz:		macro
 		dc.b	0
 		even
 		endm
+
+; Non-Null terminated string
+ascii:		macro
+		rept	\#
+		dc.b	\+
+		endr
+		endm

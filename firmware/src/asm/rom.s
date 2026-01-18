@@ -2,6 +2,7 @@
 
 	include "sys.i"
 	include "macros.i"
+	include "mmu.i"
 
 ; ------------------------------------------------------------------------------
 ; Vectors
@@ -11,65 +12,24 @@
 RAMVECTORS::
 		dcb.l	256
 
-	section	.vectors
+	xref	__vectors_start
+VECTORS	equ	__vectors_start
 
-VECTORS::
-		dc.l	INITIAL_SP	;  0
-		dc.l	RESET		;  1
-		dc.l	VEC_BUSFAULT	;  2
-		dc.l	VEC_ADERROR	;  3
-		dc.l	VEC_ILLINSTR	;  4
-		dc.l	VEC_DIVBY0	;  5
-		dc.l	VEC_CHK		;  6
-		dc.l	VEC_TRAPV	;  7
-		dc.l	VEC_PRIVVIOL	;  8
-		dc.l	VEC_TRACE	;  9
-		dc.l	VEC_LINE1010	; 10
-		dc.l	VEC_LINE1111	; 11
-		dc.l	VEC_RESERVED	; 12
-		dc.l	VEC_CCPUVIOL	; 13 - Coprocessor Protocol Violation (68020/30)
-		dc.l	VEC_FMTERROR	; 14
-		dc.l	VEC_UNINIVEC	; 15
-	rept	8
-		dc.l	VEC_RESERVED	; 16-23
-	endr
-		dc.l	VEC_SPURIOUS	; 24
-		dc.l	VEC_AUTOVEC1	; 25
-		dc.l	VEC_AUTOVEC2	; 26
-		dc.l	VEC_AUTOVEC3	; 27
-		dc.l	VEC_AUTOVEC4	; 28
-		dc.l	VEC_AUTOVEC5	; 29
-		dc.l	VEC_AUTOVEC6	; 30
-		dc.l	VEC_AUTOVEC7	; 31
-		dc.l	VEC_TRAP0	; 32
-		dc.l	VEC_TRAP1	; 33
-		dc.l	VEC_TRAP2	; 34
-		dc.l	VEC_TRAP3	; 35
-		dc.l	VEC_TRAP4	; 36
-		dc.l	VEC_TRAP5	; 37
-		dc.l	VEC_TRAP6	; 38
-		dc.l	VEC_TRAP7	; 39
-		dc.l	VEC_TRAP8	; 40
-		dc.l	VEC_TRAP9	; 41
-		dc.l	VEC_TRAP10	; 42
-		dc.l	VEC_TRAP11	; 43
-		dc.l	VEC_TRAP12	; 44
-		dc.l	VEC_TRAP13	; 45
-		dc.l	VEC_TRAP14	; 46
-		dc.l	VEC_TRAP15	; 47
-	rept	8
-		dc.l	VEC_RESERVED	; 48-55 - Floating point exceptions
-	endr
-		dc.l	VEC_RESERVED	; 56 - MMU Configuration Error (68030)
-		dc.l	VEC_RESERVED	; 57 - MMU Illegal Operation Error (68851)
-		dc.l	VEC_RESERVED	; 58 - MMU Access Violation (68851)
-	rept	5
-		dc.l	VEC_RESERVED	; 59-63 - Reserved
-	endr
+; ------------------------------------------------------------------------------
+; MMU tables
 
-	rept	192
-		dc.l	VEC_RESERVED	; 192-255 - User deviced vectors
-	endr
+	section	.bss
+	align	4096
+MMU_ROOT_TABLE:
+	ds.l	ROOT_TABLE_SIZE
+
+	align	4096
+MMU_PTR_TABLE0:
+	ds.l	PTR_TABLE_SIZE
+
+	align	4096
+MMU_PAGE_TABLE0:
+	ds.l	PAGE_TABLE_SIZE
 
 ;-------------------------------------------------------------------------------
 ; Global Variables
@@ -98,16 +58,22 @@ RAM_COUNT:
 
 	section	.text
 
-RESET:
+main::
+
+		; configure DTT0 for DUART as non-cachable
+		move.l	#$2000C040,d0	; A[31:24] == 0x20, Noncachable, Serialized
+		movec	d0,dtt0
+
+;DELAY10000:
+;		move.w	#-1,d2	; Wait for a bit (for some reason)
+;.1:		dbra	d2,.1
+;
+
 
 		; Try enabling instruction cache
+		;cinva	bc
 		;move.l	#$00008000,d0
 		;movec	d0,cacr
-
-DELAY10000:
-		move.l	#100000,d2	; Wait for a bit (for some reason)
-.1:
-		dbra	d2,.1
 
 ;INIT_MMU:
 ;		move.l	#$C0000000,d0	; Disable MMU with 4k page tables
@@ -119,27 +85,38 @@ INIT_DUART:
 		move.b	#$00,IMR(a0)			; reset interrupt mask register
 
 		; Initialize channel A
-		move.b	#$20,CRA(a0)		; reset the receiver
-		move.b	#$30,CRA(a0)		; reset the transmitter
-		move.b	#$10,CRA(a0)		; reset mode register pointer
+;		move.b	#$10,CRA(a0)		; reset mode register pointer
+;		move.b	#$20,CRA(a0)		; reset the receiver
+;		move.b	#$30,CRA(a0)		; reset the transmitter
+;		move.b	#$40,CRA(a0)		; reset error status
+		move.b	#$A0,CRA(a0)		; set TX BRG extend = 1
+		move.b	#$80,CRA(a0)		; set RX BRG extend = 1
+		move.b	#$80,ACR(a0)		; select bit rate set #2
+		move.b	#$88,CSRA(a0)		; 115.2kbps XMIT and RCV
 		move.b	#$13,MR1A(a0)		; no parity, 8 bits/char
-		move.b	#$37,MR2A(a0)		; 1 stop bit, RTS/CTS
-		move.b	#$BB,CSRA(a0)		; 9600-baud XMIT and RCV
+		move.b	#$07,MR2A(a0)		; 1 stop bit
 		move.b	#$05,CRA(a0)		; enable XMIT and RCV
-		move.b	#$01,OPRSET(a0)		; assert RTS
+;		move.b	#$01,OPRSET(a0)		; assert RTS
 
 		; Initialize channel B
-		move.b	#$20,CRB(a0)		; reset the receiver
-		move.b	#$30,CRB(a0)		; reset the transmitter
-		move.b	#$10,CRB(a0)		; reset mode register pointer
+;		move.b	#$10,CRB(a0)		; reset mode register pointer
+;		move.b	#$20,CRB(a0)		; reset the receiver
+;		move.b	#$30,CRB(a0)		; reset the transmitter
+;		move.b	#$40,CRB(a0)		; reset error status
+		move.b	#$A0,CRB(a0)		; set TX BRG extend = 1
+		move.b	#$80,CRB(a0)		; set RX BRG extend = 1
+		move.b	#$80,ACR(a0)		; select bit rate set #2
+		move.b	#$88,CSRB(a0)		; 115.2kbps XMIT and RCV
 		move.b	#$13,MR1B(a0)		; no parity, 8 bits/char
 		move.b	#$07,MR2B(a0)		; 1 stop bit
-		move.b	#$BB,CSRB(a0)		; 9600-baud XMIT and RCV
 		move.b	#$0A,CRB(a0)		; explicitly disable TX/RX
+
+		; small delay
+		move.l	#100,d0
+.1		dbra	d0,.1
 
 		; Initialize txbuf from src/uart.c
 		jsr	init_uartbuf
-
 
 	section .rodata
 
@@ -278,13 +255,21 @@ COPY_VECTORS:
 
 		; Replace AUTOVECTOR 4 with UART ISR
 		movec	vbr,a0
-		;move.l	#uart_isr,$70(a0)
+		move.l	#context_switch,$70(a0)
 		; Replace AUTOVECTOR 7 with Button ISR
 		move.l	#VEC_BUTTON,$7C(a0)
 
 		;move.l	#$2000C040,d0
 		;movec	d0,dtt0
 		
+CPU_IDENT:
+
+	section	.rodata
+
+	section	.text
+
+
+
 
 
 FPU_IDENT:
@@ -357,7 +342,13 @@ FPU_IDENT:
 
 DIE:		bra	DIE
 
+; ------------------------------------------------------------------------------
+; INIT_MMU
+; - Builds a 
+;
+; ------------------------------------------------------------------------------
 
+INIT_MMU:
 
 
 ; ------------------------------------------------------------------------------
@@ -462,7 +453,6 @@ print_long:
 ; d0 - 1 if FPU, 0 if no FPU
 ; --------------------------------------
 get_fpu:
-		link	a5,#0
 		movec	vbr,a1			; get VBR
 		move.w	sr,-(sp)		; save IPL
 		move.l	$2c(a1),-(sp)		; save old trap vector (Line F)
@@ -477,7 +467,6 @@ get_fpu:
 .1		move.l	a0,sp			; restore stack pointer
 		move.l	(sp)+,$2c(a1)		; restore trap vector
 		move.w	(sp)+,sr		; restore IPL
-		unlk	a5
 		rts
 
 
@@ -489,7 +478,8 @@ trapstub:	macro
 		lea.l	(.str,pc),a0
 		bra	trapret
 	.str:	dc.w	$0D0A,$2A2A
-		asciz	\1
+		ascii	\1
+		dc.b	$2A,$2A,$00
 		even
 		endm
 
@@ -501,102 +491,106 @@ vecstub:	macro
 		lea.l	(.str,pc),a0
 		bra	crash
 	.str:	dc.w	$0D0A,$2A2A
-		asciz	\1
+		ascii	\1
+		dc.b	$2A,$2A,$00
 		even
 		endm
 
-VEC_AUTOVEC1:
+_exc_Autovector1::
 		move.l	#1,INT1_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
-VEC_AUTOVEC2:
+_exc_Autovector2::
 		move.l	#1,INT2_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
-VEC_AUTOVEC3:
+_exc_Autovector3::
 		move.l	#1,INT3_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
-VEC_AUTOVEC4:
+_exc_Autovector4::
 		move.l	#1,INT4_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
-VEC_AUTOVEC5:
+_exc_Autovector5::
 		move.l	#1,INT5_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
-VEC_AUTOVEC6:
+_exc_Autovector6::
 		move.l	#1,INT6_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
-VEC_AUTOVEC7:
+_exc_Autovector7::
 		move.l	#1,INT7_CHECK
 		move.b	#0,F_INT+FPGA_BASE
 		rte
 VEC_BUTTON:
 		vecstub "NMI Button"
-VEC_ILLINSTR:
+_exc_IllegalInstruction::
 		vecstub	"Illegal instruction"
-VEC_BUSFAULT:
+_exc_BusError::
 		vecstub	"Bus fault"
-VEC_ADERROR:
+_exc_AddressError::
 		vecstub	"Address error"
-VEC_DIVBY0:
+_exc_ZeroDivide::
 		vecstub	"Division by zero"
-VEC_CHK:
+_exc_CHKInstruction::
 		vecstub	"Check"
-VEC_TRAPV:
+_exc_TRAPVInstruction::
 		vecstub	"TRAPV"
-VEC_PRIVVIOL:
+_exc_PrivilegeViolation::
 		vecstub	"Privilege violation"
-VEC_TRACE:
+_exc_Trace::
 		vecstub	"Trace"
-VEC_LINE1010:
+_exc_Line1010Emulator::
 		vecstub	"Line 1010 emulator"
-VEC_LINE1111:
+_exc_Line1111Emulator::
 		vecstub	"Line 1111 emulator"
-VEC_RESERVED:
+_exc_HardwareBreakpoint::
 		vecstub	"Reserved"
-VEC_CCPUVIOL:
+_exc_CoprocessorProtocolViolation::
 		vecstub	"CCPUVIOL"
-VEC_FMTERROR:
+_exc_FormatError::
 		vecstub	"Format error"
-VEC_UNINIVEC:
+_exc_UninitializedInterrupt::
 		vecstub	"Unitialized interrupt"
-VEC_SPURIOUS:
+_exc_SpuriousInterrupt::
 		vecstub	"Spurious interrupt"
-VEC_TRAP0:
+_exc_Trap0::
 		trapstub "Trap #0"
-VEC_TRAP1:
+_exc_Trap1::
 		trapstub "Trap #1"
-VEC_TRAP2:
+_exc_Trap2::
 		trapstub "Trap #2"
-VEC_TRAP3:
+_exc_Trap3::
 		trapstub "Trap #3"
-VEC_TRAP4:
+_exc_Trap4::
 		trapstub "Trap #4"
-VEC_TRAP5:
+_exc_Trap5::
 		trapstub "Trap #5"
-VEC_TRAP6:
+_exc_Trap6::
 		trapstub "Trap #6"
-VEC_TRAP7:
+_exc_Trap7::
 		trapstub "Trap #7"
-VEC_TRAP8:
+_exc_Trap8::
 		trapstub "Trap #8"
-VEC_TRAP9:
+_exc_Trap9::
 		trapstub "Trap #9"
-VEC_TRAP10:
+_exc_Trap10::
 		trapstub "Trap #10"
-VEC_TRAP11:
+_exc_Trap11::
 		trapstub "Trap #11"
-VEC_TRAP12:
+_exc_Trap12::
 		trapstub "Trap #12"
-VEC_TRAP13:
+_exc_Trap13::
 		trapstub "Trap #13"
-VEC_TRAP14:
+_exc_Trap14::
 		trapstub "Trap #14"
-VEC_TRAP15:
+_exc_Trap15::
 		trapstub "Trap #15"
+
+__exc_DefaultExceptionHandler::
+		vecstub  "DEFAULT HANDLER"
 
 crash:
 		; Print exception name
@@ -640,3 +634,56 @@ str_regs:	dc.b	"\r\nVBR=%08X\r\n"
 str_usp:	dc.b	"USP=%08X\r\n",0
 		even
 str_crlf:	dc.b	"\r\n",0
+
+	section	.text
+
+
+start_first_task::
+	 	addq.l	#4,sp		; go past return address
+		move.l	(sp)+,d0	; get SP arg
+		bra	restore_regs
+
+context_switch::
+		; See inc/asm/entry.h isr_trapframe_t
+		movem.l	d0-d7/a0-a6,-(sp)
+
+		; At this point, SP points to isr_trapframe_t
+
+		; Handle interrupt source
+		jsr	handle_uart_int
+
+
+		; Pass (sp) to C
+		move.l	sp,-(sp)
+		jsr	schedule_from_isr ; returns next task SP in d0
+		addq.l	#4,sp
+
+restore_regs:
+		; d0 = next_sp
+		move.l	d0,sp
+
+		; Restore regs
+		movem.l	(sp)+,d0-d7/a0-a6
+
+		rte
+
+
+process4_func::
+		move.l	#$D0D0D0D0,d0
+		move.l	#$D1D1D1D1,d1
+		move.l	#$D2D2D2D2,d2
+		move.l	#$D3D3D3D3,d3
+		move.l	#$D4D4D4D4,d4
+		move.l	#$D5D5D5D5,d5
+		move.l	#$D6D6D6D6,d6
+		move.l	#$D7D7D7D7,d7
+
+		move.l	#$A0A0A0A0,a0
+		move.l	#$A1A1A1A1,a1
+		move.l	#$A2A2A2A2,a2
+		move.l	#$A3A3A3A3,a3
+		move.l	#$A4A4A4A4,a4
+		move.l	#$A5A5A5A5,a5
+		move.l	#$A6A6A6A6,a6
+
+.die_loop	bra	.die_loop
