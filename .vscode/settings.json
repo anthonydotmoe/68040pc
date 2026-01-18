@@ -1,0 +1,11 @@
+{
+    "m68k.processors": [
+        "mc68040"
+    ],
+    "m68k.includePaths": [
+        "firmware/inc"
+    ],
+    "[m68k]": {
+        "editor.rulers": []
+    }
+}
