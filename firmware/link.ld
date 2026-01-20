@@ -68,7 +68,7 @@ SECTIONS
     __data_load = LOADADDR(.data);
 
     /* Zero-init data in RAM */
-    .bss :
+    .bss (NOLOAD):
     {
         __bss_start = .;
         KEEP(*(.bss.vectors))
