@@ -11,6 +11,7 @@ __ram_base = 0x40000000;
 __ram_size = 1M;
 
 __stack_size = 4K;
+__heap_size  = 256K;
 
 __rom_end = __rom_base + __rom_size;
 __ram_end = __ram_base + __ram_size;
@@ -43,8 +44,19 @@ SECTIONS
         __text_end = .;
     } > rom
 
+    /* Embedded kernel image */
+    .kernel_romimage ALIGN(8) :
+    {
+        __kernel_romimage_start = .;
+
+        KEEP(*(.kernel_romimage.header))
+        KEEP(*(.kernel_romimage.payload))
+
+        __kernel_romimage_end = .;
+    } > rom
+
     /* Read-only data in ROM */
-    .rodata :
+    .rodata ALIGN(8) :
     {
         __rodata_start = .;
         *(.rodata .rodata.*)
@@ -78,6 +90,17 @@ SECTIONS
         __bss_end = .;
         ASSERT((__bss_start  % 4) == 0, "bss start not 4-byte aligned");
         ASSERT((__bss_end    % 4) == 0, "bss end not 4-byte aligned");
+    } > ram
+
+    /* Heap just below the stack (top of RAM)
+       Uses NOLOAD to avoid ROM image size bloat */
+    .heap (NOLOAD) :
+    {
+        __heap_start = ORIGIN(ram) + LENGTH(ram) - __stack_size - __heap_size;
+        . = __heap_start;
+        *(.heap .heap.*)
+        __heap_end = __heap_start + __heap_size;
+        . = __heap_end;
     } > ram
 
     /* Reserve stack space at the top of RAM

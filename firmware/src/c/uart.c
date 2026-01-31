@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "uart68681.h"
 #include "ring_buffer.h"
-#include "memcpy.h"
+#include "stringlib.h"
 
 extern int printf_(const char *fmt, ...);
 
@@ -40,6 +40,7 @@ void init_uart(void) {
 	uart->crb  = 0x05;  // enable XMIT and RCV
 }
 
+/*
 static void uart_flush_rx(void) {
 	// drain any pending characters
 	for (;;) {
@@ -50,10 +51,10 @@ static void uart_flush_rx(void) {
 		(void)uart->rba;
 	}
 }
+*/
 
 void init_uartbuf(void) {
 	uart->imr = 0;
-	uart_flush_rx();
 	return;
 
 	tx_write_indx = 0;

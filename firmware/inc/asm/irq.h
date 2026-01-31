@@ -21,3 +21,8 @@ static inline void restore_flags(unsigned long flags)
 {
     asm volatile ("movew %0,%%sr" : : "d" (flags) : "memory");
 }
+
+static inline void die(void)
+{
+    asm volatile ("stop #0x2700" : : : "cc", "memory");
+}

@@ -1,5 +1,5 @@
 #include "ring_buffer.h"
-#include "memcpy.h"
+#include "stringlib.h"
 
 static struct ring_buffer _rb[RING_BUFFER_MAX];
 

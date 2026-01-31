@@ -20,7 +20,10 @@ ASFLAGS_ELF	= -Felf
 
 LDFLAGS     = -T link.ld -Map=output.map --print-memory-usage --no-warn-rwx-segments
 
-CFLAGS		= -m68040 -g -msoft-float -ffreestanding -fno-builtin -Os -Iinc -Wall
+KERNEL_ELF	= $(abspath ./../../os/out/kernel/kernel.elf)
+
+CWARNERR	= -Wall -Wextra -Wpedantic -Werror
+CFLAGS		= -m68040 -DKERNEL_FILEPATH=\"$(KERNEL_ELF)\" -g -std=gnu23 -msoft-float -ffreestanding -fno-builtin -Os -Iinc $(CWARNERR)
 
 #-------------------------------------------------------------------------------
 
