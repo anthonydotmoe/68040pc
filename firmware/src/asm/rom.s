@@ -9,27 +9,12 @@
 		
 	section .bss.vectors
 
+	align	3
 RAMVECTORS::
 		dcb.l	256
 
 	xref	__vectors_start
 VECTORS	equ	__vectors_start
-
-; ------------------------------------------------------------------------------
-; MMU tables
-
-	section	.bss
-	align	4096
-MMU_ROOT_TABLE:
-	ds.l	ROOT_TABLE_SIZE
-
-	align	4096
-MMU_PTR_TABLE0:
-	ds.l	PTR_TABLE_SIZE
-
-	align	4096
-MMU_PAGE_TABLE0:
-	ds.l	PAGE_TABLE_SIZE
 
 ;-------------------------------------------------------------------------------
 ; Global Variables
@@ -61,23 +46,21 @@ RAM_COUNT:
 main::
 
 		; configure DTT0 for DUART as non-cachable
-		move.l	#$2000C040,d0	; A[31:24] == 0x20, Noncachable, Serialized
-		movec	d0,dtt0
-
-;DELAY10000:
-;		move.w	#-1,d2	; Wait for a bit (for some reason)
-;.1:		dbra	d2,.1
-;
-
+		;move.l	#$00F0C040,d0	; A[31:24] == 0x20, Noncachable, Serialized
+		;movec	d0,dtt0
 
 		; Try enabling instruction cache
 		;cinva	bc
 		;move.l	#$00008000,d0
 		;movec	d0,cacr
 
+;DELAY10000:
+;		move.w	#-1,d2	; Wait for a bit (for some reason)
+;.1:		dbra	d2,.1
+
 ;INIT_MMU:
-;		move.l	#$C0000000,d0	; Disable MMU with 4k page tables
-;		movec	d0,tc
+		;move.l	#$C0000000,d0	; Disable MMU with 4k page tables
+		;movec	d0,tc
 
 INIT_DUART:
 		
@@ -284,7 +267,7 @@ FPU_IDENT:
 		even
 .s_ram_count:	dc.b	"RAM: 0x%x bytes\r\n",0
 		even
-.s_stack:	dc.b	"\r\n\r\nStack pointer: 0x%x\r\n",0
+.s_stack:	dc.b	"\r\nStack pointer: 0x%x\r\n",0
 		even
 .s_done:	dc.b	"\r\nEntering C.\r\n",0
 		even
@@ -305,7 +288,7 @@ FPU_IDENT:
 .no_fpu:	pea	.s_cpu_lc
 .print:		pea	.s_cpu
 		jsr	printf_
-		add.l	#8,sp
+		add.l	#12,sp
 
 		; Enable cache
 		;cinva	bc
@@ -323,7 +306,8 @@ FPU_IDENT:
 		add.l	#8,sp
 
 		; Print stack pointer.
-		move.l	a7,-(sp)
+		move.l	sp,d0
+		move.l	d0,-(sp)
 		pea	.s_stack
 		jsr	printf_
 		add.l	#8,sp
@@ -340,7 +324,8 @@ FPU_IDENT:
 		jsr	printf_
 		add.l	#4,sp
 
-DIE:		bra	DIE
+DIE:		stop	#$2700
+		bra	DIE
 
 ; ------------------------------------------------------------------------------
 ; INIT_MMU
@@ -634,56 +619,3 @@ str_regs:	dc.b	"\r\nVBR=%08X\r\n"
 str_usp:	dc.b	"USP=%08X\r\n",0
 		even
 str_crlf:	dc.b	"\r\n",0
-
-	section	.text
-
-
-start_first_task::
-	 	addq.l	#4,sp		; go past return address
-		move.l	(sp)+,d0	; get SP arg
-		bra	restore_regs
-
-context_switch::
-		; See inc/asm/entry.h isr_trapframe_t
-		movem.l	d0-d7/a0-a6,-(sp)
-
-		; At this point, SP points to isr_trapframe_t
-
-		; Handle interrupt source
-		jsr	handle_uart_int
-
-
-		; Pass (sp) to C
-		move.l	sp,-(sp)
-		jsr	schedule_from_isr ; returns next task SP in d0
-		addq.l	#4,sp
-
-restore_regs:
-		; d0 = next_sp
-		move.l	d0,sp
-
-		; Restore regs
-		movem.l	(sp)+,d0-d7/a0-a6
-
-		rte
-
-
-process4_func::
-		move.l	#$D0D0D0D0,d0
-		move.l	#$D1D1D1D1,d1
-		move.l	#$D2D2D2D2,d2
-		move.l	#$D3D3D3D3,d3
-		move.l	#$D4D4D4D4,d4
-		move.l	#$D5D5D5D5,d5
-		move.l	#$D6D6D6D6,d6
-		move.l	#$D7D7D7D7,d7
-
-		move.l	#$A0A0A0A0,a0
-		move.l	#$A1A1A1A1,a1
-		move.l	#$A2A2A2A2,a2
-		move.l	#$A3A3A3A3,a3
-		move.l	#$A4A4A4A4,a4
-		move.l	#$A5A5A5A5,a5
-		move.l	#$A6A6A6A6,a6
-
-.die_loop	bra	.die_loop
