@@ -24,7 +24,7 @@ extern int printf_(const char* format, ...);
 #define CL_SIZE         (256)
 #define TEMP_STACKSIZE  (256)
 
-struct my_bootinfo {
+struct my_bootparams {
     uint32_t machtype;
     uint32_t cputype;
     uint32_t fputype;
@@ -41,7 +41,7 @@ union _bp_union {
     uint8_t fake[MAX_BP_SIZE];
 };
 
-static struct my_bootinfo bi;
+static struct my_bootparams bi;
 static union _bp_union bp_union;
 static unsigned long bp_size;
 
@@ -52,7 +52,7 @@ static int add_bp_record(uint16_t tag, uint16_t size, const void* data)
 
     size2 = (sizeof(struct bp_record) + size + 3) & -4;
     if (bp_size + size2 + sizeof(bp_union.record.tag) > MAX_BP_SIZE) {
-        printf("Failed to add bootinfo record, MAX_BP_SIZE too small!\r\n");
+        printf("Failed to add bootparams record, MAX_BP_SIZE too small!\r\n");
         return 0;
     }
     record = (struct bp_record*)((uint32_t)&bp_union.record + bp_size);
@@ -68,7 +68,7 @@ static int add_bp_string(uint16_t tag, const char* s)
     return add_bp_record(tag, strlen(s) + 1, (void*)s);
 }
 
-static int init_bootinfo()
+static int init_bootparams()
 {
     bi.machtype     = MACH_A68040PC;
     bi.cputype      = CPU_68040;
@@ -90,12 +90,13 @@ static int init_bootinfo()
         bi.num_memory++;
     }
 
+    //TODO: Load the user image from ROM into RAM, parse size, entry address, and report here
     bi.user_image.addr  = 0x40030000;
     bi.user_image.size  = 0x00001000;
     bi.user_image.vaddr = 0x00010000;
     bi.user_image.entry = 0x00010000;
 
-    // Assemble bootinfo structure
+    // Assemble bootparams structure
     struct bp_record* record;
 
     // Init
@@ -205,7 +206,7 @@ void c_prog_entry(void)
     void* kernel_final_dest;
     void* kernel_dest;
 
-    if (!init_bootinfo()) {
+    if (!init_bootparams()) {
         goto Fail;
     }
 
@@ -226,12 +227,7 @@ void c_prog_entry(void)
             (uint32_t)start_mem,
             (uint32_t)mem_size);
 
-    // TODO: Consider whether or not to reserve a page
-    // For now: reserve 4K at bottom for safety
-    //start_mem += PAGE_SIZE;
-    //mem_size  -= PAGE_SIZE;
-
-    // Allocate memory for the initial copy of the kernel image + bootinfo
+    // Allocate memory for the initial copy of the kernel image + bootparams
     uint32_t needed = info.image_size + bp_size;
     printf("Allocating 0x%.8"PRIx32" for the kernel\r\n", needed);
     kernel_dest = alloc(needed);
@@ -253,13 +249,13 @@ void c_prog_entry(void)
 
     dprintf("Kernel loaded\r\n");
 
-    // Append bootinfo after the loaded image region
+    // Append bootparams after the loaded image region
     void* bp_dst = (uint8_t*)kernel_dest + info.image_size;
     memcpy(bp_dst, &bp_union, bp_size);
 
-    dprintf("Bootinfo loaded at 0x%.8"PRIx32"\r\n", (uint32_t)bp_dst);
+    dprintf("bootparams loaded at 0x%.8"PRIx32"\r\n", (uint32_t)bp_dst);
 
-    dprintf("bootinfo will be located at 0x%.8"PRIx32"\r\n",
+    dprintf("bootparams will be located at 0x%.8"PRIx32"\r\n",
             (uint32_t)kernel_final_dest + (uint32_t)info.image_size);
 
     // Allocate temporary stack
