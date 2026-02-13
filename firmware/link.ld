@@ -55,6 +55,17 @@ SECTIONS
         __kernel_romimage_end = .;
     } > rom
 
+    /* Embedded userimage image */
+    .userimage_romimage ALIGN(8) :
+    {
+        __userimage_romimage_start = .;
+
+        KEEP(*(.userimage_romimage.header))
+        KEEP(*(.userimage_romimage.payload))
+
+        __userimage_romimage_end = .;
+    } > rom
+
     /* Read-only data in ROM */
     .rodata ALIGN(8) :
     {
