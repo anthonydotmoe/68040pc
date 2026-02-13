@@ -5,8 +5,8 @@
 
 #include "alloc.h"
 #include "stringlib.h"
-#include "bootinfo.h"
-#include "bootinfo-a68040pc.h"
+#include "bootparams.h"
+#include "bootparams_a68040pc.h"
 #include "loader.h"
 #include "uart68681.h"  // for base address
 
@@ -19,7 +19,7 @@ extern int printf_(const char* format, ...);
 // Debug prints
 #define dprintf printf_
 
-#define MAX_BI_SIZE     (1024)
+#define MAX_BP_SIZE     (1024)
 #define NUM_MEMINFO     (1)
 #define CL_SIZE         (256)
 #define TEMP_STACKSIZE  (256)
@@ -32,39 +32,40 @@ struct my_bootinfo {
     uint32_t duartbase;
     int num_memory;
     struct mem_info memory[NUM_MEMINFO];
+    struct user_image user_image;
     char command_line[CL_SIZE];
 };
 
-union _bi_union {
-    struct bi_record record;
-    uint8_t fake[MAX_BI_SIZE];
+union _bp_union {
+    struct bp_record record;
+    uint8_t fake[MAX_BP_SIZE];
 };
 
 static struct my_bootinfo bi;
-static union _bi_union bi_union;
-static unsigned long bi_size;
+static union _bp_union bp_union;
+static unsigned long bp_size;
 
-static int add_bi_record(uint16_t tag, uint16_t size, const void* data)
+static int add_bp_record(uint16_t tag, uint16_t size, const void* data)
 {
-    struct bi_record* record;
+    struct bp_record* record;
     uint16_t size2;
 
-    size2 = (sizeof(struct bi_record) + size + 3) & -4;
-    if (bi_size + size2 + sizeof(bi_union.record.tag) > MAX_BI_SIZE) {
-        printf("Failed to add bootinfo record, MAX_BI_SIZE too small!\r\n");
+    size2 = (sizeof(struct bp_record) + size + 3) & -4;
+    if (bp_size + size2 + sizeof(bp_union.record.tag) > MAX_BP_SIZE) {
+        printf("Failed to add bootinfo record, MAX_BP_SIZE too small!\r\n");
         return 0;
     }
-    record = (struct bi_record*)((uint32_t)&bi_union.record + bi_size);
+    record = (struct bp_record*)((uint32_t)&bp_union.record + bp_size);
     record->tag = tag;
     record->size = size2;
     memcpy(record->data, data, size);
-    bi_size += size2;
+    bp_size += size2;
     return 1;
 }
 
-static int add_bi_string(uint16_t tag, const char* s)
+static int add_bp_string(uint16_t tag, const char* s)
 {
-    return add_bi_record(tag, strlen(s) + 1, (void*)s);
+    return add_bp_record(tag, strlen(s) + 1, (void*)s);
 }
 
 static int init_bootinfo()
@@ -89,36 +90,45 @@ static int init_bootinfo()
         bi.num_memory++;
     }
 
+    bi.user_image.addr  = 0x40030000;
+    bi.user_image.size  = 0x00001000;
+    bi.user_image.vaddr = 0x00010000;
+    bi.user_image.entry = 0x00010000;
+
     // Assemble bootinfo structure
-    struct bi_record* record;
+    struct bp_record* record;
 
     // Init
-    bi_size = 0;
+    bp_size = 0;
 
-    if (!add_bi_record(BI_MACHTYPE, sizeof(bi.machtype), &bi.machtype))
+    if (!add_bp_record(BP_MACHTYPE, sizeof(bi.machtype), &bi.machtype))
         return 0;
-    if (!add_bi_record(BI_CPUTYPE,  sizeof(bi.cputype),  &bi.cputype))
+    if (!add_bp_record(BP_CPUTYPE,  sizeof(bi.cputype),  &bi.cputype))
         return 0;
-    if (!add_bi_record(BI_FPUTYPE,  sizeof(bi.fputype),  &bi.fputype))
+    if (!add_bp_record(BP_FPUTYPE,  sizeof(bi.fputype),  &bi.fputype))
         return 0;
-    if (!add_bi_record(BI_MMUTYPE,  sizeof(bi.mmutype),  &bi.mmutype))
+    if (!add_bp_record(BP_MMUTYPE,  sizeof(bi.mmutype),  &bi.mmutype))
         return 0;
         // fputype used because it has 0 in it
-    if (!add_bi_record(BI_A68040PC_VERSION,  sizeof(bi.fputype),  &bi.fputype))
+    if (!add_bp_record(BP_A68040PC_VERSION,  sizeof(bi.fputype),  &bi.fputype))
         return 0;
-    if (!add_bi_record(BI_A68040PC_DUARTBASE,  sizeof(bi.duartbase),  &bi.duartbase))
+    if (!add_bp_record(BP_A68040PC_DUARTBASE,  sizeof(bi.duartbase),  &bi.duartbase))
         return 0;
     for (int i = 0; i < bi.num_memory; i++) {
-        if (!add_bi_record(BI_MEMCHUNK, sizeof(bi.memory[i]),  &bi.memory[i]))
+        if (!add_bp_record(BP_MEMCHUNK, sizeof(bi.memory[i]),  &bi.memory[i]))
             return 0;
     }
-    if (!add_bi_string(BI_COMMAND_LINE, bi.command_line))
+    if (!add_bp_string(BP_COMMAND_LINE, bi.command_line))
+        return 0;
+    
+    if (!add_bp_record(BP_USERIMAGE, sizeof(bi.user_image), &bi.user_image))
         return 0;
     
     // Trailer
-    record = (struct bi_record*)((uint32_t)&bi_union.record + bi_size);
-    record->tag = BI_LAST;
-    bi_size += sizeof(bi_union.record.tag);
+    record = (struct bp_record*)((uint32_t)&bp_union.record + bp_size);
+    record->tag = BP_LAST;
+    record->size = 4;
+    bp_size += 4;
 
     return 1;
 }
@@ -222,7 +232,8 @@ void c_prog_entry(void)
     //mem_size  -= PAGE_SIZE;
 
     // Allocate memory for the initial copy of the kernel image + bootinfo
-    uint32_t needed = info.image_size + bi_size;
+    uint32_t needed = info.image_size + bp_size;
+    printf("Allocating 0x%.8"PRIx32" for the kernel\r\n", needed);
     kernel_dest = alloc(needed);
     if (!kernel_dest) {
         printf("Unable to allocate memory for the kernel: need 0x%.8"PRIx32"\r\n",
@@ -243,10 +254,10 @@ void c_prog_entry(void)
     dprintf("Kernel loaded\r\n");
 
     // Append bootinfo after the loaded image region
-    void* bi_dst = (uint8_t*)kernel_dest + info.image_size;
-    memcpy(bi_dst, &bi_union, bi_size);
+    void* bp_dst = (uint8_t*)kernel_dest + info.image_size;
+    memcpy(bp_dst, &bp_union, bp_size);
 
-    dprintf("Bootinfo loaded at 0x%.8"PRIx32"\r\n", (uint32_t)bi_dst);
+    dprintf("Bootinfo loaded at 0x%.8"PRIx32"\r\n", (uint32_t)bp_dst);
 
     dprintf("bootinfo will be located at 0x%.8"PRIx32"\r\n",
             (uint32_t)kernel_final_dest + (uint32_t)info.image_size);

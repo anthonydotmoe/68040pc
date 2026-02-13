@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-struct bi_record {
+struct bp_record {
     uint16_t tag;       // tag ID
     uint16_t size;      // size of record (in bytes)
     uint32_t data[];    // data
@@ -13,41 +13,37 @@ struct mem_info {
     uint32_t size;      // length of memory chunk (in bytes)
 };
 
-#define BI_LAST         0x0000  // list record (sentinel)
-#define BI_MACHTYPE     0x0001  // machine type
-#define BI_CPUTYPE      0x0002  // cpu type
-#define BI_FPUTYPE      0x0003  // fpu type
-#define BI_MMUTYPE      0x0004  // mmu type
-#define BI_MEMCHUNK     0x0005  //memory chunk address and size
+struct user_image {
+    uint32_t addr;      // physical address of user image
+    uint32_t size;      // length of user image
+    uint32_t vaddr;     // user virtual base address
+    uint32_t entry;     // executable virtual entry address
+};
+
+#define BP_LAST         0x0000  // list record (sentinel)
+#define BP_MACHTYPE     0x0001  // machine type
+#define BP_CPUTYPE      0x0002  // cpu type
+#define BP_FPUTYPE      0x0003  // fpu type
+#define BP_MMUTYPE      0x0004  // mmu type
+#define BP_MEMCHUNK     0x0005  //memory chunk address and size
                                 // (struct mem_info)
-#define BI_RAMDISK      0x0006  // ramdisk address and size
+#define BP_RAMDISK      0x0006  // ramdisk address and size
                                 // (struct mem_info)
-#define BI_COMMAND_LINE 0x0007  // kernel command line parameters
+#define BP_COMMAND_LINE 0x0007  // kernel command line parameters
                                 // (string)
 
 // A random seed used to initialize the RNG:
 // - length    [2 bytes, 16-bit big endian]
 // - seed data [`length` bytes, padded to preserve 4-byte struct alignment]
-#define BI_RNG_SEED     0x0008
+#define BP_RNG_SEED     0x0008
 
-/* Linux/m68k Architectures (BI_MACHTYPE) */
-#define MACH_AMIGA      1
-#define MACH_ATARI      2
-#define MACH_MAC        3
-#define MACH_APOLLO     4
-#define MACH_SUN3       5
-#define MACH_MVME147    6
-#define MACH_MVME16x    7
-#define MACH_BVME6000   8
-#define MACH_HP300      9
-#define MACH_Q40        10
-#define MACH_SUN3X      11
-#define MACH_M54XX      12
-#define MACH_M5441X     13
-#define MACH_VIRT       14
-#define MACH_A68040PC   15
+#define BP_USERIMAGE    0x0009  // krnL4 user image
+                                // (struct user_image)
 
-/* CPU, FPU, MMU types (BI_CPUTYPE, BI_FPUTYPE, BI_MMUTYPE) */
+/* Linux/m68k Architectures (BP_MACHTYPE) */
+#define MACH_A68040PC   1
+
+/* CPU, FPU, MMU types (BP_CPUTYPE, BP_FPUTYPE, BP_MMUTYPE) */
 
 #define CPUB_68020      0
 #define CPUB_68030      1
@@ -91,10 +87,10 @@ struct mem_info {
 #define MMU_APOLLO      (1 << MMUB_APOLLO)
 #define MMU_COLDFIRE    (1 << MMUB_COLDFIRE)
 
-#define BOOTINFOV_MAGIC             0x4249561A  /* 'BIV^Z' */
-#define MK_BI_VERSION(major,minor)  (((major) << 16) + (minor))
-#define BI_VERSION_MAJOR(v)         (((v) >> 16) & 0xffff)
-#define BI_VERSION_MINOR(v)         ((v) >> & 0xffff)
+#define BOOTPARAMSV_MAGIC           0x4250561A  /* 'BPV^Z' */
+#define MK_BP_VERSION(major,minor)  (((major) << 16) + (minor))
+#define BP_VERSION_MAJOR(v)         (((v) >> 16) & 0xffff)
+#define BP_VERSION_MINOR(v)         ((v) >> & 0xffff)
 
 struct __attribute__((packed)) bootversion {
     uint16_t branch;
