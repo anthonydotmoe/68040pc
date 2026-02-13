@@ -21,9 +21,10 @@ ASFLAGS_ELF	= -Felf
 LDFLAGS     = -T link.ld -Map=output.map --print-memory-usage --no-warn-rwx-segments
 
 KERNEL_ELF	= $(abspath ./../../os/out/kernel/kernel.elf)
+USERIMAGE_ELF = $(abspath ./../../os/out/servers/root.elf)
 
 CWARNERR	= -Wall -Wextra -Wpedantic -Werror
-CFLAGS		= -m68040 -DKERNEL_FILEPATH=\"$(KERNEL_ELF)\" -g -std=gnu23 -msoft-float -ffreestanding -fno-builtin -Os -Iinc $(CWARNERR)
+CFLAGS		= -m68040 -DKERNEL_FILEPATH=\"$(KERNEL_ELF)\" -DUSERIMAGE_FILEPATH=\"$(USERIMAGE_ELF)\" -g -std=gnu23 -msoft-float -ffreestanding -fno-builtin -Os -Iinc $(CWARNERR)
 
 #-------------------------------------------------------------------------------
 

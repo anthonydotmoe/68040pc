@@ -2,12 +2,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <elf.h>
 
 #include "alloc.h"
 #include "stringlib.h"
 #include "bootparams.h"
 #include "bootparams_a68040pc.h"
 #include "loader.h"
+#include "romimage.h"
 #include "uart68681.h"  // for base address
 
 #include "asm/irq.h"
@@ -44,6 +46,125 @@ union _bp_union {
 static struct my_bootparams bi;
 static union _bp_union bp_union;
 static unsigned long bp_size;
+
+extern const unsigned char __userimage_romimage_start[]; // symbol from linker script
+
+static int load_user_image_segments(void)
+{
+    const romimage_t *img = (const romimage_t *)(uintptr_t)__userimage_romimage_start;
+    const uint32_t ROMIMAGE_MAGIC = 0x55AA0E1Fu;
+
+    if (img->magic != ROMIMAGE_MAGIC) {
+        printf("Invalid user image header magic: 0x%08" PRIx32 "\r\n", img->magic);
+        return 0;
+    }
+
+    const uint8_t *elf_src = (const uint8_t *)img + sizeof(*img);
+    const uint32_t elf_size = img->size;
+
+    if (elf_size < sizeof(Elf32_Ehdr)) {
+        printf("User image too small to be ELF\r\n");
+        return 0;
+    }
+
+    const Elf32_Ehdr *eh = (const Elf32_Ehdr *)(const void *)elf_src;
+    if (memcmp(eh->e_ident, ELFMAG, SELFMAG) != 0 ||
+        eh->e_ident[EI_CLASS] != ELFCLASS32 ||
+        eh->e_ident[EI_DATA]  != ELFDATA2MSB ||
+        eh->e_type != ET_EXEC ||
+        eh->e_machine != EM_68K ||
+        eh->e_version != EV_CURRENT) {
+        printf("User image ELF header invalid\r\n");
+        return 0;
+    }
+
+    if (eh->e_phentsize != sizeof(Elf32_Phdr) || eh->e_phnum == 0) {
+        printf("User image has invalid phdr table\r\n");
+        return 0;
+    }
+    if (eh->e_phoff > elf_size ||
+        (uint32_t)eh->e_phnum > (elf_size - eh->e_phoff) / sizeof(Elf32_Phdr)) {
+        printf("User image phdr table out of range\r\n");
+        return 0;
+    }
+
+    const Elf32_Phdr *ph = (const Elf32_Phdr *)(const void *)(elf_src + eh->e_phoff);
+
+    // Find virtual span of all PT_LOAD segments
+    uint32_t min_vaddr = 0xffffffffu;
+    uint32_t max_vaddr = 0;
+
+    for (uint16_t i = 0; i < eh->e_phnum; i++) {
+        if (ph[i].p_type != PT_LOAD || ph[i].p_memsz == 0) {
+            continue;
+        }
+        if (ph[i].p_filesz > ph[i].p_memsz) {
+            printf("PT_LOAD has filesz > memsz\r\n");
+            return 0;
+        }
+        if (ph[i].p_offset > elf_size || ph[i].p_filesz > (elf_size - ph[i].p_offset)) {
+            printf("PT_LOAD data out of range\r\n");
+            return 0;
+        }
+        if (ph[i].p_vaddr < min_vaddr) {
+            min_vaddr = ph[i].p_vaddr;
+        }
+        uint32_t seg_end = ph[i].p_vaddr + ph[i].p_memsz;
+        if (seg_end > max_vaddr) {
+            max_vaddr = seg_end;
+        }
+    }
+
+    if (min_vaddr == 0xffffffffu) {
+        printf("User image has no loadable segments\r\n");
+        return 0;
+    }
+
+    // Optional: align span to a page (or at least 4/16). Use your page size.
+    const uint32_t PAGE = 0x1000;
+    uint32_t span = max_vaddr - min_vaddr;
+    uint32_t span_rounded = (span + PAGE - 1) & ~(PAGE - 1);
+
+    uint8_t *blob = (uint8_t *)alloc(span_rounded);
+    if (!blob) {
+        printf("Unable to allocate user image span: 0x%08" PRIx32 "\r\n", span_rounded);
+        return 0;
+    }
+    // Zero whole blob so gaps between segments become zero-filled.
+    memset(blob, 0, span_rounded);
+
+    // Load each PT_LOAD into the blob at (vaddr - min_vaddr)
+    for (uint16_t i = 0; i < eh->e_phnum; i++) {
+        if (ph[i].p_type != PT_LOAD || ph[i].p_memsz == 0) {
+            continue;
+        }
+
+        uint32_t off = ph[i].p_vaddr - min_vaddr;
+        if (off > span_rounded || ph[i].p_memsz > (span_rounded - off)) {
+            printf("PT_LOAD does not fit in allocated span\r\n");
+            return 0;
+        }
+
+        uint8_t *dst = blob + off;
+        const uint8_t *src = elf_src + ph[i].p_offset;
+
+        memcpy(dst, src, ph[i].p_filesz);
+        // bss tail already zero because we memset(blob,0,span_rounded)
+        // but it doesn't hurt to be explicit:
+        // memset(dst + ph[i].p_filesz, 0, ph[i].p_memsz - ph[i].p_filesz);
+    }
+
+    bi.user_image.addr  = (uint32_t)(uintptr_t)blob;       // physical address from alloc()
+    bi.user_image.size  = span_rounded;
+    bi.user_image.vaddr = min_vaddr;
+    bi.user_image.entry = eh->e_entry;
+
+    dprintf("User image loaded:\r\n  paddr: 0x%08" PRIx32 "\r\n  size: 0x%08" PRIx32
+            "\r\n  vbase: 0x%08" PRIx32 "\r\n  entry: 0x%08" PRIx32 "\r\n",
+            bi.user_image.addr, bi.user_image.size, bi.user_image.vaddr, bi.user_image.entry);
+
+    return 1;
+}
 
 static int add_bp_record(uint16_t tag, uint16_t size, const void* data)
 {
@@ -90,11 +211,9 @@ static int init_bootparams()
         bi.num_memory++;
     }
 
-    //TODO: Load the user image from ROM into RAM, parse size, entry address, and report here
-    bi.user_image.addr  = 0x40030000;
-    bi.user_image.size  = 0x00001000;
-    bi.user_image.vaddr = 0x00010000;
-    bi.user_image.entry = 0x00010000;
+    if (!load_user_image_segments()) {
+        return 0;
+    }
 
     // Assemble bootparams structure
     struct bp_record* record;
