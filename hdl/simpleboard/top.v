@@ -104,7 +104,42 @@ debounce btn_db(
 
 // DFF for TS
 reg i_ts;
-always @(posedge clk) i_ts <= !ts;
+always @(posedge clk or negedge rst) begin
+	if (!rst) begin
+		i_ts <= 1'b0;
+	end else begin
+		i_ts <= !ts;
+	end
+end
+
+// CPU bus cycle decode --------------------------------------------------------
+// The 68040 control inputs are active-low on this board.  The address is
+// latched on the falling edge of /TS below, so decoded selects are only valid
+// after /TS has returned high and /TIP still says the transfer is active.
+wire cpu_cycle_start;
+wire cpu_cycle_active;
+
+assign cpu_cycle_start = i_ts && (tip == 1'b0);
+assign cpu_cycle_active = (tip == 1'b0) && (ts == 1'b1);
+
+wire rom_sel, uart_sel, ram_sel, fpga_sel, vector_sel;
+assign rom_sel = (addr[31:28] == 4'h0);
+assign uart_sel = (addr[31:28] == 4'h2);
+assign ram_sel = (addr[31:28] == 4'h4);
+assign fpga_sel = (addr[31:28] == 4'h6);
+assign vector_sel = (addr[31:0] == 32'hFFFFFFFF);
+
+wire rom_access, uart_access, ram_access, fpga_access, vector_access;
+assign rom_access = cpu_cycle_active && rom_sel;
+assign uart_access = cpu_cycle_active && uart_sel;
+assign ram_access = cpu_cycle_active && ram_sel;
+assign fpga_access = cpu_cycle_active && fpga_sel;
+assign vector_access = cpu_cycle_active && vector_sel;
+
+wire resizer_access, illegal_access;
+assign resizer_access = uart_access || ram_access;
+assign illegal_access = cpu_cycle_active && !rom_sel && !uart_sel &&
+			!ram_sel && !fpga_sel && !vector_sel;
 
 //reg [2:0] int_lvl;
 
@@ -121,7 +156,7 @@ wire [21:0] flash_addr;
 wire [31:0] flash_data;
 assign flash_addr = { (addr[23:16] + FLASH_PAGE ), addr[15:2] };
 wire flash_stb, flash_ack;
-assign flash_stb = rom_sel && i_ts;
+assign flash_stb = rom_sel && cpu_cycle_start;
 
 // Instantiate ROM reader
 rom rom_reader(
@@ -144,7 +179,7 @@ rom rom_reader(
 wire fpga_stb, fpga_ack;
 wire [2:0] fpga_ipl;
 wire [7:0] fpga_data;
-assign fpga_stb = fpga_sel && i_ts;
+assign fpga_stb = fpga_sel && cpu_cycle_start;
 assign fpga_data = 8'h00;
 
 // Instantiate FPGA-CPU interface
@@ -170,20 +205,6 @@ localparam	START = 0,
 		FINISH_TA = 4,
 		ILLEGAL_ACCESS = 5,
 		ILLEGAL_ACCESS_END = 6;
-
-
-wire rom_sel, uart_sel, ram_sel, fpga_sel;
-assign rom_sel = (addr[31:28] == 4'h0);
-assign uart_sel = (addr[31:28] == 4'h2);
-assign ram_sel = (addr[31:28] == 4'h4);
-assign fpga_sel = (addr[31:28] == 4'h6);
-
-wire rom_access = ( (tip == 0) && (rom_sel == 1) );
-wire uart_access = ( (tip == 0) && (uart_sel == 1) );
-wire ram_access = ( (tip == 0) && (ram_sel == 1) );	// 55nS
-wire fpga_access = ( (tip == 0) && (fpga_sel == 1) );
-wire vector_access = ( (tip == 0) && (addr == 32'hFFFFFFFF) );
-wire illegal_access = ( (tip == 0) && &{ !rom_access, !uart_access, !ram_access, !fpga_access, !vector_access } );
 
 // Do the following for 68150 accesses:
 //
@@ -213,7 +234,7 @@ always @(posedge clk or negedge rst) begin
 
 		if (!ram_busy) begin
 			// Start a new local access when 68150 asserts DS to RAM
-			if (!ds_now && ds_fall && ram_sel) begin
+			if (!ds_now && ds_fall && ram_access) begin
 				ram_busy     <= 1'b1;
 				ram_wait_cnt <= 3'b000;
 				ram_ack      <= 1'b0;
@@ -242,7 +263,7 @@ wire COM_CS, RAM_CS, RESIZ_CS;
 assign COM_CS = uart_access ? ~RESIZ_DS : 1'b0;
 assign RAM_CS = ram_access ? ~RESIZ_DS : 1'b0;
 
-assign RESIZ_CS = ts && (uart_access || ram_access);
+assign RESIZ_CS = resizer_access;
 
 always @(posedge clk or negedge rst) begin
 	if (~rst) begin
@@ -257,13 +278,13 @@ always @(posedge clk or negedge rst) begin
 				i_tea <= 0;
 				d_oe <= 1;
 
-				if( vector_access == 1'b1 && ts == 1 ) begin
+				if( vector_access == 1'b1 ) begin
 					state <= START_TA;
-				end else if( rom_access == 1'b1 && ts == 1 ) begin
+				end else if( rom_access == 1'b1 ) begin
 					state <= WAIT_ROM;
 				end else if ( illegal_access == 1'b1 ) begin
 					state <= ILLEGAL_ACCESS;
-			    end else if( fpga_access == 1'b1 && ts == 1 ) begin
+			    end else if( fpga_access == 1'b1 ) begin
 					d_oe <= 0;
 					state <= WAIT_FPGA;
 				end else begin
@@ -321,9 +342,9 @@ end
 
 // Blinky lights ---------------------------------------------------------------
 
-// Event: Read address 0x03 from DUART
-wire blink_event = ((uart_sel == 1'b1) &&
-                    (addr[3:0] == 4'b0011) &&
+// Event: read receive buffer A from the DUART.
+wire blink_event = ((uart_access == 1'b1) &&
+                    (addr[5:0] == 6'h0C) &&
                     (rw == 1'b1));
 
 // Timing
