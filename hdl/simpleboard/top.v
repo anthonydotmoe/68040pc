@@ -178,9 +178,9 @@ rom rom_reader(
 
 wire fpga_stb, fpga_ack;
 wire [2:0] fpga_ipl;
-wire [7:0] fpga_data;
+wire [31:0] fpga_odata;
+wire fpga_led;
 assign fpga_stb = fpga_sel && cpu_cycle_start;
-assign fpga_data = 8'h00;
 
 // Instantiate FPGA-CPU interface
 fpga_int fpga_interface(
@@ -189,11 +189,13 @@ fpga_int fpga_interface(
 
 	.fpga_stb(fpga_stb),
 	.fpga_ack(fpga_ack),
+	.fpga_rw(rw),
 	.fpga_addr(addr[3:0]),
 	.fpga_data(data_in[31:24]),
-	.fpga_odata(),
+	.fpga_odata(fpga_odata),
 
-	.out_ipl(fpga_ipl)
+	.out_ipl(fpga_ipl),
+	.led_state(fpga_led)
 );
 
 reg [2:0] state;
@@ -299,6 +301,7 @@ always @(posedge clk or negedge rst) begin
 			end
 			WAIT_FPGA: begin
 				if( fpga_ack == 1'b1 ) begin
+					data_out <= fpga_odata;
 					state <= START_TA;
 				end
 			end
@@ -340,83 +343,8 @@ always @(posedge clk or negedge rst) begin
 	end
 end
 
-// Blinky lights ---------------------------------------------------------------
-
-// Event: read receive buffer A from the DUART.
-wire blink_event = ((uart_access == 1'b1) &&
-                    (addr[5:0] == 6'h0C) &&
-                    (rw == 1'b1));
-
-// Timing
-localparam integer OFF_TICKS   = 23'd2_000_000;  // ~60 ms at 33 MHz
-localparam integer TOTAL_TICKS = 23'd4_000_000;  // total cycle time (~120 ms)
-
-// How many blink cycles we can queue up
-localparam integer BLINK_QUEUE_BITS = 4;         // up to 15 pending events
-
-// State
-reg        blink_active;    // 0 = idle, 1 = currently in a blink cycle
-reg [22:0] blink_count;
-reg        blink_event_d;   // for edge detection
-reg [BLINK_QUEUE_BITS-1:0] blink_queue;  // pending blink cycles
-
-// edge-detect blink_event so we only trigger on rising edges.
-wire blink_event_edge = blink_event & ~blink_event_d;
-
-always @(posedge clk or negedge rst) begin
-    if (!rst) begin
-        blink_active   <= 1'b0;
-        blink_count    <= 23'd0;
-        blink_event_d  <= 1'b0;
-        blink_queue    <= {BLINK_QUEUE_BITS{1'b0}};
-    end else begin
-        // Capture previous value for edge detection
-        blink_event_d <= blink_event;
-
-        // On every rising edge of blink_event, enqueue a blink cycle
-        // (saturating at the max representable value).
-        if (blink_event_edge) begin
-            if (blink_queue != {BLINK_QUEUE_BITS{1'b1}}) begin
-                blink_queue <= blink_queue + 1'b1;
-            end
-        end
-
-        if (!blink_active) begin
-            // Idle: if there are queued events, start a new cycle
-            if (blink_queue != {BLINK_QUEUE_BITS{1'b0}}) begin
-                blink_active <= 1'b1;
-                blink_count  <= 23'd0;
-                blink_queue  <= blink_queue - 1'b1;
-            end
-        end else begin
-            // In an off+on cycle
-            blink_count <= blink_count + 1'b1;
-
-            if (blink_count == (TOTAL_TICKS - 1)) begin
-                blink_active <= 1'b0;   // done; go back to idle
-            end
-        end
-    end
-end
-
-
-// Logical LED behavior (before polarity inversion):
-//
-// - When idle (blink_active = 0): LED is ON (steady).
-// - During the cycle (blink_active = 1):
-//     * First OFF_TICKS cycles: LED OFF
-//     * Remaining (TOTAL_TICKS - OFF_TICKS) cycles: LED ON
-//
-wire led_logical =
-    (!blink_active)                  ? 1'b1 :   // idle: ON
-    (blink_count < OFF_TICKS)        ? 1'b0 :   // first phase: OFF
-                                       1'b1;    // second phase: ON
-
-// Flip polarity for the physical LED:
-// If the board LED is active-low, then:
-//   led = 0 -> LED ON
-//   led = 1 -> LED OFF
-assign led = ~led_logical;
+// CPU-controlled LED ----------------------------------------------------------
+assign led = fpga_led;
 
 
 endmodule
