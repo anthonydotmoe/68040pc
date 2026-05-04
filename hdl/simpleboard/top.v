@@ -3,52 +3,52 @@
 
 (* top *)
 module top (
-	input	clk,		// 68040 BCLK
-	input	rst,
-	input	btn,
-	output	led,
+    input	clk,		// 68040 BCLK
+    input	rst,
+    input	btn,
+    output	led,
 
-	output	d_dir,		// D[31:0] 74ALVC16425 DIR
-	output	d_oe,		// D[31:0] 74ALVC16425 OE
+    output	d_dir,		// D[31:0] 74ALVC16425 DIR
+    output	d_oe,		// D[31:0] 74ALVC16425 OE
 
-	input	[31:0]	a,	// A[31:0] direct from CPU
-	inout	[31:0]	d,	// D[31:0] FPGA <-> 74ALVC16425 <-> CPU
+    input	[31:0]	a,	// A[31:0] direct from CPU
+    inout	[31:0]	d,	// D[31:0] FPGA <-> 74ALVC16425 <-> CPU
 
-	output	dbg0,
-	input	dbg1,
-	output	dbg2,
+    output	dbg0,
+    input	dbg1,
+    output	dbg2,
 
-	input	ts,			// Transfer Start
-	output	ta,			// Transfer Acknowledge
-	output	tea,		// Transfer Error Acknowledge
-	input	tip,		// Transfer In Progress
-	output	tci,		// Transfer Cache Inhibit
-	output	tbi,		// Transfer Burst Inhibit
-	input	[1:0]	tt,	// Transfer Type
-	input	[2:0]	tm,	// Transfer Modifier
-	input	[1:0]	siz,// Transfer Size
+    input	ts,			// Transfer Start
+    output	ta,			// Transfer Acknowledge
+    output	tea,		// Transfer Error Acknowledge
+    input	tip,		// Transfer In Progress
+    output	tci,		// Transfer Cache Inhibit
+    output	tbi,		// Transfer Burst Inhibit
+    input	[1:0]	tt,	// Transfer Type
+    input	[2:0]	tm,	// Transfer Modifier
+    input	[1:0]	siz,// Transfer Size
 
-	input	rw,
+    input	rw,
 
-	output	[1:0]	DSACK,	// FPGA -> 74LVC07 -> 68150 DSACK
-	input		RESIZ_DS,	// 68150 -> DS
-	output		RESIZ_CS,	// FPGA -> 74AHCT04 -> 68150 CS
+    output	[1:0]	DSACK,	// FPGA -> 74LVC07 -> 68150 DSACK
+    input		RESIZ_DS,	// 68150 -> DS
+    output		RESIZ_CS,	// FPGA -> 74AHCT04 -> 68150 CS
 
-	output		COM_CS,		// FPGA -> 74AHCT04 -> DUART CS
-	input		COM_IRQ,	// DUART -> FPGA
-	output		COM_IACK,	// FPGA -> 74AHCT04 -> DUART IACK
+    output		COM_CS,		// FPGA -> 74AHCT04 -> DUART CS
+    input		COM_IRQ,	// DUART -> FPGA
+    output		COM_IACK,	// FPGA -> 74AHCT04 -> DUART IACK
 
-	output		RAM_CS,		// FPGA -> 74AHCT04 -> RAM CS
+    output		RAM_CS,		// FPGA -> 74AHCT04 -> RAM CS
 
-	output	[2:0]	IPL,	// FPGA -> 74LVC07 -> 68040 IPL
-	output		AVEC,		// FPGA -> 74AHCT04 -> 68040 AVEC
+    output	[2:0]	IPL,	// FPGA -> 74LVC07 -> 68040 IPL
+    output		AVEC,		// FPGA -> 74AHCT04 -> 68040 AVEC
 
-	output	spi_ss,
-	output	spi_sck,
-	output	spi_mosi,
-	input	spi_miso,
-	output	spi_io2,
-	output	spi_io3
+    output	spi_ss,
+    output	spi_sck,
+    output	spi_mosi,
+    input	spi_miso,
+    output	spi_io2,
+    output	spi_io3
 );
 
 // Assign default states -------------------------------------------------------
@@ -79,13 +79,13 @@ wire d_dir;
 assign d_dir = rw;
 
 SB_IO #(
-	.PIN_TYPE(6'b1010_01),
-	.PULLUP(1'b1)
+    .PIN_TYPE(6'b1010_01),
+    .PULLUP(1'b1)
 ) data_io [31:0] (
-	.PACKAGE_PIN(d[31:0]),
-	.OUTPUT_ENABLE(rw),
-	.D_OUT_0(data_out[31:0]),
-	.D_IN_0(data_in[31:0])
+    .PACKAGE_PIN(d[31:0]),
+    .OUTPUT_ENABLE(rw),
+    .D_OUT_0(data_out[31:0]),
+    .D_IN_0(data_in[31:0])
 );
 
 // Transfer Ack ----------------------------------------------------------------
@@ -97,19 +97,19 @@ assign ta = ~i_ta;
 // Button input ----------------------------------------------------------------
 wire btn_pressed;
 debounce btn_db(
-	.clk(clk),
-	.button(~btn),
-	.btn_out(btn_pressed)
+    .clk(clk),
+    .button(~btn),
+    .btn_out(btn_pressed)
 );
 
 // DFF for TS
 reg i_ts;
 always @(posedge clk or negedge rst) begin
-	if (!rst) begin
-		i_ts <= 1'b0;
-	end else begin
-		i_ts <= !ts;
-	end
+    if (!rst) begin
+        i_ts <= 1'b0;
+    end else begin
+        i_ts <= !ts;
+    end
 end
 
 // CPU bus cycle decode --------------------------------------------------------
@@ -139,7 +139,7 @@ assign vector_access = cpu_cycle_active && vector_sel;
 wire resizer_access, illegal_access;
 assign resizer_access = uart_access || ram_access;
 assign illegal_access = cpu_cycle_active && !rom_sel && !uart_sel &&
-			!ram_sel && !fpga_sel && !vector_sel;
+            !ram_sel && !fpga_sel && !vector_sel;
 
 //reg [2:0] int_lvl;
 
@@ -160,20 +160,20 @@ assign flash_stb = rom_sel && cpu_cycle_start;
 
 // Instantiate ROM reader
 rom rom_reader(
-	.clk(clk),
-	.rst(rst),
+    .clk(clk),
+    .rst(rst),
 
-	.rom_stb(flash_stb),
-	.rom_ack(flash_ack),
-	.rom_addr(flash_addr),
-	.rom_odata(flash_data),
+    .rom_stb(flash_stb),
+    .rom_ack(flash_ack),
+    .rom_addr(flash_addr),
+    .rom_odata(flash_data),
 
-	.spi_ss(spi_ss),
-	.spi_sck(spi_sck),
-	.spi_mosi(spi_mosi),
-	.spi_miso(spi_miso),
-	.spi_io2(spi_io2),
-	.spi_io3(spi_io3)
+    .spi_ss(spi_ss),
+    .spi_sck(spi_sck),
+    .spi_mosi(spi_mosi),
+    .spi_miso(spi_miso),
+    .spi_io2(spi_io2),
+    .spi_io3(spi_io3)
 );
 
 wire fpga_stb, fpga_ack;
@@ -186,31 +186,31 @@ assign fpga_stb = fpga_sel && cpu_cycle_start;
 
 // Instantiate FPGA-CPU interface
 fpga_int fpga_interface(
-	.clk(clk),
-	.rst(rst),
+    .clk(clk),
+    .rst(rst),
 
-	.fpga_stb(fpga_stb),
-	.fpga_ack(fpga_ack),
-	.fpga_rw(rw),
-	.fpga_addr(addr[4:0]),
-	.fpga_data(data_in[31:24]),
-	.fpga_odata(fpga_odata),
+    .fpga_stb(fpga_stb),
+    .fpga_ack(fpga_ack),
+    .fpga_rw(rw),
+    .fpga_addr(addr[4:0]),
+    .fpga_data(data_in[31:24]),
+    .fpga_odata(fpga_odata),
 
-	.out_ipl(fpga_ipl),
-	.led_state(fpga_led),
-	.uart_tx(fpga_uart_tx),
-	.uart_rx(fpga_uart_rx)
+    .out_ipl(fpga_ipl),
+    .led_state(fpga_led),
+    .uart_tx(fpga_uart_tx),
+    .uart_rx(fpga_uart_rx)
 );
 
 reg [2:0] state;
 
 localparam	START = 0,
-		WAIT_ROM = 1,
-		WAIT_FPGA = 2,
-		START_TA = 3,
-		FINISH_TA = 4,
-		ILLEGAL_ACCESS = 5,
-		ILLEGAL_ACCESS_END = 6;
+        WAIT_ROM = 1,
+        WAIT_FPGA = 2,
+        START_TA = 3,
+        FINISH_TA = 4,
+        ILLEGAL_ACCESS = 5,
+        ILLEGAL_ACCESS_END = 6;
 
 // Do the following for 68150 accesses:
 //
@@ -230,36 +230,36 @@ localparam integer RAM_WS     = 3'd1; // 60ns
 localparam integer RAM_WS_END = RAM_WS + 3'd1;
 
 always @(posedge clk or negedge rst) begin
-	if (!rst) begin
-		ds_prev      <= 1'b1;
-		ram_wait_cnt <= 3'b000;
-		ram_busy     <= 1'b0;
-		ram_ack      <= 1'b0;
-	end else begin
-		ds_prev <= ds_now;
+    if (!rst) begin
+        ds_prev      <= 1'b1;
+        ram_wait_cnt <= 3'b000;
+        ram_busy     <= 1'b0;
+        ram_ack      <= 1'b0;
+    end else begin
+        ds_prev <= ds_now;
 
-		if (!ram_busy) begin
-			// Start a new local access when 68150 asserts DS to RAM
-			if (!ds_now && ds_fall && ram_access) begin
-				ram_busy     <= 1'b1;
-				ram_wait_cnt <= 3'b000;
-				ram_ack      <= 1'b0;
-			end
-		end else begin
-			// In a local RAM access wait
-			ram_wait_cnt <= ram_wait_cnt + 1;
+        if (!ram_busy) begin
+            // Start a new local access when 68150 asserts DS to RAM
+            if (!ds_now && ds_fall && ram_access) begin
+                ram_busy     <= 1'b1;
+                ram_wait_cnt <= 3'b000;
+                ram_ack      <= 1'b0;
+            end
+        end else begin
+            // In a local RAM access wait
+            ram_wait_cnt <= ram_wait_cnt + 1;
 
-			if (ram_wait_cnt == RAM_WS) begin
-				ram_ack <= 1'b1;
-			end
+            if (ram_wait_cnt == RAM_WS) begin
+                ram_ack <= 1'b1;
+            end
 
-			if (ram_wait_cnt == RAM_WS_END || ds_now) begin
-				// finish this local access
-				ram_ack  <= 1'b0;
-				ram_busy <= 1'b0;
-			end
-		end
-	end
+            if (ram_wait_cnt == RAM_WS_END || ds_now) begin
+                // finish this local access
+                ram_ack  <= 1'b0;
+                ram_busy <= 1'b0;
+            end
+        end
+    end
 end
 
 assign DSACK[0] = 1'b1;
@@ -272,79 +272,79 @@ assign RAM_CS = ram_access ? ~RESIZ_DS : 1'b0;
 assign RESIZ_CS = resizer_access;
 
 always @(posedge clk or negedge rst) begin
-	if (~rst) begin
-		state <= START;
-		i_ta <= 1'b0;
-		i_tea <= 0;
-		d_oe <= 1;
-	end else begin
-		case (state)
-			START: begin
-				i_ta <= 0;
-				i_tea <= 0;
-				d_oe <= 1;
+    if (~rst) begin
+        state <= START;
+        i_ta <= 1'b0;
+        i_tea <= 0;
+        d_oe <= 1;
+    end else begin
+        case (state)
+            START: begin
+                i_ta <= 0;
+                i_tea <= 0;
+                d_oe <= 1;
 
-				if( vector_access == 1'b1 ) begin
-					state <= START_TA;
-				end else if( rom_access == 1'b1 ) begin
-					state <= WAIT_ROM;
-				end else if ( illegal_access == 1'b1 ) begin
-					state <= ILLEGAL_ACCESS;
-			    end else if( fpga_access == 1'b1 ) begin
-					d_oe <= 0;
-					state <= WAIT_FPGA;
-				end else begin
-					state <= START;
-				end
-			end
-			WAIT_ROM: begin
-				if( flash_ack == 1'b1 ) begin
-					data_out <= flash_data;
-					state <= START_TA;
-				end
-			end
-			WAIT_FPGA: begin
-				if( fpga_ack == 1'b1 ) begin
-					data_out <= fpga_odata;
-					state <= START_TA;
-				end
-			end
-			START_TA: begin
-				i_ta <= 1;
-				d_oe <= 0;
-				state <= FINISH_TA;
-			end
-			FINISH_TA: begin
-				i_ta <= 0;
-				d_oe <= 1;
+                if( vector_access == 1'b1 ) begin
+                    state <= START_TA;
+                end else if( rom_access == 1'b1 ) begin
+                    state <= WAIT_ROM;
+                end else if ( illegal_access == 1'b1 ) begin
+                    state <= ILLEGAL_ACCESS;
+                end else if( fpga_access == 1'b1 ) begin
+                    d_oe <= 0;
+                    state <= WAIT_FPGA;
+                end else begin
+                    state <= START;
+                end
+            end
+            WAIT_ROM: begin
+                if( flash_ack == 1'b1 ) begin
+                    data_out <= flash_data;
+                    state <= START_TA;
+                end
+            end
+            WAIT_FPGA: begin
+                if( fpga_ack == 1'b1 ) begin
+                    data_out <= fpga_odata;
+                    state <= START_TA;
+                end
+            end
+            START_TA: begin
+                i_ta <= 1;
+                d_oe <= 0;
+                state <= FINISH_TA;
+            end
+            FINISH_TA: begin
+                i_ta <= 0;
+                d_oe <= 1;
 
-				state <= START;
-			end
-			ILLEGAL_ACCESS: begin
-				i_tea <= 1;
-				state <= ILLEGAL_ACCESS_END;
-			end
-			ILLEGAL_ACCESS_END: begin
-				i_tea <= 0;
-				state <= START;
-			end
-		endcase
-	end
+                state <= START;
+            end
+            ILLEGAL_ACCESS: begin
+                i_tea <= 1;
+                state <= ILLEGAL_ACCESS_END;
+            end
+            ILLEGAL_ACCESS_END: begin
+                i_tea <= 0;
+                state <= START;
+            end
+        endcase
+    end
 end
 
 // Latch address when TS is going low
 reg ts_prev;
 always @(posedge clk or negedge rst) begin
-	if (!rst) begin
-		ts_prev <= 1'b1;
-		addr    <= 32'h00000000;
-	end else begin
-		ts_prev <= ts;
+    if (!rst) begin
+        ts_prev <= 1'b1;
+        addr    <= 32'h00000000;
+    end else begin
+        ts_prev <= ts;
 
-		// TS falling edge: valid address for new bus cycle
-		if (ts_prev == 1'b1 && ts == 1'b0)
-			addr <= a;
-	end
+        // TS falling edge: valid address for new bus cycle
+        if (ts_prev == 1'b1 && ts == 1'b0)
+            addr <= a;
+    end
 end
 
 // CPU-controlled LED ----------------------------------------------------------
