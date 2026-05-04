@@ -58,9 +58,9 @@ assign tbi = 0;
 assign COM_IACK = 0;
 
 // Debug lines -----------------------------------------------------------------
-assign dbg0 = a[29];
-assign dbg1 = a[30];
-assign dbg2 = a[31];
+assign dbg0 = fpga_uart_tx;
+assign dbg1 = 0;
+assign dbg2 = 0;
 
 // Addr Buffer -----------------------------------------------------------------
 reg [31:0] addr;
@@ -180,6 +180,7 @@ wire fpga_stb, fpga_ack;
 wire [2:0] fpga_ipl;
 wire [31:0] fpga_odata;
 wire fpga_led;
+wire fpga_uart_tx;
 assign fpga_stb = fpga_sel && cpu_cycle_start;
 
 // Instantiate FPGA-CPU interface
@@ -195,7 +196,8 @@ fpga_int fpga_interface(
 	.fpga_odata(fpga_odata),
 
 	.out_ipl(fpga_ipl),
-	.led_state(fpga_led)
+	.led_state(fpga_led),
+	.uart_tx(fpga_uart_tx)
 );
 
 reg [2:0] state;
@@ -345,6 +347,5 @@ end
 
 // CPU-controlled LED ----------------------------------------------------------
 assign led = fpga_led;
-
 
 endmodule
