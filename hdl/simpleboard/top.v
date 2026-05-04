@@ -15,7 +15,7 @@ module top (
 	inout	[31:0]	d,	// D[31:0] FPGA <-> 74ALVC16425 <-> CPU
 
 	output	dbg0,
-	output	dbg1,
+	input	dbg1,
 	output	dbg2,
 
 	input	ts,			// Transfer Start
@@ -59,7 +59,7 @@ assign COM_IACK = 0;
 
 // Debug lines -----------------------------------------------------------------
 assign dbg0 = fpga_uart_tx;
-assign dbg1 = 0;
+assign dbg1 = fpga_uart_rx;
 assign dbg2 = 0;
 
 // Addr Buffer -----------------------------------------------------------------
@@ -181,6 +181,7 @@ wire [2:0] fpga_ipl;
 wire [31:0] fpga_odata;
 wire fpga_led;
 wire fpga_uart_tx;
+wire fpga_uart_rx;
 assign fpga_stb = fpga_sel && cpu_cycle_start;
 
 // Instantiate FPGA-CPU interface
@@ -191,13 +192,14 @@ fpga_int fpga_interface(
 	.fpga_stb(fpga_stb),
 	.fpga_ack(fpga_ack),
 	.fpga_rw(rw),
-	.fpga_addr(addr[3:0]),
+	.fpga_addr(addr[4:0]),
 	.fpga_data(data_in[31:24]),
 	.fpga_odata(fpga_odata),
 
 	.out_ipl(fpga_ipl),
 	.led_state(fpga_led),
-	.uart_tx(fpga_uart_tx)
+	.uart_tx(fpga_uart_tx),
+	.uart_rx(fpga_uart_rx)
 );
 
 reg [2:0] state;
