@@ -4,23 +4,20 @@ module fpga_int(
     input rst,
 
     input fpga_stb,
-    output fpga_ack,
+    output reg fpga_ack,
     input fpga_rw,
     input [4:0] fpga_addr,
     input [7:0] fpga_data,
     output [31:0] fpga_odata,
 
     // Interrupt lines
-    output [2:0] out_ipl,
-    output led_state,
+    output reg [2:0] out_ipl,
+    output reg led_state,
     output uart_tx,
     input uart_rx
 );
 
-reg [2:0] out_ipl;
-reg led_state;
-
-reg waitstate, fpga_ack;
+reg waitstate;
 
 localparam F_LED = 5'h00;
 localparam F_INT = 5'h04;
@@ -44,19 +41,21 @@ always @(posedge clk or negedge rst) begin
         fpga_ack <= 0;
 
         if (fpga_stb == 1) begin
-            waitstate <= 1;
-        end else if (waitstate == 1) begin
+            //waitstate <= 1;
+        //end else if (waitstate == 1) begin
             fpga_ack <= 1;
-            waitstate <= 0;
+            //waitstate <= 0;
         end
     end
 end
 
 wire fpga_write;
-assign fpga_write = waitstate && !fpga_rw;
+//assign fpga_write = waitstate && !fpga_rw;
+assign fpga_write = fpga_ack && !fpga_rw;
 
 wire fpga_read;
-assign fpga_read = waitstate && fpga_rw;
+//assign fpga_read = waitstate && fpga_rw;
+assign fpga_read = fpga_ack && fpga_rw;
 
 always @(posedge clk or negedge rst) begin
     if(~rst) begin
