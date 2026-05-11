@@ -3,6 +3,50 @@
 * Use ATF1508 for the DRAM controller. This leaves more pins for a non-BGA FPGA
   to be useful.
 
+## EDO DRAM Bursting Support
+
+Use four matching 72-pin EDO SIMMs as one 512 MiB interleaved memory array, not
+as four separate linear banks.
+
+Each SIMM remains a 32-bit data source/sink. The CPU data bus is still only 32
+bits wide. Only one SIMM drives the 68040 data bus per transfer beat.
+
+Address mapping:
+
+| Address Bits | Mapping                                       |
+|--------------|-----------------------------------------------|
+| A1..A0       |  byte lane within longword                    |
+| A3..A2       |  SIMM select / longword-in-16-byte cache line |
+| A15..A4      |  12-bit DRAM column                           |
+| A27..A16     |  12-bit DRAM row                              |
+| A28          |  SIMM rank select                             |
+
+A 16-byte cache line is distributed as:
+
+|     |        |
+|-----|--------|
+| +0  | SIMM 0 |
+| +4  | SIMM 1 |
+| +8  | SIMM 2 |
+| +12 | SIMM 3 |
+
+For burst/line fills, initialize the SIMM selector from A3..A2, then increment
+modulo 4 each accepted /TA beat. This supports critical-word-first ordering:
+
+| A[3:2] | Order   |
+|--------|---------|
+| 00     | 0,1,2,3 |
+| 01     | 1,2,3,0 |
+| 10     | 2,3,0,1 |
+| 11     | 3,0,1,2 |
+
+All SIMMs share the same row/column address for a given line. With 12 column
+bits and four 32-bit SIMMs interleaved, one open DRAM row group covers:
+
+4096 columns × 16 bytes = 64 KiB
+
+So naturally aligned 4 KiB MMU pages never straddle DRAM row groups.
+
 # Problems
 
 ## XR68C681 DUART
